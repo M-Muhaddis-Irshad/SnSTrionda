@@ -1,0 +1,254 @@
+// =============================================================================
+// Trionda Wears — Complete Data Model
+// =============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url is configured via prisma.config.ts and the Neon adapter at runtime
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  JAZZCASH
+  EASYPAISA
+  COD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// =============================================================================
+// PRODUCT CATALOG
+// =============================================================================
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  parentId    String?
+  parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children    Category[] @relation("CategoryTree")
+  products    Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parentId])
+}
+
+model Product {
+  id              String            @id @default(cuid())
+  name            String
+  slug            String            @unique
+  description     String?
+  basePrice       Decimal           @db.Decimal(10, 2)
+  isCustomizable  Boolean           @default(false)
+  isActive        Boolean           @default(true)
+
+  categoryId      String
+  category        Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  variants        ProductVariant[]
+  images          ProductImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model ProductVariant {
+  id              String       @id @default(cuid())
+  size            String?
+  color           String?
+  fabricType      String?
+  sku             String       @unique
+  price           Decimal?     @db.Decimal(10, 2) // nullable: falls back to Product.basePrice
+  stockQuantity   Int          @default(0)
+
+  productId       String
+  product         Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  orderItems      OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([sku])
+}
+
+model ProductImage {
+  id           String  @id @default(cuid())
+  url          String  // Will be a Cloudinary URL in production
+  altText      String?
+  displayOrder Int     @default(0)
+
+  productId    String
+  product      Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+// =============================================================================
+// CUSTOM MEASUREMENTS (Made-to-Order)
+// =============================================================================
+
+// Standard measurements for tailored clothing (shirts, trousers, sherwanis, etc.)
+model CustomMeasurement {
+  id String @id @default(cuid())
+
+  // Upper body (shirts, sherwanis, kurtas)
+  chest       Decimal?  @db.Decimal(5, 2)  // in inches
+  waist       Decimal?  @db.Decimal(5, 2)
+  shoulder    Decimal?  @db.Decimal(5, 2)
+  sleeveLength Decimal? @db.Decimal(5, 2)
+  neck        Decimal?  @db.Decimal(5, 2)
+
+  // Lower body (trousers, shalwars)
+  hip         Decimal?  @db.Decimal(5, 2)
+  inseam      Decimal?  @db.Decimal(5, 2)
+  thigh       Decimal?  @db.Decimal(5, 2)
+  rise        Decimal?  @db.Decimal(5, 2)
+  cuff        Decimal?  @db.Decimal(5, 2)
+
+  // General
+  height      Decimal?  @db.Decimal(5, 2)
+  notes       String?   @db.Text  // Special instructions, fit preferences, etc.
+
+  // Relation to OrderItem (one-to-one: each order item with measurements has one set)
+  orderItem   OrderItem?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =============================================================================
+// USER & AUTH
+// =============================================================================
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  role         UserRole  @default(CUSTOMER)
+
+  addresses    Address[]
+  orders       Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Address {
+  id          String  @id @default(cuid())
+  label       String  // e.g. "Home", "Work", "Parents' House"
+  fullName    String
+  phone       String
+  addressLine1 String
+  addressLine2 String?
+  city        String
+  province    String  // Province/State
+  postalCode  String?
+  country     String  @default("Pakistan")
+  isDefault   Boolean @default(false)
+
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Orders shipping to this address
+  shippingOrders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// =============================================================================
+// ORDERS
+// =============================================================================
+
+model Order {
+  id                String          @id @default(cuid())
+  orderNumber       String          @unique  // Human-readable: e.g. "TRD-2026-000001"
+  status            OrderStatus     @default(PENDING)
+  subtotal          Decimal         @db.Decimal(10, 2)
+  shippingCost      Decimal         @db.Decimal(10, 2) @default(0)
+  total             Decimal         @db.Decimal(10, 2)
+  paymentMethod     PaymentMethod
+  paymentStatus     PaymentStatus   @default(PENDING)
+
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  shippingAddressId String
+  shippingAddress   Address         @relation(fields: [shippingAddressId], references: [id], onDelete: Restrict)
+
+  items             OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+}
+
+model OrderItem {
+  id              String             @id @default(cuid())
+  quantity        Int                @default(1)
+  priceAtPurchase Decimal            @db.Decimal(10, 2) // Snapshot price at time of purchase
+
+  orderId         String
+  order           Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productVariantId String
+  productVariant  ProductVariant     @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+
+  // Nullable: only set for made-to-order (customizable) items
+  customMeasurementId String?        @unique  // One-to-one: each order item has at most one measurement set
+  customMeasurement   CustomMeasurement? @relation(fields: [customMeasurementId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([productVariantId])
+}
