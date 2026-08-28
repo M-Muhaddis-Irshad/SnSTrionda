@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import VariantSelector from "@/components/products/VariantSelector";
+import MeasurementForm from "@/components/products/MeasurementForm";
 import Card, { CardImage, CardContent } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -213,13 +214,14 @@ export default async function ProductDetailPage({
               />
             </div>
 
-            {/* Made to Order badge */}
+            {/* Made to Order badge + measurement form */}
             {product.isCustomizable && (
               <div className="mt-6">
                 <Badge variant="filled">Made to Order</Badge>
                 <p className="mt-2 font-body text-sm text-muted">
-                  This item is custom-made. Measurements will be collected after purchase.
+                  This item is custom-made. Provide your measurements below for a perfect fit.
                 </p>
+                <MeasurementForm apiUrl={process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"} />
               </div>
             )}
 

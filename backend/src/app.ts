@@ -3,6 +3,7 @@ import cors from "cors";
 import healthRoutes from "./features/health/health.routes";
 import authRoutes from "./features/auth/auth.routes";
 import productRoutes from "./features/products/products.routes";
+import measurementRoutes from "./features/measurements/measurements.routes";
 
 const app = express();
 
@@ -19,5 +20,6 @@ app.use(express.json());
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/measurements", measurementRoutes);
 
 export default app;
