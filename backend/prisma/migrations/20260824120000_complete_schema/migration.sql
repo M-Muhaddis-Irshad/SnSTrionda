@@ -1,3 +1,12 @@
+-- CreateEnums
+CREATE TYPE "UserRole" AS ENUM ('CUSTOMER', 'ADMIN');
+
+CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED');
+
+CREATE TYPE "PaymentMethod" AS ENUM ('JAZZCASH', 'EASYPAISA', 'COD');
+
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'FAILED', 'REFUNDED');
+
 -- CreateTable
 CREATE TABLE "Category" (
     "id" TEXT NOT NULL,
@@ -85,7 +94,7 @@ CREATE TABLE "User" (
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "phone" TEXT,
-    "role" TEXT NOT NULL DEFAULT 'CUSTOMER',
+    "role" "UserRole" NOT NULL DEFAULT 'CUSTOMER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -116,12 +125,12 @@ CREATE TABLE "Address" (
 CREATE TABLE "Order" (
     "id" TEXT NOT NULL,
     "orderNumber" TEXT NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
     "subtotal" DECIMAL(10,2) NOT NULL,
     "shippingCost" DECIMAL(10,2) NOT NULL DEFAULT 0,
     "total" DECIMAL(10,2) NOT NULL,
-    "paymentMethod" TEXT NOT NULL,
-    "paymentStatus" TEXT NOT NULL DEFAULT 'PENDING',
+    "paymentMethod" "PaymentMethod" NOT NULL,
+    "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
     "userId" TEXT NOT NULL,
     "shippingAddressId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

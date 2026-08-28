@@ -3,3 +3,9 @@ node_modules
 .env
 
 /src/generated/prisma
+
+# AI coding tool artifacts (not part of our project)
+.agents/
+.claude/
+.windsurf/
+skills-lock.json

@@ -229,6 +229,7 @@ model Order {
   @@index([userId])
   @@index([orderNumber])
   @@index([status])
+  @@index([paymentStatus])
 }
 
 model OrderItem {
