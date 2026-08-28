@@ -8,13 +8,23 @@ import {
   handleLogin,
   handleRefresh,
   handleLogout,
+  handleMe,
+  handleAdminCheck,
 } from "./auth.controller";
+import { authenticate, requireRole } from "./auth.middleware";
 
 const router = Router();
 
+// Public routes
 router.post("/register", handleRegister);
 router.post("/login", handleLogin);
 router.post("/refresh", handleRefresh);
 router.post("/logout", handleLogout);
+
+// Protected routes — require valid access token
+router.get("/me", authenticate, handleMe);
+
+// Admin-only routes — require authenticate + ADMIN role
+router.get("/admin-check", authenticate, requireRole("ADMIN"), handleAdminCheck);
 
 export default router;

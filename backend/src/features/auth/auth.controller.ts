@@ -10,6 +10,7 @@ import {
   logout,
   AppError,
 } from "./auth.service";
+import { prisma } from "../../db";
 import type {
   RegisterRequestBody,
   LoginRequestBody,
@@ -136,4 +137,49 @@ export function handleLogout(req: Request, res: Response) {
     console.error("Logout error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/auth/me
+// ---------------------------------------------------------------------------
+
+export async function handleMe(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.json({ user });
+  } catch (err: any) {
+    console.error("Get profile error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/auth/admin-check
+// ---------------------------------------------------------------------------
+
+export function handleAdminCheck(req: Request, res: Response) {
+  res.json({ message: "Admin access confirmed.", user: req.user });
 }
