@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -65,11 +65,16 @@ export default function VariantSelector({
   // Display price: variant price override or base price
   const displayPrice = matchedVariant?.price ?? basePrice;
 
-  // Notify parent of variant change
-  if (matchedVariant && onVariantChange) {
-    // Use a ref-based approach in parent to avoid re-render loops
-    // For now, the parent can read the variant from a callback
-  }
+  // Notify parent of variant change via callback
+  // Using useEffect to avoid calling during render
+  const prevVariantRef = useRef<string | null>(null);
+  useEffect(() => {
+    const variantKey = matchedVariant?.id || null;
+    if (variantKey !== prevVariantRef.current) {
+      prevVariantRef.current = variantKey;
+      onVariantChange?.(matchedVariant);
+    }
+  }, [matchedVariant, onVariantChange]);
 
   // Don't render if there are no selectable options
   if (sizes.length === 0 && colors.length === 0) {

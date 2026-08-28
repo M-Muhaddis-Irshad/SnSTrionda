@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
-import VariantSelector from "@/components/products/VariantSelector";
-import MeasurementForm from "@/components/products/MeasurementForm";
+import ProductActions from "@/components/products/ProductActions";
 import Card, { CardImage, CardContent } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
-import Button from "@/components/ui/Button";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -199,41 +197,17 @@ export default async function ProductDetailPage({
               </p>
             )}
 
-            {/* Price (base — variant selector overrides below) */}
-            <div className="mt-8">
-              <p className="font-display text-2xl tracking-wide text-foreground">
-                {formatPrice(product.basePrice)}
-              </p>
-            </div>
-
-            {/* Variant selector */}
-            <div className="mt-8">
-              <VariantSelector
-                variants={product.variants}
-                basePrice={product.basePrice}
-              />
-            </div>
-
-            {/* Made to Order badge + measurement form */}
-            {product.isCustomizable && (
-              <div className="mt-6">
-                <Badge variant="filled">Made to Order</Badge>
-                <p className="mt-2 font-body text-sm text-muted">
-                  This item is custom-made. Provide your measurements below for a perfect fit.
-                </p>
-                <MeasurementForm apiUrl={process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"} />
-              </div>
-            )}
-
-            {/* Add to Cart button — visual only */}
-            <div className="mt-10">
-              <Button variant="primary" className="w-full opacity-50 cursor-not-allowed">
-                Add to Cart
-              </Button>
-              <p className="mt-2 font-body text-xs text-muted text-center">
-                Cart functionality coming soon
-              </p>
-            </div>
+            {/* Price + Variant Selector + Add to Cart (all client-side) */}
+            <ProductActions
+              productId={product.id}
+              productName={product.name}
+              productSlug={product.slug}
+              basePrice={Number(product.basePrice)}
+              isCustomizable={product.isCustomizable}
+              variants={product.variants}
+              images={product.images}
+              apiUrl={process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}
+            />
           </div>
         </div>
 
