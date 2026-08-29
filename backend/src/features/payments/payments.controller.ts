@@ -51,21 +51,12 @@ export async function handleCreateCheckout(req: Request, res: Response) {
 
 export async function handleSafepayWebhook(req: Request, res: Response) {
   try {
-    // For signature verification we need the raw body bytes.
-    // If middleware saved req.rawBody, use that; otherwise reconstruct from parsed body.
-    let rawBody: Buffer;
-    const savedRaw = (req as any).rawBody as Buffer | undefined;
+    // express.raw() middleware sets req.body to a raw Buffer.
+    // Use it directly for signature verification — never reconstruct from JSON.
+    const rawBody = req.body as Buffer;
 
-    if (Buffer.isBuffer(savedRaw)) {
-      rawBody = savedRaw;
-    } else if (typeof req.body === "string") {
-      rawBody = Buffer.from(req.body, "utf-8");
-    } else if (typeof req.body === "object" && req.body !== null) {
-      // Reconstruct from parsed JSON — works for verification if Safepay
-      // signed the canonical JSON form. This is a fallback.
-      rawBody = Buffer.from(JSON.stringify(req.body), "utf-8");
-    } else {
-      console.error("[Safepay] Webhook received without body");
+    if (!Buffer.isBuffer(rawBody)) {
+      console.error("[Safepay] Webhook received without raw body buffer");
       return res.status(400).json({ error: "Missing request body" });
     }
 
@@ -85,8 +76,15 @@ export async function handleSafepayWebhook(req: Request, res: Response) {
       return res.status(401).json({ error: "Invalid webhook signature" });
     }
 
-    // Signature valid — process the event
-    const eventPayload = req.body;
+    // Signature valid — parse the raw buffer to get the event data
+    let eventPayload: any;
+    try {
+      eventPayload = JSON.parse(rawBody.toString("utf-8"));
+    } catch {
+      console.error("[Safepay] Failed to parse webhook body as JSON");
+      return res.status(400).json({ error: "Invalid JSON" });
+    }
+
     await processWebhookEvent(eventPayload);
 
     // Always respond 200 to acknowledge receipt (Safepay retries on non-200)

@@ -2,7 +2,7 @@
 // Payments Feature — Route Definitions
 // =============================================================================
 
-import { Router } from "express";
+import { Router, raw } from "express";
 import {
   handleCreateCheckout,
   handleSafepayWebhook,
@@ -15,8 +15,8 @@ const router = Router();
 router.post("/safepay/create", optionalAuth, handleCreateCheckout);
 
 // POST /api/payments/safepay/webhook — Safepay payment confirmation callback
-// NOTE: This route needs raw body for signature verification.
-// The rawBody middleware is applied in app.ts for this route only.
-router.post("/safepay/webhook", handleSafepayWebhook);
+// express.raw() gives us the raw Buffer in req.body for signature verification,
+// scoped to this route only so all other routes keep using express.json().
+router.post("/safepay/webhook", raw({ type: "application/json" }), handleSafepayWebhook);
 
 export default router;

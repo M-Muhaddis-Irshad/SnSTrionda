@@ -17,7 +17,14 @@ app.use(
   })
 );
 
-app.use(express.json());
+app.use((req, res, next) => {
+  // The webhook route uses express.raw() for signature verification —
+  // skip express.json() so the body stream is available for raw parsing.
+  if (req.method === "POST" && req.path === "/api/payments/safepay/webhook") {
+    return next();
+  }
+  express.json()(req, res, next);
+});
 
 // Routes
 app.use("/api/health", healthRoutes);
