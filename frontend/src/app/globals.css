@@ -22,3 +22,7 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
+
+.heroSetion {
+  @apply relative flex min-h-[90vh] items-center justify-center overflow-hidden;
+}

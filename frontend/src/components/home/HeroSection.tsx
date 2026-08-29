@@ -2,7 +2,7 @@ import Button from "@/components/ui/Button";
 
 export default function HeroSection() {
   return (
-    <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden">
+    <section className="heroSetion">
       {/* Background gradient */}
       <div
         className="absolute inset-0"
