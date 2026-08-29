@@ -3,8 +3,8 @@ import MobileMenu from "./MobileMenu";
 import CartButton from "./cart/CartButton";
 
 const navLinks = [
-  { label: "Shop", href: "#" },
-  { label: "Collections", href: "#" },
+  { label: "Shop", href: "/shop" },
+  { label: "Collections", href: "/shop" },
   { label: "About", href: "#" },
   { label: "Contact", href: "#" },
 ];

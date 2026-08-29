@@ -2,7 +2,7 @@ import Button from "@/components/ui/Button";
 
 export default function HeroSection() {
   return (
-    <section className="heroSetion">
+    <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden">
       {/* Background gradient */}
       <div
         className="absolute inset-0"
@@ -35,7 +35,7 @@ export default function HeroSection() {
         </p>
 
         <div className="mt-10">
-          <Button as="a" href="#" variant="primary">
+          <Button as="a" href="/shop" variant="primary">
             Shop Collection
           </Button>
         </div>

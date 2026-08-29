@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import VariantSelector from "./VariantSelector";
 import MeasurementForm from "./MeasurementForm";
+import QuantitySelector from "./QuantitySelector";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import { useCartStore } from "@/stores/cartStore";
@@ -71,6 +72,7 @@ export default function ProductActions({
   apiUrl,
 }: ProductActionsProps) {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
 
   // Display price: variant override or base price
@@ -109,9 +111,13 @@ export default function ProductActions({
       productSlug,
       variantLabel: buildVariantLabel(variantToAdd),
       unitPrice: variantToAdd.price ?? basePrice,
+      quantity,
       imageUrl,
       customMeasurementId: null, // TODO: connect to MeasurementForm state when measurement is submitted
     });
+
+    // Reset quantity after adding
+    setQuantity(1);
   }
 
   return (
@@ -147,8 +153,18 @@ export default function ProductActions({
         </div>
       )}
 
-      {/* Add to Cart button */}
-      <div className="mt-10">
+      {/* Quantity selector + Add to Cart */}
+      <div className="mt-10 space-y-4">
+        <div className="flex items-center gap-4">
+          <label className="font-body text-sm text-muted">Quantity</label>
+          <QuantitySelector
+            value={quantity}
+            onChange={setQuantity}
+            min={1}
+            max={selectedVariant ? Math.min(selectedVariant.stockQuantity, 99) : 99}
+          />
+        </div>
+
         <Button
           variant="primary"
           className={`w-full ${!canAddToCart ? "opacity-50 cursor-not-allowed" : ""}`}

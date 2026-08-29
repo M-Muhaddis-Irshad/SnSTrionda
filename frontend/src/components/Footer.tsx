@@ -1,10 +1,10 @@
 import NewsletterForm from "./NewsletterForm";
 
 const shopLinks = [
-  { label: "Shirts", href: "#" },
-  { label: "Trousers", href: "#" },
-  { label: "Fabric", href: "#" },
-  { label: "New Arrivals", href: "#" },
+  { label: "Shirts", href: "/shop?category=shirts" },
+  { label: "Trousers", href: "/shop?category=trousers" },
+  { label: "Fabric", href: "/shop?category=fabric" },
+  { label: "Sherwanis", href: "/shop?category=sherwanis" },
 ];
 
 const companyLinks = [

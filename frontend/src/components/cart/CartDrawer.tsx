@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCartStore, selectSubtotal } from "@/stores/cartStore";
 
 // ---------------------------------------------------------------------------
@@ -24,6 +25,7 @@ function formatPrice(price: number): string {
 // ---------------------------------------------------------------------------
 
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
+  const router = useRouter();
   const items = useCartStore((state) => state.items);
   const subtotal = useCartStore(selectSubtotal);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -185,12 +187,16 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               <p className="font-body text-xs text-muted">
                 Shipping calculated at checkout
               </p>
-              <a
-                href="/checkout"
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  router.push("/checkout");
+                }}
                 className="block w-full text-center font-body text-sm tracking-[0.2em] uppercase border border-chrome-400 bg-transparent text-foreground px-10 py-4 transition-all duration-300 hover:border-chrome-200 hover:bg-chrome-500 hover:text-chrome-100"
               >
                 Checkout
-              </a>
+              </button>
             </div>
           )}
         </div>
