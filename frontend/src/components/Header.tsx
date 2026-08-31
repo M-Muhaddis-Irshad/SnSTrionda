@@ -5,9 +5,13 @@ import AccountButton from "./AccountButton";
 
 const navLinks = [
   { label: "Shop", href: "/shop" },
-  { label: "Collections", href: "/shop" },
-  { label: "About", href: "#" },
-  { label: "Contact", href: "#" },
+  { label: "Men", href: "/shop/men" },
+  { label: "Women", href: "/shop/women" },
+  { label: "Clothing", href: "/shop/clothing" },
+  { label: "Footwear", href: "/shop/footwear" },
+  { label: "Accessories", href: "/shop/accessories" },
+  { label: "New Arrivals", href: "/shop/new-arrivals" },
+  { label: "Collections", href: "/shop/collections" },
 ];
 
 export default function Header() {
@@ -30,7 +34,7 @@ export default function Header() {
         </a>
 
         {/* Center — Desktop nav links */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-6 overflow-x-auto scrollbar-hide">
           {navLinks.map((link) => (
             <a
               key={link.label}

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import CategoryFilter from "@/components/shop/CategoryFilter";
-import Card, { CardImage, CardContent } from "@/components/ui/Card";
+import ProductCard from "@/components/ui/ProductCard";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -95,24 +95,14 @@ function groupByCategory(products: Product[]): CategoryGroup[] {
     map.get(key)!.products.push(product);
   }
 
-  // Sort categories by name for consistent display
   return Array.from(map.values()).sort((a, b) =>
     a.category.name.localeCompare(b.category.name)
   );
 }
 
 // ---------------------------------------------------------------------------
-// Format price in PKR
-// ---------------------------------------------------------------------------
-
-function formatPrice(price: number): string {
-  return `Rs. ${price.toLocaleString("en-PK")}`;
-}
-
-// ---------------------------------------------------------------------------
 // ShopPage (Server Component)
 // ---------------------------------------------------------------------------
-// searchParams is async in Next.js 16 — reads ?category=slug for filtering.
 
 export default async function ShopPage({
   searchParams,
@@ -125,10 +115,8 @@ export default async function ShopPage({
   const products = await fetchAllProducts();
   const groups = groupByCategory(products);
 
-  // Extract unique categories for the filter
   const categories = groups.map((g) => g.category);
 
-  // Filter groups based on active category
   const visibleGroups =
     activeCategory === "all"
       ? groups
@@ -155,51 +143,20 @@ export default async function ShopPage({
           {visibleGroups.length > 0 ? (
             visibleGroups.map((group) => (
               <section key={group.category.id} id={group.category.slug}>
-                {/* Category heading */}
                 <h2 className="font-display text-2xl tracking-[0.08em] text-foreground sm:text-3xl">
                   {group.category.name}
                 </h2>
                 <div className="mt-2 h-px w-12 bg-chrome-400" />
 
-                {/* Horizontal scroll rail — same pattern as FeaturedCollection */}
+                {/* Horizontal scroll rail */}
                 <div className="mt-8 overflow-x-auto scrollbar-hide">
-                  <div
-                    className="flex gap-5 pb-4"
-                  >
+                  <div className="flex gap-5 pb-4">
                     {group.products.map((product) => (
-                      <a
+                      <ProductCard
                         key={product.id}
-                        href={`/products/${product.slug}`}
-                        className="flex-shrink-0 w-56 sm:w-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                      >
-                        <Card className="w-full">
-                          <CardImage>
-                            {product.images.length > 0 ? (
-                              <img
-                                src={product.images[0].url}
-                                alt={product.images[0].altText || product.name}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
-                            ) : (
-                              <div
-                                className="h-full w-full transition-transform duration-500 group-hover:scale-105"
-                                style={{
-                                  background:
-                                    "linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%)",
-                                }}
-                              />
-                            )}
-                          </CardImage>
-                          <CardContent>
-                            <h3 className="font-body text-sm text-foreground group-hover:text-chrome-200 transition-colors duration-200">
-                              {product.name}
-                            </h3>
-                            <p className="mt-1 font-body text-sm text-muted">
-                              {formatPrice(product.basePrice)}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </a>
+                        product={product}
+                        layout="rail"
+                      />
                     ))}
                   </div>
                 </div>

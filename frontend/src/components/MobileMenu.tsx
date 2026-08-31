@@ -6,9 +6,14 @@ import { useAuthStore } from "@/stores/authStore";
 
 const navLinks = [
   { label: "Shop", href: "/shop" },
-  { label: "Collections", href: "/shop" },
+  { label: "Men", href: "/shop/men" },
+  { label: "Women", href: "/shop/women" },
+  { label: "Clothing", href: "/shop/clothing" },
+  { label: "Footwear", href: "/shop/footwear" },
+  { label: "Accessories", href: "/shop/accessories" },
+  { label: "New Arrivals", href: "/shop/new-arrivals" },
+  { label: "Collections", href: "/shop/collections" },
   { label: "FAQ", href: "/faq" },
-  { label: "Contact", href: "#" },
 ];
 
 export default function MobileMenu() {

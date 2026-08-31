@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import ProductActions from "@/components/products/ProductActions";
-import Card, { CardImage, CardContent } from "@/components/ui/Card";
+import ProductCard from "@/components/ui/ProductCard";
 import Badge from "@/components/ui/Badge";
 
 // ---------------------------------------------------------------------------
@@ -222,39 +222,11 @@ export default async function ProductDetailPage({
             <div className="mt-8 overflow-x-auto scrollbar-hide">
               <div className="flex gap-5 pb-4">
                 {relatedProducts.map((related) => (
-                  <a
+                  <ProductCard
                     key={related.id}
-                    href={`/products/${related.slug}`}
-                    className="flex-shrink-0 w-56 sm:w-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                  >
-                    <Card className="w-full">
-                      <CardImage>
-                        {related.images.length > 0 ? (
-                          <img
-                            src={related.images[0].url}
-                            alt={related.images[0].altText || related.name}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div
-                            className="h-full w-full transition-transform duration-500 group-hover:scale-105"
-                            style={{
-                              background:
-                                "linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%)",
-                            }}
-                          />
-                        )}
-                      </CardImage>
-                      <CardContent>
-                        <h3 className="font-body text-sm text-foreground group-hover:text-chrome-200 transition-colors duration-200">
-                          {related.name}
-                        </h3>
-                        <p className="mt-1 font-body text-sm text-muted">
-                          {formatPrice(related.basePrice)}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </a>
+                    product={related}
+                    layout="rail"
+                  />
                 ))}
               </div>
             </div>
