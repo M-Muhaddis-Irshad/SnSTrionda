@@ -75,6 +75,21 @@ export async function listProducts(params: PaginationParams): Promise<PaginatedR
 // Get Product by Slug (full detail)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// List Categories (public, for homepage/shop)
+// ---------------------------------------------------------------------------
+
+export async function listCategories() {
+  return prisma.category.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, slug: true },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Get Product by Slug (full detail)
+// ---------------------------------------------------------------------------
+
 export async function getProductBySlug(slug: string) {
   const product = await prisma.product.findUnique({
     where: { slug },

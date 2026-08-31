@@ -38,7 +38,7 @@ export default function OrderSummaryPanel() {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between px-4 py-3 font-body text-sm text-foreground"
+          className="w-full flex items-center justify-between px-4 py-3 font-body text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <span className="flex items-center gap-2">
             Order summary

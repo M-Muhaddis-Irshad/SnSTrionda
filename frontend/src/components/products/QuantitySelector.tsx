@@ -2,6 +2,7 @@
 
 // ---------------------------------------------------------------------------
 // QuantitySelector — +/− stepper with min/max bounds
+// Reusable component used on: product detail page, cart drawer, checkout summary
 // ---------------------------------------------------------------------------
 
 interface QuantitySelectorProps {
@@ -31,7 +32,7 @@ export default function QuantitySelector({
         type="button"
         onClick={handleDecrement}
         disabled={value <= min}
-        className="flex h-10 w-10 items-center justify-center border border-chrome-500 text-muted transition-colors hover:border-chrome-400 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+        className="flex h-10 w-10 items-center justify-center border border-chrome-500 text-muted transition-colors hover:border-chrome-400 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label="Decrease quantity"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -47,7 +48,7 @@ export default function QuantitySelector({
         type="button"
         onClick={handleIncrement}
         disabled={value >= max}
-        className="flex h-10 w-10 items-center justify-center border border-chrome-500 text-muted transition-colors hover:border-chrome-400 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+        className="flex h-10 w-10 items-center justify-center border border-chrome-500 text-muted transition-colors hover:border-chrome-400 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label="Increase quantity"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

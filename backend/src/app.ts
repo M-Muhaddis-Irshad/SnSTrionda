@@ -6,6 +6,7 @@ import productRoutes from "./features/products/products.routes";
 import measurementRoutes from "./features/measurements/measurements.routes";
 import orderRoutes from "./features/orders/orders.routes";
 import paymentRoutes from "./features/payments/payments.routes";
+import adminRoutes from "./features/admin/admin.routes";
 
 const app = express();
 
@@ -33,5 +34,6 @@ app.use("/api/products", productRoutes);
 app.use("/api/measurements", measurementRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/admin", adminRoutes);
 
 export default app;

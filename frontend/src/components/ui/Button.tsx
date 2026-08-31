@@ -24,16 +24,19 @@ const variantStyles: Record<string, string> = {
     "border border-chrome-400 bg-transparent text-foreground",
     "transition-all duration-300",
     "hover:border-chrome-200 hover:bg-chrome-500 hover:text-chrome-100",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
   ].join(" "),
   ghost: [
     "border-b border-chrome-400 pb-1 bg-transparent text-foreground",
     "transition-colors duration-200",
     "hover:border-chrome-200 hover:text-chrome-200",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
   ].join(" "),
   filled: [
     "border border-chrome-500 bg-chrome-500 text-foreground",
     "transition-colors duration-200",
     "hover:bg-chrome-400",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
   ].join(" "),
 };
 

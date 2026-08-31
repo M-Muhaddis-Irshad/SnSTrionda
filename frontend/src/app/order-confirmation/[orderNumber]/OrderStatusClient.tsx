@@ -34,7 +34,10 @@ export function OrderStatusClient({ orderNumber }: { orderNumber: string }) {
 
     async function fetchOrder() {
       try {
-        const res = await fetch(`${apiUrl}/api/orders/${orderNumber}`);
+        // Retrieve email stored during checkout for order verification
+        const storedEmail = localStorage.getItem(`trionda-order-email-${orderNumber}`) || "";
+        const emailParam = storedEmail ? `?email=${encodeURIComponent(storedEmail)}` : "";
+        const res = await fetch(`${apiUrl}/api/orders/${orderNumber}${emailParam}`);
         if (!res.ok) return;
         const data = await res.json();
         if (!cancelled && data.data) {

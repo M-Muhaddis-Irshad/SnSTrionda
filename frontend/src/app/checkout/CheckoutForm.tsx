@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore, selectSubtotal } from "@/stores/cartStore";
+import { useAuthStore } from "@/stores/authStore";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
@@ -62,6 +63,7 @@ export default function CheckoutForm() {
   const items = useCartStore((state) => state.items);
   const subtotal = useCartStore(selectSubtotal);
   const clearCart = useCartStore((state) => state.clearCart);
+  const accessToken = useAuthStore((state) => state.accessToken);
 
   const [form, setForm] = useState<ShippingForm>(INITIAL_FORM);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
@@ -127,9 +129,14 @@ export default function CheckoutForm() {
         email: form.email.trim() || undefined,
       };
 
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+
       const res = await fetch(`${apiUrl}/api/orders`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(payload),
       });
 
@@ -139,6 +146,11 @@ export default function CheckoutForm() {
         setStatus("error");
         setErrorMessage(data.error || "Failed to place order.");
         return;
+      }
+
+      // Store email for order confirmation page's email verification
+      if (form.email.trim()) {
+        localStorage.setItem(`trionda-order-email-${data.data.orderNumber}`, form.email.trim());
       }
 
       // For card payments: create Safepay session and redirect to hosted checkout
@@ -204,7 +216,7 @@ export default function CheckoutForm() {
           />
           <p className="font-body text-xs text-muted">
             Already have an account?{" "}
-            <a href="/auth/login" className="text-chrome-200 underline hover:text-foreground transition-colors">
+            <a href="/login" className="text-chrome-200 underline hover:text-foreground transition-colors">
               Sign in
             </a>
           </p>
@@ -225,7 +237,7 @@ export default function CheckoutForm() {
             <select
               value={form.country}
               onChange={(e) => handleChange("country", e.target.value)}
-              className="w-full bg-surface border border-chrome-500 px-4 py-2 text-sm text-foreground focus:outline-none focus:border-chrome-300 transition-colors"
+              className="w-full bg-surface border border-chrome-500 px-4 py-2 text-sm text-foreground focus:outline-none focus:border-chrome-300 focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
             >
               <option value="Pakistan">Pakistan</option>
             </select>

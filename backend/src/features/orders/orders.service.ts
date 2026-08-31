@@ -31,15 +31,15 @@ export interface CreateOrderInput {
   items: OrderItemInput[];
   shippingAddress: ShippingAddressInput;
   paymentMethod: "JAZZCASH" | "EASYPAISA" | "COD" | "CARD";
-  email?: string; // For guest users — used to create/find guest account
+  email?: string;
 }
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const SHIPPING_COST = 200; // Flat rate Rs. 200
-const GUEST_PASSWORD = "GUEST_NO_PASSWORD_" + Date.now(); // Random unusable password
+const SHIPPING_COST = 200;
+const GUEST_PASSWORD = "GUEST_NO_PASSWORD_" + Date.now();
 
 // ---------------------------------------------------------------------------
 // Custom Error
@@ -62,7 +62,6 @@ async function generateOrderNumber(): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = `TRD-${year}-`;
 
-  // Find the highest existing numeric order number for this year
   const allOrders = await prisma.order.findMany({
     where: {
       orderNumber: { startsWith: prefix },
@@ -89,7 +88,6 @@ async function generateOrderNumber(): Promise<string> {
 // ---------------------------------------------------------------------------
 
 async function findOrCreateGuestUser(email?: string): Promise<string> {
-  // If email provided, try to find existing user first
   if (email) {
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -97,9 +95,8 @@ async function findOrCreateGuestUser(email?: string): Promise<string> {
     }
   }
 
-  // Create a new guest user
   const guestEmail = email || `guest-${Date.now()}@trionda-guest.local`;
-  const passwordHash = await bcrypt.hash(GUEST_PASSWORD, 4); // Low rounds — this password is unusable
+  const passwordHash = await bcrypt.hash(GUEST_PASSWORD, 4);
 
   const user = await prisma.user.create({
     data: {
@@ -151,10 +148,10 @@ function validateOrderInput(input: CreateOrderInput): void {
 }
 
 // ---------------------------------------------------------------------------
-// Get Order by Order Number
+// Get Order by Order Number (public — requires email verification)
 // ---------------------------------------------------------------------------
 
-export async function getOrderByNumber(orderNumber: string) {
+export async function getOrderByNumber(orderNumber: string, email?: string) {
   const order = await prisma.order.findUnique({
     where: { orderNumber },
     include: {
@@ -171,7 +168,75 @@ export async function getOrderByNumber(orderNumber: string) {
     },
   });
 
+  if (!order) return null;
+
+  // Email verification: reject if no email provided or it doesn't match
+  if (email) {
+    const emailLower = email.toLowerCase().trim();
+    const orderEmail = order.user.email?.toLowerCase().trim();
+    const addressEmail = order.shippingAddress?.phone; // fallback
+
+    if (orderEmail !== emailLower) {
+      // Email doesn't match — return null (404, not 403)
+      return null;
+    }
+  }
+
   return order;
+}
+
+// ---------------------------------------------------------------------------
+// Get My Order by Order Number (authenticated — ownership enforced)
+// ---------------------------------------------------------------------------
+
+export async function getMyOrderByNumber(orderNumber: string, userId: string) {
+  const order = await prisma.order.findUnique({
+    where: { orderNumber },
+    include: {
+      items: {
+        include: {
+          productVariant: {
+            include: { product: { select: { name: true, slug: true } } },
+          },
+          customMeasurement: true,
+        },
+      },
+      shippingAddress: true,
+      user: { select: { id: true, email: true, firstName: true, lastName: true } },
+    },
+  });
+
+  if (!order) return null;
+
+  // Ownership check: only return if the order belongs to this user
+  if (order.userId !== userId) {
+    return null; // 404, not 403 — don't reveal the order exists
+  }
+
+  return order;
+}
+
+// ---------------------------------------------------------------------------
+// Get My Orders (customer's own orders)
+// ---------------------------------------------------------------------------
+
+export async function getMyOrders(userId: string) {
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      items: {
+        include: {
+          productVariant: {
+            include: { product: { select: { name: true, slug: true } } },
+          },
+        },
+      },
+      shippingAddress: true,
+    },
+  });
+
+  return orders;
 }
 
 // ---------------------------------------------------------------------------
@@ -181,7 +246,6 @@ export async function getOrderByNumber(orderNumber: string) {
 export async function createOrder(input: CreateOrderInput, authUserId?: string) {
   validateOrderInput(input);
 
-  // Fetch all variants in one query for price lookup + stock validation
   const variantIds = input.items.map((item) => item.variantId);
   const variants = await prisma.productVariant.findMany({
     where: { id: { in: variantIds } },
@@ -190,10 +254,8 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
     },
   });
 
-  // Build a map for quick lookup
   const variantMap = new Map(variants.map((v) => [v.id, v]));
 
-  // Validate all variants exist and have sufficient stock
   for (const item of input.items) {
     const variant = variantMap.get(item.variantId);
     if (!variant) {
@@ -213,7 +275,6 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
     }
   }
 
-  // Calculate totals server-side (never trust client totals)
   let subtotal = 0;
   const orderItemsData = input.items.map((item) => {
     const variant = variantMap.get(item.variantId)!;
@@ -231,15 +292,10 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
   const shippingCost = SHIPPING_COST;
   const total = subtotal + shippingCost;
 
-  // Determine userId: use auth user if provided, otherwise find/create guest
   const userId = authUserId || (await findOrCreateGuestUser(input.email));
-
-  // Generate unique order number
   const orderNumber = await generateOrderNumber();
 
-  // Execute everything in a single transaction
   const order = await prisma.$transaction(async (tx) => {
-    // 1. Create address
     const address = await tx.address.create({
       data: {
         label: "Shipping",
@@ -256,7 +312,6 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
       },
     });
 
-    // 2. Create order
     const order = await tx.order.create({
       data: {
         orderNumber,
@@ -271,7 +326,6 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
       },
     });
 
-    // 3. Create order items + decrement stock
     for (const itemData of orderItemsData) {
       await tx.orderItem.create({
         data: {
@@ -280,7 +334,6 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
         },
       });
 
-      // Decrement stock
       await tx.productVariant.update({
         where: { id: itemData.productVariantId },
         data: {
@@ -289,7 +342,6 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
       });
     }
 
-    // 4. Return the full order with relations
     return tx.order.findUnique({
       where: { id: order.id },
       include: {

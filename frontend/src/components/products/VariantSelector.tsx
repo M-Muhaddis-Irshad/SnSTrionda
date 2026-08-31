@@ -95,7 +95,7 @@ export default function VariantSelector({
                 key={size}
                 type="button"
                 onClick={() => setSelectedSize(size)}
-                className={`px-4 py-2 font-body text-sm tracking-wider transition-all duration-200 ${
+                className={`px-4 py-2 font-body text-sm tracking-wider transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   selectedSize === size
                     ? "border border-chrome-200 bg-chrome-500 text-chrome-100"
                     : "border border-chrome-500 bg-transparent text-muted hover:border-chrome-400 hover:text-foreground"
@@ -120,7 +120,7 @@ export default function VariantSelector({
                 key={color}
                 type="button"
                 onClick={() => setSelectedColor(color)}
-                className={`px-4 py-2 font-body text-sm tracking-wider transition-all duration-200 ${
+                className={`px-4 py-2 font-body text-sm tracking-wider transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   selectedColor === color
                     ? "border border-chrome-200 bg-chrome-500 text-chrome-100"
                     : "border border-chrome-500 bg-transparent text-muted hover:border-chrome-400 hover:text-foreground"

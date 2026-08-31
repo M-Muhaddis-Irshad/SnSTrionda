@@ -165,16 +165,12 @@ export default async function ShopPage({
                 <div className="mt-8 overflow-x-auto scrollbar-hide">
                   <div
                     className="flex gap-5 pb-4"
-                    style={{
-                      paddingLeft:
-                        "max(0rem, calc((100vw - 80rem) / 2))",
-                    }}
                   >
                     {group.products.map((product) => (
                       <a
                         key={product.id}
                         href={`/products/${product.slug}`}
-                        className="flex-shrink-0 w-56 sm:w-64"
+                        className="flex-shrink-0 w-56 sm:w-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       >
                         <Card className="w-full">
                           <CardImage>

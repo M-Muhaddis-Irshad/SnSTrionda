@@ -3,7 +3,7 @@
 // =============================================================================
 
 import { Request, Response } from "express";
-import { listProducts, getProductBySlug } from "./products.service";
+import { listProducts, getProductBySlug, listCategories } from "./products.service";
 import { AppError } from "../auth/auth.service";
 
 // ---------------------------------------------------------------------------
@@ -24,6 +24,20 @@ export async function handleListProducts(req: Request, res: Response) {
     });
   } catch (err: any) {
     console.error("List products error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/products/categories
+// ---------------------------------------------------------------------------
+
+export async function handleListCategories(_req: Request, res: Response) {
+  try {
+    const categories = await listCategories();
+    res.json({ data: categories });
+  } catch (err: any) {
+    console.error("List categories error:", err?.message || err);
     res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -4,7 +4,7 @@
 
 import { Router, Request, Response, NextFunction } from "express";
 import multer from "multer";
-import { handleListProducts, handleGetProductBySlug } from "./products.controller";
+import { handleListProducts, handleGetProductBySlug, handleListCategories } from "./products.controller";
 import { handleUploadImage, handleDeleteImage } from "./products.image.controller";
 import { authenticate, requireRole } from "../auth/auth.middleware";
 
@@ -54,6 +54,12 @@ router.delete(
   requireRole("ADMIN"),
   handleDeleteImage
 );
+
+// ---------------------------------------------------------------------------
+// Public category list (for homepage/shop filtering)
+// ---------------------------------------------------------------------------
+
+router.get("/categories", handleListCategories);
 
 // ---------------------------------------------------------------------------
 // Product routes (/:slug must come after image routes)

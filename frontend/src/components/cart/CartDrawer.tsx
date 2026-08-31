@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCartStore, selectSubtotal } from "@/stores/cartStore";
+import QuantitySelector from "@/components/products/QuantitySelector";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -57,7 +58,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <button
               type="button"
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center text-muted transition-colors hover:text-foreground"
+              className="flex h-8 w-8 items-center justify-center text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label="Close cart"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -77,7 +78,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="mt-4 font-body text-sm tracking-wider text-muted underline transition-colors hover:text-foreground"
+                  className="mt-4 font-body text-sm tracking-wider text-muted underline transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Continue Shopping
                 </button>
@@ -111,7 +112,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         <div>
                           <a
                             href={`/products/${item.productSlug}`}
-                            className="font-body text-sm text-foreground hover:text-chrome-200 transition-colors"
+                            className="font-body text-sm text-foreground hover:text-chrome-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
                             onClick={onClose}
                           >
                             {item.productName}
@@ -128,7 +129,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         <button
                           type="button"
                           onClick={() => removeItem(item.productId, item.variantId)}
-                          className="flex h-6 w-6 flex-shrink-0 items-center justify-center text-muted transition-colors hover:text-foreground"
+                          className="flex h-6 w-6 flex-shrink-0 items-center justify-center text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                           aria-label={`Remove ${item.productName}`}
                         >
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -139,31 +140,12 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                       {/* Quantity + Price */}
                       <div className="mt-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateQuantity(item.productId, item.variantId, item.quantity - 1)
-                            }
-                            className="flex h-7 w-7 items-center justify-center border border-chrome-500 text-muted transition-colors hover:border-chrome-400 hover:text-foreground"
-                            aria-label="Decrease quantity"
-                          >
-                            −
-                          </button>
-                          <span className="font-body text-sm text-foreground w-6 text-center">
-                            {item.quantity}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateQuantity(item.productId, item.variantId, item.quantity + 1)
-                            }
-                            className="flex h-7 w-7 items-center justify-center border border-chrome-500 text-muted transition-colors hover:border-chrome-400 hover:text-foreground"
-                            aria-label="Increase quantity"
-                          >
-                            +
-                          </button>
-                        </div>
+                        <QuantitySelector
+                          value={item.quantity}
+                          onChange={(q) => updateQuantity(item.productId, item.variantId, q)}
+                          min={1}
+                          max={99}
+                        />
                         <p className="font-body text-sm text-foreground">
                           {formatPrice(item.unitPrice * item.quantity)}
                         </p>
@@ -193,7 +175,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   onClose();
                   router.push("/checkout");
                 }}
-                className="block w-full text-center font-body text-sm tracking-[0.2em] uppercase border border-chrome-400 bg-transparent text-foreground px-10 py-4 transition-all duration-300 hover:border-chrome-200 hover:bg-chrome-500 hover:text-chrome-100"
+                className="block w-full text-center font-body text-sm tracking-[0.2em] uppercase border border-chrome-400 bg-transparent text-foreground px-10 py-4 transition-all duration-300 hover:border-chrome-200 hover:bg-chrome-500 hover:text-chrome-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Checkout
               </button>

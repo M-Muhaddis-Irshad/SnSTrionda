@@ -136,13 +136,13 @@ export default async function ProductDetailPage({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         {/* Breadcrumb */}
         <nav className="mb-8 font-body text-sm text-muted">
-          <a href="/shop" className="hover:text-foreground transition-colors">
+          <a href="/shop" className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm">
             Shop
           </a>
           <span className="mx-2">/</span>
           <a
             href={`/shop?category=${product.category.slug}`}
-            className="hover:text-foreground transition-colors"
+            className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
           >
             {product.category.name}
           </a>
@@ -225,7 +225,7 @@ export default async function ProductDetailPage({
                   <a
                     key={related.id}
                     href={`/products/${related.slug}`}
-                    className="flex-shrink-0 w-56 sm:w-64"
+                    className="flex-shrink-0 w-56 sm:w-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     <Card className="w-full">
                       <CardImage>

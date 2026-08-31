@@ -1,6 +1,7 @@
 import Image from "next/image";
 import MobileMenu from "./MobileMenu";
 import CartButton from "./cart/CartButton";
+import AccountButton from "./AccountButton";
 
 const navLinks = [
   { label: "Shop", href: "/shop" },
@@ -34,7 +35,7 @@ export default function Header() {
             <a
               key={link.label}
               href={link.href}
-              className="text-sm font-body tracking-wide text-muted transition-colors duration-200 hover:text-chrome-200"
+              className="text-sm font-body tracking-wide text-muted transition-colors duration-200 hover:text-chrome-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
             >
               {link.label}
             </a>
@@ -43,10 +44,13 @@ export default function Header() {
 
         {/* Right — Icons + Mobile menu */}
         <div className="flex items-center gap-3">
+          {/* Account icon */}
+          <AccountButton />
+
           {/* Search icon */}
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center text-muted transition-colors duration-200 hover:text-foreground"
+            className="flex h-10 w-10 items-center justify-center text-muted transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="Search"
           >
             <svg

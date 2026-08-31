@@ -3,27 +3,82 @@
 // =============================================================================
 
 import { Request, Response } from "express";
-import { createOrder, getOrderByNumber, OrderError } from "./orders.service";
+import { createOrder, getOrderByNumber, getMyOrderByNumber, getMyOrders, OrderError } from "./orders.service";
 
 // ---------------------------------------------------------------------------
-// POST /api/orders
-// ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// GET /api/orders/:orderNumber
+// GET /api/orders/mine — customer's own orders (list)
 // ---------------------------------------------------------------------------
 
-export async function handleGetOrder(req: Request, res: Response) {
+export async function handleGetMyOrders(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    const orders = await getMyOrders(userId);
+    res.status(200).json({ data: orders });
+  } catch (err: any) {
+    console.error("Get my orders error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/orders/mine/:orderNumber — customer's own order (single, authenticated)
+// ---------------------------------------------------------------------------
+
+export async function handleGetMyOrder(req: Request, res: Response) {
   try {
     const orderNumber = req.params.orderNumber as string;
+    const userId = req.user?.userId;
 
     if (!orderNumber) {
       return res.status(400).json({ error: "orderNumber is required." });
     }
 
-    const order = await getOrderByNumber(orderNumber);
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    const order = await getMyOrderByNumber(orderNumber, userId);
 
     if (!order) {
+      return res.status(404).json({ error: "Order not found." });
+    }
+
+    res.status(200).json({ data: order });
+  } catch (err: any) {
+    console.error("Get my order error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/orders/:orderNumber — public, requires email verification
+// ---------------------------------------------------------------------------
+
+export async function handleGetOrder(req: Request, res: Response) {
+  try {
+    const orderNumber = req.params.orderNumber as string;
+    const email = req.query.email as string | undefined;
+
+    if (!orderNumber) {
+      return res.status(400).json({ error: "orderNumber is required." });
+    }
+
+    // Require email for verification
+    if (!email || email.trim().length === 0) {
+      return res.status(400).json({ error: "email query parameter is required." });
+    }
+
+    const order = await getOrderByNumber(orderNumber, email);
+
+    if (!order) {
+      // 404 regardless of whether it's missing email or wrong email
       return res.status(404).json({ error: "Order not found." });
     }
 

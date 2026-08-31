@@ -96,18 +96,14 @@ export default async function FeaturedCollection() {
       {/* Horizontal scroll rail */}
       <div className="mt-10 overflow-x-auto scrollbar-hide">
         <div
-          className="flex gap-5 px-4 pb-4 sm:px-6 lg:px-8"
-          style={{
-            paddingLeft:
-              "max(1rem, calc((100vw - 80rem) / 2 + 2rem))",
-          }}
+          className="flex gap-5 px-4 pb-4 sm:px-6 lg:px-8 xl:px-[max(2rem,calc((100%-80rem)/2+2rem))]"
         >
           {products.length > 0 ? (
             products.map((product) => (
               <a
                 key={product.id}
                 href={`/products/${product.slug}`}
-                className="flex-shrink-0 w-56 sm:w-64"
+                className="flex-shrink-0 w-56 sm:w-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <Card className="w-full">
                   <CardImage>

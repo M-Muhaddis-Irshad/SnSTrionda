@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCartStore, selectTotalItems } from "@/stores/cartStore";
 import CartDrawer from "./CartDrawer";
 
@@ -14,12 +14,19 @@ export default function CartButton() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const totalItems = useCartStore(selectTotalItems);
 
+  // Listen for custom event from mobile bottom nav cart tab
+  useEffect(() => {
+    const handleOpenCart = () => setIsDrawerOpen(true);
+    window.addEventListener("trionda:open-cart", handleOpenCart);
+    return () => window.removeEventListener("trionda:open-cart", handleOpenCart);
+  }, []);
+
   return (
     <>
       <button
         type="button"
         onClick={() => setIsDrawerOpen(true)}
-        className="relative flex h-10 w-10 items-center justify-center text-muted transition-colors duration-200 hover:text-foreground"
+        className="relative flex h-10 w-10 items-center justify-center text-muted transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label={`Cart${totalItems > 0 ? ` (${totalItems} items)` : ""}`}
       >
         <svg

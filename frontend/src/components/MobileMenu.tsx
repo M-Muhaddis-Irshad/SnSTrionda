@@ -1,15 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useAuthStore } from "@/stores/authStore";
 
 const navLinks = [
-  { label: "Shop", href: "#" },
-  { label: "Collections", href: "#" },
-  { label: "About", href: "#" },
+  { label: "Shop", href: "/shop" },
+  { label: "Collections", href: "/shop" },
+  { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "#" },
 ];
 
 export default function MobileMenu() {
+  const { isAuthenticated, isAdmin } = useAuthStore();
+  const authenticated = isAuthenticated();
+  const admin = isAdmin();
+  const accountHref = !authenticated ? "/login" : admin ? "/admin" : "/account";
+  const accountLabel = !authenticated ? "Sign In" : "My Account";
+
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -18,7 +26,7 @@ export default function MobileMenu() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative flex h-10 w-10 items-center justify-center text-foreground transition-colors hover:text-chrome-200"
+        className="relative flex h-10 w-10 items-center justify-center text-foreground transition-colors hover:text-chrome-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label={isOpen ? "Close menu" : "Open menu"}
         aria-expanded={isOpen}
       >
@@ -67,7 +75,7 @@ export default function MobileMenu() {
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="absolute top-5 right-5 flex h-10 w-10 items-center justify-center text-muted transition-colors hover:text-foreground"
+            className="absolute top-5 right-5 flex h-10 w-10 items-center justify-center text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="Close menu"
           >
             <svg
@@ -97,6 +105,13 @@ export default function MobileMenu() {
                 {link.label}
               </a>
             ))}
+            <Link
+              href={accountHref}
+              className="font-display text-2xl tracking-wide text-chrome-200 transition-colors hover:text-foreground border-t border-chrome-500 pt-6"
+              onClick={() => setIsOpen(false)}
+            >
+              {accountLabel}
+            </Link>
           </nav>
         </div>
       </div>

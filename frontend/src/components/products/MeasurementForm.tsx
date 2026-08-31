@@ -165,8 +165,7 @@ export default function MeasurementForm({ apiUrl }: MeasurementFormProps) {
             setStatus("idle");
             setFields(INITIAL_FIELDS);
             setIsOpen(false);
-          }}
-          className="mt-3 font-body text-xs tracking-wider text-muted underline transition-colors hover:text-foreground"
+          }}            className="mt-3 font-body text-xs tracking-wider text-muted underline transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           Submit new measurements
         </button>
@@ -181,7 +180,7 @@ export default function MeasurementForm({ apiUrl }: MeasurementFormProps) {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="font-body text-sm tracking-wider text-muted underline transition-colors hover:text-foreground"
+          className="font-body text-sm tracking-wider text-muted underline transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           Add Your Measurements
         </button>
@@ -198,7 +197,7 @@ export default function MeasurementForm({ apiUrl }: MeasurementFormProps) {
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="font-body text-xs tracking-wider text-muted transition-colors hover:text-foreground"
+              className="font-body text-xs tracking-wider text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Collapse
             </button>
@@ -226,7 +225,7 @@ export default function MeasurementForm({ apiUrl }: MeasurementFormProps) {
                     max="100"
                     value={fields[key]}
                     onChange={(e) => handleChange(key, e.target.value)}
-                    className="w-full border border-chrome-500 bg-transparent px-3 py-2 font-body text-sm text-foreground placeholder-chrome-400 focus:border-chrome-300 focus:outline-none transition-colors"
+                    className="w-full border border-chrome-500 bg-transparent px-3 py-2 font-body text-sm text-foreground placeholder-chrome-400 focus:border-chrome-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
                     placeholder={`e.g. ${key === "chest" ? "40" : key === "waist" ? "34" : ""}`}
                   />
                 </div>
@@ -252,7 +251,7 @@ export default function MeasurementForm({ apiUrl }: MeasurementFormProps) {
                     max="100"
                     value={fields[key]}
                     onChange={(e) => handleChange(key, e.target.value)}
-                    className="w-full border border-chrome-500 bg-transparent px-3 py-2 font-body text-sm text-foreground placeholder-chrome-400 focus:border-chrome-300 focus:outline-none transition-colors"
+                    className="w-full border border-chrome-500 bg-transparent px-3 py-2 font-body text-sm text-foreground placeholder-chrome-400 focus:border-chrome-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
                     placeholder={`e.g. ${key === "inseam" ? "32" : key === "hip" ? "42" : ""}`}
                   />
                 </div>
@@ -289,7 +288,7 @@ export default function MeasurementForm({ apiUrl }: MeasurementFormProps) {
                   value={fields.notes}
                   onChange={(e) => handleChange("notes", e.target.value)}
                   rows={3}
-                  className="w-full border border-chrome-500 bg-transparent px-3 py-2 font-body text-sm text-foreground placeholder-chrome-400 focus:border-chrome-300 focus:outline-none transition-colors resize-none"
+                  className="w-full border border-chrome-500 bg-transparent px-3 py-2 font-body text-sm text-foreground placeholder-chrome-400 focus:border-chrome-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors resize-none"
                   placeholder="Fit preferences, body shape notes, etc."
                 />
               </div>
