@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import FaqAccordion from "./FaqAccordion";
 
 export const metadata: Metadata = {
@@ -86,12 +87,12 @@ export default function FaqPage() {
         <p className="mt-6 font-body text-base leading-relaxed text-muted">
           Find answers to common questions about ordering, shipping, payments,
           and our tailoring process. If you need further help,{" "}
-          <a
+          <Link
             href="/#contact"
             className="text-chrome-200 underline underline-offset-2 hover:text-foreground transition-colors"
           >
             get in touch
-          </a>
+          </Link>
           .
         </p>
 

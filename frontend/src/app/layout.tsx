@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Inter } from "next/font/google";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import ClientShell from "@/components/ClientShell";
+import ConditionalShell from "@/components/ConditionalShell";
+import Providers from "@/components/Providers";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -26,10 +26,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${bodoniModa.variable} ${inter.variable}`}>
       <body className="min-h-screen overflow-x-hidden bg-background text-foreground font-body antialiased pb-14 md:pb-0">
-        <Header />
-        {children}
-        <Footer />
-        <ClientShell />
+        <Providers>
+          <ConditionalShell>
+            {children}
+          </ConditionalShell>
+          <ClientShell />
+        </Providers>
       </body>
     </html>
   );

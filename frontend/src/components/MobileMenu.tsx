@@ -101,14 +101,14 @@ export default function MobileMenu() {
           {/* Nav links */}
           <nav className="flex flex-col gap-6">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 className="font-display text-2xl tracking-wide text-foreground transition-colors hover:text-chrome-200"
                 onClick={() => setIsOpen(false)}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
             <Link
               href={accountHref}

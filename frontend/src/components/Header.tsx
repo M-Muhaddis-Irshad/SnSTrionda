@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import MobileMenu from "./MobileMenu";
 import CartButton from "./cart/CartButton";
 import AccountButton from "./AccountButton";
@@ -19,7 +20,7 @@ export default function Header() {
     <header className="sticky top-0 z-30 w-full bg-surface border-b border-chrome-500">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left — Logo lockup */}
-        <a href="/" className="flex items-center gap-3 shrink-0">
+        <Link href="/" className="flex items-center gap-3 shrink-0">
           <Image
             src="/logo/trionda-icon-mark.png"
             alt="Trionda Wears icon"
@@ -31,18 +32,18 @@ export default function Header() {
           <span className="font-display text-lg tracking-[0.2em] text-foreground hidden sm:inline">
             TRIONDA WEARS
           </span>
-        </a>
+        </Link>
 
         {/* Center — Desktop nav links */}
         <nav className="hidden md:flex items-center gap-6 overflow-x-auto scrollbar-hide">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
               className="text-sm font-body tracking-wide text-muted transition-colors duration-200 hover:text-chrome-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 

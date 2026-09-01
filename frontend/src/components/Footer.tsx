@@ -1,3 +1,4 @@
+import Link from "next/link";
 import NewsletterForm from "./NewsletterForm";
 
 const shopLinks = [
@@ -50,12 +51,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {shopLinks.map((link) => (
                 <li key={link.label}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-sm text-muted hover:text-chrome-200 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -88,12 +89,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {supportLinks.map((link) => (
                 <li key={link.label}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-sm text-muted hover:text-chrome-200 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

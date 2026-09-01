@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Link from "next/link";
 import { useWishlistStore } from "@/stores/wishlistStore";
 
 // ---------------------------------------------------------------------------
@@ -168,7 +169,7 @@ export default function ProductCard({
   const widthClass = layout === "rail" ? "w-56 sm:w-64 flex-shrink-0" : "w-full";
 
   return (
-    <a
+    <Link
       href={`/products/${product.slug}`}
       className={`group block ${widthClass} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background`}
     >
@@ -247,6 +248,6 @@ export default function ProductCard({
           </div>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }

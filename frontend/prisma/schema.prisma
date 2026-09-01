@@ -1,0 +1,286 @@
+// =============================================================================
+// Trionda Wears — Frontend Prisma Schema (NextAuth + Auth Images)
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url is configured via prisma.config.ts and the adapter at runtime
+}
+
+// =============================================================================
+// NEXTAUTH MODELS
+// =============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // For credentials provider (hashed)
+  phone         String?
+  role          String    @default("CUSTOMER")
+
+  accounts      Account[]
+  sessions      Session[]
+
+  // Relations kept for app functionality (orders, addresses)
+  addresses     Address[]
+  orders        Order[]
+  activities    Activity[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// =============================================================================
+// AUTH IMAGES
+// =============================================================================
+
+model AuthImage {
+  id        String   @id @default(cuid())
+  pageType  String   // "login" or "signup"
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =============================================================================
+// PRODUCT CATALOG (kept for reference — already in backend DB)
+// =============================================================================
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  parentId    String?
+  parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children    Category[] @relation("CategoryTree")
+  products    Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parentId])
+}
+
+model Product {
+  id              String            @id @default(cuid())
+  name            String
+  slug            String            @unique
+  description     String?
+  basePrice       Decimal           @db.Decimal(10, 2)
+  isCustomizable  Boolean           @default(false)
+  isActive        Boolean           @default(true)
+
+  categoryId      String
+  category        Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  variants        ProductVariant[]
+  images          ProductImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model ProductVariant {
+  id              String       @id @default(cuid())
+  size            String?
+  color           String?
+  fabricType      String?
+  sku             String       @unique
+  price           Decimal?     @db.Decimal(10, 2)
+  stockQuantity   Int          @default(0)
+
+  productId       String
+  product         Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  orderItems      OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([sku])
+}
+
+model ProductImage {
+  id           String  @id @default(cuid())
+  url          String
+  altText      String?
+  displayOrder Int     @default(0)
+
+  productId    String
+  product      Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+// =============================================================================
+// CUSTOM MEASUREMENTS (Made-to-Order)
+// =============================================================================
+
+model CustomMeasurement {
+  id String @id @default(cuid())
+
+  chest        Decimal?  @db.Decimal(5, 2)
+  waist        Decimal?  @db.Decimal(5, 2)
+  shoulder     Decimal?  @db.Decimal(5, 2)
+  sleeveLength Decimal?  @db.Decimal(5, 2)
+  neck         Decimal?  @db.Decimal(5, 2)
+
+  hip          Decimal?  @db.Decimal(5, 2)
+  inseam       Decimal?  @db.Decimal(5, 2)
+  thigh        Decimal?  @db.Decimal(5, 2)
+  rise         Decimal?  @db.Decimal(5, 2)
+  cuff         Decimal?  @db.Decimal(5, 2)
+
+  height       Decimal?  @db.Decimal(5, 2)
+  notes        String?   @db.Text
+
+  orderItem    OrderItem?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =============================================================================
+// ADDRESSES & ORDERS
+// =============================================================================
+
+model Address {
+  id           String  @id @default(cuid())
+  label        String
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  province     String
+  postalCode   String?
+  country      String  @default("Pakistan")
+  isDefault    Boolean @default(false)
+
+  userId         String
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingOrders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Order {
+  id                String          @id @default(cuid())
+  orderNumber       String          @unique
+  status            String          @default("PENDING")
+  subtotal          Decimal         @db.Decimal(10, 2)
+  shippingCost      Decimal         @db.Decimal(10, 2) @default(0)
+  total             Decimal         @db.Decimal(10, 2)
+  paymentMethod     String
+  paymentStatus     String          @default("PENDING")
+
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  shippingAddressId String
+  shippingAddress   Address         @relation(fields: [shippingAddressId], references: [id], onDelete: Restrict)
+
+  items             OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([paymentStatus])
+}
+
+model OrderItem {
+  id              String             @id @default(cuid())
+  quantity        Int                @default(1)
+  priceAtPurchase Decimal            @db.Decimal(10, 2)
+
+  orderId         String
+  order           Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productVariantId String
+  productVariant  ProductVariant     @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+
+  customMeasurementId String?        @unique
+  customMeasurement   CustomMeasurement? @relation(fields: [customMeasurementId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([productVariantId])
+}
+
+// =============================================================================
+// ACTIVITY LOG
+// =============================================================================
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String   // "order", "product", "customer", "discount", "review"
+  message   String
+  metadata  String?  // JSON string for additional info
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}

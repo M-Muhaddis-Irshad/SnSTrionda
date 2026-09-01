@@ -1,97 +1,107 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/authStore";
-import { fetchDashboardStats } from "@/lib/admin-api";
-import RevenueChart from "@/components/admin/RevenueChart";
+import { useEffect, useState } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+} from 'recharts';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-interface DashboardStats {
-  totalOrders: number;
-  totalRevenue: number;
-  totalProducts: number;
-  totalCustomers: number;
-  recentOrders: any[];
-  lowStockProducts: any[];
-  revenueByDay: { date: string; day: string; revenue: number; orders: number }[];
+interface DashboardData {
+  stats: {
+    totalRevenue: number;
+    revenueChange: string;
+    totalOrders: number;
+    ordersChange: string;
+    totalCustomers: number;
+    customersChange: string;
+    totalProducts: number;
+    conversionRate: string;
+  };
+  chartData: Array<{ date: string; revenue: number; orders: number }>;
+  statusData: Array<{ name: string; value: number }>;
+  channelData: Array<{ name: string; revenue: number; percentage: string }>;
+  topProducts: Array<{
+    id: string;
+    name: string;
+    price: number;
+    sold: number;
+  }>;
+  recentOrders: Array<{
+    id: string;
+    orderNumber: string;
+    customer: string;
+    date: string;
+    status: string;
+    total: number;
+  }>;
+  recentActivities: Array<{
+    id: string;
+    type: string;
+    message: string;
+    user: string;
+    timestamp: string;
+  }>;
+  customerStats: {
+    total: number;
+    new: number;
+    returning: number;
+    avgOrderValue: string;
+    customerLifetimeValue: string;
+  };
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+const COLORS = ['#ffffff', '#888888', '#555555', '#333333'];
+const STATUS_COLORS: Record<string, string> = {
+  Pending: '#fbbf24',
+  Processing: '#60a5fa',
+  Shipped: '#34d399',
+  Delivered: '#10b981',
+  Cancelled: '#ef4444',
+};
 
-function formatCurrency(amount: number): string {
-  return `Rs. ${amount.toLocaleString()}`;
-}
-
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function statusColor(status: string): string {
-  switch (status) {
-    case "PAID":
-    case "DELIVERED":
-      return "text-emerald-400 border-emerald-400/30";
-    case "PENDING":
-    case "CONFIRMED":
-      return "text-amber-400 border-amber-400/30";
-    case "PROCESSING":
-    case "SHIPPED":
-      return "text-blue-400 border-blue-400/30";
-    case "CANCELLED":
-    case "FAILED":
-      return "text-red-400 border-red-400/30";
-    default:
-      return "text-muted border-chrome-400/30";
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Page Component
-// ---------------------------------------------------------------------------
-
-export default function AdminDashboardPage() {
-  const router = useRouter();
-  const { isAuthenticated, isAdmin } = useAuthStore();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+export default function AdminDashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!isAuthenticated() || !isAdmin()) {
-      router.replace("/admin/login");
-      return;
-    }
-
-    loadStats();
+    fetchDashboardData();
   }, []);
 
-  async function loadStats() {
+  const fetchDashboardData = async () => {
     try {
-      setLoading(true);
-      const res = await fetchDashboardStats();
-      setStats(res.data);
+      const res = await fetch('/api/admin/dashboard/stats');
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to fetch');
+      }
+      const dashboardData = await res.json();
+      setData(dashboardData);
     } catch (err: any) {
-      setError(err.message || "Failed to load dashboard");
+      console.error('Dashboard error:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-muted font-body text-sm tracking-wider uppercase">
-          Loading dashboard...
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -100,10 +110,10 @@ export default function AdminDashboardPage() {
   if (error) {
     return (
       <div className="py-20 text-center">
-        <p className="text-red-400 font-body text-sm mb-4">{error}</p>
+        <p className="text-red-400 text-sm mb-4">{error}</p>
         <button
-          onClick={loadStats}
-          className="font-body text-sm text-muted hover:text-foreground underline transition-colors"
+          onClick={fetchDashboardData}
+          className="text-gray-400 hover:text-white text-sm underline"
         >
           Retry
         </button>
@@ -111,169 +121,369 @@ export default function AdminDashboardPage() {
     );
   }
 
-  if (!stats) return null;
+  if (!data) return null;
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-display text-2xl text-foreground tracking-wide">
-          Dashboard
-        </h1>
-        <p className="font-body text-sm text-muted mt-1">
-          Overview of your store performance
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+    <div className="space-y-8">
+      {/* STAT CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard
-          label="Total Orders"
-          value={stats.totalOrders.toString()}
-          icon="🛒"
-        />
-        <StatCard
-          label="Total Revenue"
-          value={formatCurrency(stats.totalRevenue)}
+          label="TOTAL REVENUE"
+          value={`Rs. ${data.stats.totalRevenue.toLocaleString()}`}
+          change={data.stats.revenueChange}
+          period="vs last 30 days"
           icon="💰"
         />
         <StatCard
-          label="Active Products"
-          value={stats.totalProducts.toString()}
+          label="TOTAL ORDERS"
+          value={data.stats.totalOrders.toString()}
+          change={data.stats.ordersChange}
+          period="vs last 30 days"
           icon="📦"
         />
         <StatCard
-          label="Customers"
-          value={stats.totalCustomers.toString()}
+          label="TOTAL CUSTOMERS"
+          value={data.stats.totalCustomers.toString()}
+          change={data.stats.customersChange}
+          period="vs last 30 days"
           icon="👥"
+        />
+        <StatCard
+          label="TOTAL PRODUCTS"
+          value={data.stats.totalProducts.toString()}
+          change="+0%"
+          period="vs last 30 days"
+          icon="🛍️"
+        />
+        <StatCard
+          label="CONVERSION RATE"
+          value={data.stats.conversionRate}
+          change="+0%"
+          period="vs last 30 days"
+          icon="📈"
         />
       </div>
 
-      {/* Revenue Analytics Chart */}
-      <div className="border border-chrome-500 bg-surface mb-6">
-        <div className="px-6 py-4 border-b border-chrome-500">
-          <h2 className="font-display text-lg text-foreground">Revenue Analytics</h2>
-          <p className="font-body text-xs text-muted mt-0.5">Last 7 days — paid orders only</p>
+      {/* CHARTS SECTION */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* LINE CHART - Sales Overview */}
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-white font-semibold">SALES OVERVIEW</h3>
+            <select className="bg-gray-800 text-white text-sm px-3 py-1 rounded border border-gray-700">
+              <option>This Month</option>
+              <option>Last Month</option>
+            </select>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={data.chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+              <XAxis dataKey="date" stroke="#666" />
+              <YAxis stroke="#666" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1a1a1a',
+                  border: '1px solid #333',
+                  borderRadius: '8px',
+                }}
+                formatter={(value: any) =>
+                  typeof value === 'number'
+                    ? `Rs. ${value.toLocaleString()}`
+                    : value
+                }
+              />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="revenue"
+                stroke="#fff"
+                strokeWidth={2}
+                dot={false}
+                name="Revenue"
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
-        <div className="px-4 py-4">
-          <RevenueChart data={stats.revenueByDay || []} />
+
+        {/* PIE CHART - Order Status */}
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+          <h3 className="text-white font-semibold mb-6">ORDERS BY STATUS</h3>
+          {data.statusData.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={data.statusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={({ name, value }) => `${name}: ${value}`}
+                  >
+                    {data.statusData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={STATUS_COLORS[entry.name] || COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="mt-6 space-y-2">
+                {data.statusData.map((status) => {
+                  const total = data.statusData.reduce((sum, s) => sum + s.value, 0);
+                  const percentage = ((status.value / total) * 100).toFixed(1);
+                  return (
+                    <div key={status.name} className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">
+                        ● {status.name}
+                      </span>
+                      <span className="text-white">
+                        {status.value} ({percentage}%)
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-64 text-gray-500 text-sm">
+              No orders yet
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Orders */}
-        <div className="lg:col-span-2 border border-chrome-500 bg-surface">
-          <div className="px-6 py-4 border-b border-chrome-500 flex items-center justify-between">
-            <h2 className="font-display text-lg text-foreground">Recent Orders</h2>
-            <button
-              onClick={() => router.push("/admin/orders")}
-              className="font-body text-xs text-muted hover:text-foreground transition-colors tracking-wider uppercase"
-            >
-              View All →
-            </button>
-          </div>
+      {/* BAR CHART - Sales by Channel */}
+      {data.channelData.length > 0 && (
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+          <h3 className="text-white font-semibold mb-6">SALES BY CHANNEL</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data.channelData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+              <XAxis dataKey="name" stroke="#666" />
+              <YAxis stroke="#666" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1a1a1a',
+                  border: '1px solid #333',
+                }}
+                formatter={(value: any) =>
+                  typeof value === 'number'
+                    ? `Rs. ${value.toLocaleString()}`
+                    : value
+                }
+              />
+              <Bar dataKey="revenue" fill="#fff" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
-          {stats.recentOrders.length === 0 ? (
-            <div className="px-6 py-12 text-center text-muted font-body text-sm">
-              No orders yet.
-            </div>
-          ) : (
-            <div className="divide-y divide-chrome-500">
-              {stats.recentOrders.map((order: any) => (
+      {/* TABLES SECTION */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* RECENT ORDERS TABLE */}
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-white font-semibold">RECENT ORDERS</h3>
+            <a href="/admin/orders" className="text-gray-400 hover:text-white text-sm">
+              View All
+            </a>
+          </div>
+          <div className="space-y-2">
+            {data.recentOrders.length > 0 ? (
+              data.recentOrders.map((order) => (
                 <div
                   key={order.id}
-                  className="px-6 py-4 flex items-center justify-between hover:bg-chrome-500/10 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/admin/orders?id=${order.id}`)}
+                  className="flex items-center justify-between py-3 border-b border-gray-800"
                 >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-body text-sm text-foreground truncate">
-                      {order.orderNumber}
-                    </p>
-                    <p className="font-body text-xs text-muted mt-0.5">
-                      {order.user?.email || "Unknown"}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-800 rounded flex items-center justify-center">
+                      📦
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold text-sm">
+                        #{order.orderNumber}
+                      </p>
+                      <p className="text-gray-500 text-xs">{order.customer}</p>
+                    </div>
                   </div>
-                  <div className="text-right ml-4 flex-shrink-0">
-                    <p className="font-body text-sm text-foreground">
-                      {formatCurrency(Number(order.total))}
+                  <div className="text-right">
+                    <p className="text-white text-sm">{order.date}</p>
+                    <span
+                      className="text-xs px-2 py-1 rounded"
+                      style={{
+                        backgroundColor: `${STATUS_COLORS[order.status] || '#555'}33`,
+                        color: STATUS_COLORS[order.status] || '#999',
+                      }}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm text-center py-6">
+                No orders yet
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* TOP PRODUCTS TABLE */}
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-white font-semibold">TOP SELLING PRODUCTS</h3>
+            <a href="/admin/products" className="text-gray-400 hover:text-white text-sm">
+              View All
+            </a>
+          </div>
+          <div className="space-y-2">
+            {data.topProducts.length > 0 ? (
+              data.topProducts.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="flex items-center justify-between py-3 border-b border-gray-800"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-gray-500 font-semibold w-6">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="text-white font-semibold text-sm">
+                        {product.name}
+                      </p>
+                      <p className="text-gray-500 text-xs">
+                        {product.sold} sold
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-white font-semibold">
+                    Rs. {product.price.toLocaleString()}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm text-center py-6">
+                No products yet
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* CUSTOMER OVERVIEW & ACTIVITIES */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* CUSTOMER OVERVIEW */}
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+          <h3 className="text-white font-semibold mb-6">CUSTOMER OVERVIEW</h3>
+          <div className="space-y-4">
+            <OverviewStat label="Total Customers" value={data.customerStats.total.toString()} />
+            <OverviewStat label="New Customers (This Month)" value={data.customerStats.new.toString()} />
+            <OverviewStat label="Returning Customers" value={data.customerStats.returning.toString()} />
+            <OverviewStat label="Average Order Value" value={`Rs. ${data.customerStats.avgOrderValue}`} />
+            <OverviewStat label="Customer Lifetime Value" value={`Rs. ${data.customerStats.customerLifetimeValue}`} />
+          </div>
+        </div>
+
+        {/* RECENT ACTIVITIES */}
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+          <h3 className="text-white font-semibold mb-6">RECENT ACTIVITIES</h3>
+          <div className="space-y-2">
+            {data.recentActivities.length > 0 ? (
+              data.recentActivities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-start gap-3 py-3 border-b border-gray-800"
+                >
+                  <div className="text-lg">
+                    {getActivityIcon(activity.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm break-words">
+                      {activity.message}
                     </p>
-                    <div className="flex items-center gap-2 mt-1 justify-end">
-                      <span
-                        className={`font-body text-xs px-2 py-0.5 border ${statusColor(order.status)}`}
-                      >
-                        {order.status}
-                      </span>
-                      <span className="font-body text-xs text-muted">
-                        {formatDate(order.createdAt)}
-                      </span>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-gray-500 text-xs">{activity.user}</p>
+                      <p className="text-gray-600 text-xs">
+                        {activity.timestamp}
+                      </p>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Low Stock */}
-        <div className="border border-chrome-500 bg-surface">
-          <div className="px-6 py-4 border-b border-chrome-500">
-            <h2 className="font-display text-lg text-foreground">Low Stock</h2>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm text-center py-6">
+                No activities yet
+              </p>
+            )}
           </div>
-
-          {stats.lowStockProducts.length === 0 ? (
-            <div className="px-6 py-12 text-center text-muted font-body text-sm">
-              All products well-stocked.
-            </div>
-          ) : (
-            <div className="divide-y divide-chrome-500 max-h-96 overflow-y-auto">
-              {stats.lowStockProducts.map((variant: any) => (
-                <div
-                  key={variant.id}
-                  className="px-6 py-3 flex items-center justify-between"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-body text-sm text-foreground truncate">
-                      {variant.product.name}
-                    </p>
-                    <p className="font-body text-xs text-muted mt-0.5">
-                      {[variant.size, variant.color].filter(Boolean).join(" / ") || variant.sku}
-                    </p>
-                  </div>
-                  <span
-                    className={`font-body text-sm font-medium ${
-                      variant.stockQuantity === 0
-                        ? "text-red-400"
-                        : variant.stockQuantity < 3
-                        ? "text-amber-400"
-                        : "text-foreground"
-                    }`}
-                  >
-                    {variant.stockQuantity}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Stat Card
-// ---------------------------------------------------------------------------
+function StatCard({
+  label,
+  value,
+  change,
+  period,
+  icon,
+}: {
+  label: string;
+  value: string;
+  change: string;
+  period: string;
+  icon: string;
+}) {
+  const isPositive = !change.startsWith('-');
 
-function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
-    <div className="border border-chrome-500 bg-surface px-6 py-5">
+    <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
       <div className="flex items-start justify-between">
         <div>
-          <p className="font-body text-xs text-muted tracking-wider uppercase">{label}</p>
-          <p className="font-display text-2xl text-foreground mt-2">{value}</p>
+          <p className="text-xs uppercase text-gray-500 font-bold mb-2">
+            {label}
+          </p>
+          <p className="text-3xl font-semibold text-white">{value}</p>
+          <p className={`text-xs mt-2 ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+            {change}{' '}
+            <span className="text-gray-500">{period}</span>
+          </p>
         </div>
-        <span className="text-xl">{icon}</span>
+        <div className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center text-lg">
+          {icon}
+        </div>
       </div>
     </div>
   );
+}
+
+function OverviewStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-gray-800">
+      <span className="text-gray-400 text-sm">{label}</span>
+      <p className="text-white font-semibold text-sm">{value}</p>
+    </div>
+  );
+}
+
+function getActivityIcon(type: string): string {
+  const icons: Record<string, string> = {
+    order: '📦',
+    product: '🛍️',
+    customer: '👥',
+    discount: '🏷️',
+    review: '⭐',
+  };
+  return icons[type] || '📌';
 }

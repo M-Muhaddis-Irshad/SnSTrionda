@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import Link from "next/link";
 import Autoplay from "embla-carousel-autoplay";
 
 // ---------------------------------------------------------------------------
@@ -216,7 +217,7 @@ export default function HeroCarousel() {
 
                   {/* CTA button */}
                   <div className="mt-10">
-                    <a
+                    <Link
                       href={slide.ctaHref}
                       className="group inline-flex items-center gap-3 border border-chrome-400 bg-transparent px-10 py-4 font-body text-sm tracking-[0.2em] uppercase text-foreground transition-all duration-300 hover:border-chrome-200 hover:bg-chrome-500 hover:text-chrome-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
@@ -235,7 +236,7 @@ export default function HeroCarousel() {
                           d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
                         />
                       </svg>
-                    </a>
+                    </Link>
                   </div>
 
                   {/* Small diamond accent below CTA */}

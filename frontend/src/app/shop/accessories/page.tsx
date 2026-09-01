@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function AccessoriesPage() {
   return (
     <main className="min-h-screen bg-background">
@@ -6,12 +8,12 @@ export default function AccessoriesPage() {
         <div className="mt-3 h-px w-16 bg-chrome-400" />
         <div className="mt-16 text-center">
           <p className="text-muted text-sm">No accessories available yet.</p>
-          <a
+          <Link
             href="/shop"
             className="mt-4 inline-block text-sm text-chrome-200 underline underline-offset-4 hover:text-foreground transition-colors duration-200"
           >
             Browse all products
-          </a>
+          </Link>
         </div>
       </div>
     </main>

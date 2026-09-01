@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useCartStore, selectSubtotal } from "@/stores/cartStore";
 import QuantitySelector from "@/components/products/QuantitySelector";
 
@@ -110,13 +111,13 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <a
+                          <Link
                             href={`/products/${item.productSlug}`}
                             className="font-body text-sm text-foreground hover:text-chrome-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
                             onClick={onClose}
                           >
                             {item.productName}
-                          </a>
+                          </Link>
                           <p className="font-body text-xs text-muted mt-0.5">
                             {item.variantLabel}
                           </p>

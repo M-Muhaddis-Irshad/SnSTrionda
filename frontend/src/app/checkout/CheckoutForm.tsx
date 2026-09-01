@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useCartStore, selectSubtotal } from "@/stores/cartStore";
 import { useAuthStore } from "@/stores/authStore";
 import Button from "@/components/ui/Button";
@@ -216,9 +217,9 @@ export default function CheckoutForm() {
           />
           <p className="font-body text-xs text-muted">
             Already have an account?{" "}
-            <a href="/login" className="text-chrome-200 underline hover:text-foreground transition-colors">
+            <Link href="/login" className="text-chrome-200 underline hover:text-foreground transition-colors">
               Sign in
-            </a>
+            </Link>
           </p>
         </div>
       </section>

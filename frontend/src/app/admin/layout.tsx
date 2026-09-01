@@ -1,66 +1,75 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
-import { useAuthStore } from "@/stores/authStore";
+import { useEffect, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 const NAV_ITEMS = [
-  { href: "/admin", label: "Dashboard", icon: "📊" },
-  { href: "/admin/products", label: "Products", icon: "📦" },
-  { href: "/admin/orders", label: "Orders", icon: "🛒" },
+  { section: 'Main', items: [
+    { href: '/admin', label: 'Dashboard', icon: '📊' },
+  ]},
+  { section: 'Management', items: [
+    { href: '/admin/orders', label: 'Orders', icon: '📦' },
+    { href: '/admin/products', label: 'Products', icon: '🛍️' },
+    { href: '/admin/customers', label: 'Customers', icon: '👥' },
+    { href: '/admin/categories', label: 'Categories', icon: '📂' },
+    { href: '/admin/collections', label: 'Collections', icon: '🎨' },
+    { href: '/admin/reviews', label: 'Reviews', icon: '⭐' },
+  ]},
+  { section: 'Marketing', items: [
+    { href: '/admin/discounts', label: 'Discounts', icon: '🏷️' },
+    { href: '/admin/campaigns', label: 'Email Campaigns', icon: '📧' },
+    { href: '/admin/coupons', label: 'Coupons', icon: '🎟️' },
+  ]},
+  { section: 'Settings', items: [
+    { href: '/admin/settings', label: 'Store Settings', icon: '⚙️' },
+    { href: '/admin/users', label: 'Users', icon: '👤' },
+  ]},
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, isAdmin, user, clearAuth } = useAuthStore();
-  const [checking, setChecking] = useState(true);
+  const { data: session, status } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // If on the login page, skip the auth gate (login page handles its own redirect)
-    if (pathname === "/admin/login") {
-      setChecking(false);
-      return;
+    if (pathname === '/admin/login') return;
+    if (status === 'unauthenticated') {
+      router.replace('/login');
     }
-
-    if (!isAuthenticated() || !isAdmin()) {
-      router.replace("/admin/login");
-      return;
-    }
-
-    setChecking(false);
-  }, [pathname, isAuthenticated, isAdmin, router]);
-
-  function handleLogout() {
-    clearAuth();
-    router.push("/admin/login");
-  }
+  }, [pathname, status, router]);
 
   // Login page renders without the admin shell
-  if (pathname === "/admin/login") {
+  if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  // Auth loading state
-  if (checking) {
+  // Loading state
+  if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted font-body text-sm tracking-wider uppercase">
-          Verifying access...
-        </div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  // Not authenticated — will redirect via useEffect, show nothing
-  if (!isAuthenticated() || !isAdmin()) {
+  // Not authenticated
+  if (status === 'unauthenticated') {
+    return null;
+  }
+
+  const isAdmin = session?.user?.role === 'ADMIN';
+
+  // Not admin — redirect
+  if (!isAdmin) {
+    router.replace('/login');
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="flex min-h-screen bg-black">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -72,93 +81,105 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-surface border-r border-chrome-500
+          fixed inset-y-0 left-0 z-50 w-64 bg-black border-r border-gray-800
           transform transition-transform duration-200 ease-in-out
           lg:translate-x-0 lg:static lg:z-auto
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         <div className="flex flex-col h-full">
-          {/* Brand */}
-          <div className="px-6 py-6 border-b border-chrome-500">
-            <h1 className="font-display text-lg text-foreground tracking-wide">
-              Trionda Wears
-            </h1>
-            <p className="font-body text-xs text-muted mt-1 tracking-wider uppercase">
-              Admin Panel
-            </p>
+          {/* Logo */}
+          <div className="px-6 py-6 border-b border-gray-800">
+            <h1 className="text-white font-serif text-xl">Trionda Admin</h1>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1">
-            {NAV_ITEMS.map((item) => {
-              const isActive =
-                item.href === "/admin"
-                  ? pathname === "/admin"
-                  : pathname.startsWith(item.href);
+          <nav className="flex-1 px-4 py-6 overflow-y-auto space-y-6">
+            {NAV_ITEMS.map((group) => (
+              <div key={group.section}>
+                <p className="text-xs uppercase text-gray-500 font-bold mb-4 px-3">
+                  {group.section}
+                </p>
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive =
+                      item.href === '/admin'
+                        ? pathname === '/admin'
+                        : pathname.startsWith(item.href);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 font-body text-sm tracking-wide
-                    transition-colors duration-150
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-surface
-                    ${
-                      isActive
-                        ? "bg-chrome-500 text-foreground border-l-2 border-chrome-100"
-                        : "text-muted hover:text-foreground hover:bg-chrome-500/30"
-                    }
-                  `}
-                >
-                  <span className="text-base">{item.icon}</span>
-                  {item.label}
-                </Link>
-              );
-            })}
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`
+                          flex items-center gap-3 px-3 py-2 rounded text-sm transition
+                          ${isActive
+                            ? 'bg-gray-900 text-white border-l-2 border-white'
+                            : 'text-gray-400 hover:text-white hover:bg-gray-900'
+                          }
+                        `}
+                      >
+                        <span className="text-lg">{item.icon}</span>
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
-          {/* User info + logout */}
-          <div className="px-4 py-4 border-t border-chrome-500">
-            <div className="px-4 py-2">
-              <p className="font-body text-sm text-foreground truncate">
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p className="font-body text-xs text-muted truncate">{user?.email}</p>
+          {/* User Profile */}
+          <div className="border-t border-gray-800 px-4 py-4">
+            <div className="flex items-center gap-3 px-3">
+              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm">
+                {session?.user?.name?.charAt(0) || 'A'}
+              </div>
+              <div>
+                <p className="text-sm text-white">{session?.user?.name || 'Admin'}</p>
+                <p className="text-xs text-gray-500">super_admin</p>
+              </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="w-full mt-2 px-4 py-2 font-body text-sm text-muted hover:text-foreground transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-            >
-              Sign Out →
-            </button>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-0">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen">
         {/* Top bar (mobile) */}
-        <header className="lg:hidden sticky top-0 z-30 bg-surface border-b border-chrome-500 px-4 py-3 flex items-center justify-between">
+        <header className="lg:hidden sticky top-0 z-30 bg-black border-b border-gray-800 px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-muted hover:text-foreground transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300"
-            aria-label="Open navigation"
+            className="text-gray-400 hover:text-white transition p-1"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M3 7h18M3 12h18M3 17h18" strokeLinecap="round" />
             </svg>
           </button>
-          <span className="font-display text-sm text-foreground tracking-wide">
-            Admin
-          </span>
-          <div className="w-8" /> {/* Spacer */}
+          <span className="text-white text-sm font-semibold">Admin</span>
+          <div className="w-8" />
         </header>
 
+        {/* Desktop header */}
+        <div className="hidden lg:flex bg-black border-b border-gray-800 px-8 py-4 items-center justify-between">
+          <h1 className="text-white text-2xl font-semibold">Dashboard</h1>
+          <div className="flex items-center gap-6">
+            <input
+              type="text"
+              placeholder="Search anything..."
+              className="bg-gray-900 text-white text-sm px-4 py-2 rounded border border-gray-800 focus:outline-none focus:border-gray-600"
+            />
+            <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs">
+              {session?.user?.name?.charAt(0) || 'A'}
+            </div>
+          </div>
+        </div>
+
         {/* Page content */}
-        <main className="flex-1 p-6 lg:p-8">{children}</main>
+        <main className="flex-1 overflow-auto bg-gray-950 p-8">
+          {children}
+        </main>
       </div>
     </div>
   );
