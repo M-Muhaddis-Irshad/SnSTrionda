@@ -250,6 +250,10 @@ export declare const ModelName: {
     readonly ProductImage: 'ProductImage';
     readonly CustomMeasurement: 'CustomMeasurement';
     readonly User: 'User';
+    readonly Account: 'Account';
+    readonly Session: 'Session';
+    readonly VerificationToken: 'VerificationToken';
+    readonly AuthImage: 'AuthImage';
     readonly Address: 'Address';
     readonly Order: 'Order';
     readonly OrderItem: 'OrderItem';
@@ -265,7 +269,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "category" | "product" | "productVariant" | "productImage" | "customMeasurement" | "user" | "address" | "order" | "orderItem";
+        modelProps: "category" | "product" | "productVariant" | "productImage" | "customMeasurement" | "user" | "account" | "session" | "verificationToken" | "authImage" | "address" | "order" | "orderItem";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -713,6 +717,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 };
             };
         };
+        Account: {
+            payload: Prisma.$AccountPayload<ExtArgs>;
+            fields: Prisma.AccountFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.AccountFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.AccountFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload>;
+                };
+                findFirst: {
+                    args: Prisma.AccountFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.AccountFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload>;
+                };
+                findMany: {
+                    args: Prisma.AccountFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload>[];
+                };
+                create: {
+                    args: Prisma.AccountCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload>;
+                };
+                createMany: {
+                    args: Prisma.AccountCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.AccountCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload>[];
+                };
+                delete: {
+                    args: Prisma.AccountDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload>;
+                };
+                update: {
+                    args: Prisma.AccountUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.AccountDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.AccountUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.AccountUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload>[];
+                };
+                upsert: {
+                    args: Prisma.AccountUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountPayload>;
+                };
+                aggregate: {
+                    args: Prisma.AccountAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateAccount>;
+                };
+                groupBy: {
+                    args: Prisma.AccountGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AccountGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.AccountCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AccountCountAggregateOutputType> | number;
+                };
+            };
+        };
+        Session: {
+            payload: Prisma.$SessionPayload<ExtArgs>;
+            fields: Prisma.SessionFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.SessionFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.SessionFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>;
+                };
+                findFirst: {
+                    args: Prisma.SessionFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.SessionFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>;
+                };
+                findMany: {
+                    args: Prisma.SessionFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>[];
+                };
+                create: {
+                    args: Prisma.SessionCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>;
+                };
+                createMany: {
+                    args: Prisma.SessionCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.SessionCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>[];
+                };
+                delete: {
+                    args: Prisma.SessionDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>;
+                };
+                update: {
+                    args: Prisma.SessionUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.SessionDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.SessionUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.SessionUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>[];
+                };
+                upsert: {
+                    args: Prisma.SessionUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>;
+                };
+                aggregate: {
+                    args: Prisma.SessionAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateSession>;
+                };
+                groupBy: {
+                    args: Prisma.SessionGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.SessionGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.SessionCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.SessionCountAggregateOutputType> | number;
+                };
+            };
+        };
+        VerificationToken: {
+            payload: Prisma.$VerificationTokenPayload<ExtArgs>;
+            fields: Prisma.VerificationTokenFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.VerificationTokenFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.VerificationTokenFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>;
+                };
+                findFirst: {
+                    args: Prisma.VerificationTokenFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.VerificationTokenFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>;
+                };
+                findMany: {
+                    args: Prisma.VerificationTokenFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>[];
+                };
+                create: {
+                    args: Prisma.VerificationTokenCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>;
+                };
+                createMany: {
+                    args: Prisma.VerificationTokenCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.VerificationTokenCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>[];
+                };
+                delete: {
+                    args: Prisma.VerificationTokenDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>;
+                };
+                update: {
+                    args: Prisma.VerificationTokenUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.VerificationTokenDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.VerificationTokenUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.VerificationTokenUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>[];
+                };
+                upsert: {
+                    args: Prisma.VerificationTokenUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>;
+                };
+                aggregate: {
+                    args: Prisma.VerificationTokenAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateVerificationToken>;
+                };
+                groupBy: {
+                    args: Prisma.VerificationTokenGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.VerificationTokenGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.VerificationTokenCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.VerificationTokenCountAggregateOutputType> | number;
+                };
+            };
+        };
+        AuthImage: {
+            payload: Prisma.$AuthImagePayload<ExtArgs>;
+            fields: Prisma.AuthImageFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.AuthImageFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.AuthImageFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload>;
+                };
+                findFirst: {
+                    args: Prisma.AuthImageFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.AuthImageFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload>;
+                };
+                findMany: {
+                    args: Prisma.AuthImageFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload>[];
+                };
+                create: {
+                    args: Prisma.AuthImageCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload>;
+                };
+                createMany: {
+                    args: Prisma.AuthImageCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.AuthImageCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload>[];
+                };
+                delete: {
+                    args: Prisma.AuthImageDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload>;
+                };
+                update: {
+                    args: Prisma.AuthImageUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload>;
+                };
+                deleteMany: {
+                    args: Prisma.AuthImageDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.AuthImageUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.AuthImageUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload>[];
+                };
+                upsert: {
+                    args: Prisma.AuthImageUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthImagePayload>;
+                };
+                aggregate: {
+                    args: Prisma.AuthImageAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateAuthImage>;
+                };
+                groupBy: {
+                    args: Prisma.AuthImageGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AuthImageGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.AuthImageCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AuthImageCountAggregateOutputType> | number;
+                };
+            };
+        };
         Address: {
             payload: Prisma.$AddressPayload<ExtArgs>;
             fields: Prisma.AddressFieldRefs;
@@ -1035,16 +1335,53 @@ export declare const CustomMeasurementScalarFieldEnum: {
 export type CustomMeasurementScalarFieldEnum = (typeof CustomMeasurementScalarFieldEnum)[keyof typeof CustomMeasurementScalarFieldEnum];
 export declare const UserScalarFieldEnum: {
     readonly id: 'id';
+    readonly name: 'name';
     readonly email: 'email';
-    readonly passwordHash: 'passwordHash';
-    readonly firstName: 'firstName';
-    readonly lastName: 'lastName';
+    readonly emailVerified: 'emailVerified';
+    readonly image: 'image';
+    readonly password: 'password';
     readonly phone: 'phone';
     readonly role: 'role';
     readonly createdAt: 'createdAt';
     readonly updatedAt: 'updatedAt';
 };
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
+export declare const AccountScalarFieldEnum: {
+    readonly id: 'id';
+    readonly userId: 'userId';
+    readonly type: 'type';
+    readonly provider: 'provider';
+    readonly providerAccountId: 'providerAccountId';
+    readonly refresh_token: 'refresh_token';
+    readonly access_token: 'access_token';
+    readonly expires_at: 'expires_at';
+    readonly token_type: 'token_type';
+    readonly scope: 'scope';
+    readonly id_token: 'id_token';
+    readonly session_state: 'session_state';
+};
+export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum];
+export declare const SessionScalarFieldEnum: {
+    readonly id: 'id';
+    readonly sessionToken: 'sessionToken';
+    readonly userId: 'userId';
+    readonly expires: 'expires';
+};
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum];
+export declare const VerificationTokenScalarFieldEnum: {
+    readonly identifier: 'identifier';
+    readonly token: 'token';
+    readonly expires: 'expires';
+};
+export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum];
+export declare const AuthImageScalarFieldEnum: {
+    readonly id: 'id';
+    readonly pageType: 'pageType';
+    readonly imageUrl: 'imageUrl';
+    readonly createdAt: 'createdAt';
+    readonly updatedAt: 'updatedAt';
+};
+export type AuthImageScalarFieldEnum = (typeof AuthImageScalarFieldEnum)[keyof typeof AuthImageScalarFieldEnum];
 export declare const AddressScalarFieldEnum: {
     readonly id: 'id';
     readonly label: 'label';
@@ -1335,6 +1672,10 @@ export type GlobalOmitConfig = {
     productImage?: Prisma.ProductImageOmit;
     customMeasurement?: Prisma.CustomMeasurementOmit;
     user?: Prisma.UserOmit;
+    account?: Prisma.AccountOmit;
+    session?: Prisma.SessionOmit;
+    verificationToken?: Prisma.VerificationTokenOmit;
+    authImage?: Prisma.AuthImageOmit;
     address?: Prisma.AddressOmit;
     order?: Prisma.OrderOmit;
     orderItem?: Prisma.OrderItemOmit;

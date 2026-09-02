@@ -32,6 +32,10 @@ export declare const ModelName: {
     readonly ProductImage: 'ProductImage';
     readonly CustomMeasurement: 'CustomMeasurement';
     readonly User: 'User';
+    readonly Account: 'Account';
+    readonly Session: 'Session';
+    readonly VerificationToken: 'VerificationToken';
+    readonly AuthImage: 'AuthImage';
     readonly Address: 'Address';
     readonly Order: 'Order';
     readonly OrderItem: 'OrderItem';
@@ -110,16 +114,53 @@ export declare const CustomMeasurementScalarFieldEnum: {
 export type CustomMeasurementScalarFieldEnum = (typeof CustomMeasurementScalarFieldEnum)[keyof typeof CustomMeasurementScalarFieldEnum];
 export declare const UserScalarFieldEnum: {
     readonly id: 'id';
+    readonly name: 'name';
     readonly email: 'email';
-    readonly passwordHash: 'passwordHash';
-    readonly firstName: 'firstName';
-    readonly lastName: 'lastName';
+    readonly emailVerified: 'emailVerified';
+    readonly image: 'image';
+    readonly password: 'password';
     readonly phone: 'phone';
     readonly role: 'role';
     readonly createdAt: 'createdAt';
     readonly updatedAt: 'updatedAt';
 };
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
+export declare const AccountScalarFieldEnum: {
+    readonly id: 'id';
+    readonly userId: 'userId';
+    readonly type: 'type';
+    readonly provider: 'provider';
+    readonly providerAccountId: 'providerAccountId';
+    readonly refresh_token: 'refresh_token';
+    readonly access_token: 'access_token';
+    readonly expires_at: 'expires_at';
+    readonly token_type: 'token_type';
+    readonly scope: 'scope';
+    readonly id_token: 'id_token';
+    readonly session_state: 'session_state';
+};
+export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum];
+export declare const SessionScalarFieldEnum: {
+    readonly id: 'id';
+    readonly sessionToken: 'sessionToken';
+    readonly userId: 'userId';
+    readonly expires: 'expires';
+};
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum];
+export declare const VerificationTokenScalarFieldEnum: {
+    readonly identifier: 'identifier';
+    readonly token: 'token';
+    readonly expires: 'expires';
+};
+export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum];
+export declare const AuthImageScalarFieldEnum: {
+    readonly id: 'id';
+    readonly pageType: 'pageType';
+    readonly imageUrl: 'imageUrl';
+    readonly createdAt: 'createdAt';
+    readonly updatedAt: 'updatedAt';
+};
+export type AuthImageScalarFieldEnum = (typeof AuthImageScalarFieldEnum)[keyof typeof AuthImageScalarFieldEnum];
 export declare const AddressScalarFieldEnum: {
     readonly id: 'id';
     readonly label: 'label';

@@ -94,7 +94,6 @@ async function fetchRelatedProducts(categoryId: string, excludeId: string): Prom
 
     const data: ProductsResponse = await res.json();
 
-    // Filter: same category, exclude current product, max 6
     return data.data
       .filter((p) => p.category.id === categoryId && p.id !== excludeId)
       .slice(0, 6);
@@ -129,38 +128,34 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  // Fetch related products from the same category
   const relatedProducts = await fetchRelatedProducts(product.category.id, product.id);
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <main className="page-main">
+      <div className="page-container">
         {/* Breadcrumb */}
-        <nav className="mb-8 font-body text-sm text-muted">
-          <Link href="/shop" className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm">
+        <nav className="product-detail-breadcrumb">
+          <Link href="/shop" className="product-detail-breadcrumb-link">
             Shop
           </Link>
-          <span className="mx-2">/</span>
+          <span className="product-detail-breadcrumb-sep">/</span>
           <Link
             href={`/shop?category=${product.category.slug}`}
-            className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+            className="product-detail-breadcrumb-link"
           >
             {product.category.name}
           </Link>
-          <span className="mx-2">/</span>
-          <span className="text-foreground">{product.name}</span>
+          <span className="product-detail-breadcrumb-sep">/</span>
+          <span className="product-detail-breadcrumb-current">{product.name}</span>
         </nav>
 
         {/* Product detail grid */}
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+        <div className="product-detail-grid">
           {/* Images */}
-          <div className="space-y-4">
+          <div className="product-detail-images">
             {product.images.length > 0 ? (
               product.images.map((image) => (
-                <div
-                  key={image.id}
-                  className="relative aspect-[3/4] overflow-hidden border border-chrome-500"
-                >
+                <div key={image.id} className="product-detail-image-wrap">
                   <img
                     src={image.url}
                     alt={image.altText || product.name}
@@ -169,36 +164,26 @@ export default async function ProductDetailPage({
                 </div>
               ))
             ) : (
-              <div
-                className="aspect-[3/4] border border-chrome-500"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%)",
-                }}
-              />
+              <div className="product-detail-image-placeholder" />
             )}
           </div>
 
           {/* Details */}
-          <div className="flex flex-col">
-            {/* Category badge */}
+          <div className="product-detail-info">
             <Badge variant="outline" className="mb-4 w-fit">
               {product.category.name}
             </Badge>
 
-            {/* Product name */}
-            <h1 className="font-display text-3xl tracking-[0.08em] text-foreground sm:text-4xl">
+            <h1 className="product-detail-name">
               {product.name}
             </h1>
 
-            {/* Description */}
             {product.description && (
-              <p className="mt-6 font-body text-base leading-relaxed text-muted">
+              <p className="product-detail-desc">
                 {product.description}
               </p>
             )}
 
-            {/* Price + Variant Selector + Add to Cart (all client-side) */}
             <ProductActions
               productId={product.id}
               productName={product.name}
@@ -214,14 +199,14 @@ export default async function ProductDetailPage({
 
         {/* You Might Also Like */}
         {relatedProducts.length > 0 && (
-          <section className="mt-24">
-            <h2 className="font-display text-2xl tracking-[0.08em] text-foreground sm:text-3xl">
+          <section className="product-detail-related">
+            <h2 className="section-heading section-heading--sm">
               You Might Also Like
             </h2>
-            <div className="mt-2 h-px w-12 bg-chrome-400" />
+            <div className="section-divider section-divider--sm" />
 
-            <div className="mt-8 overflow-x-auto scrollbar-hide">
-              <div className="flex gap-5 pb-4">
+            <div className="product-detail-related-scroll">
+              <div className="product-detail-related-track">
                 {relatedProducts.map((related) => (
                   <ProductCard
                     key={related.id}

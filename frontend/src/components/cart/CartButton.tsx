@@ -4,17 +4,10 @@ import { useState, useEffect } from "react";
 import { useCartStore, selectTotalItems } from "@/stores/cartStore";
 import CartDrawer from "./CartDrawer";
 
-// ---------------------------------------------------------------------------
-// CartButton Component
-// ---------------------------------------------------------------------------
-// Isolated client sub-component so Header stays a Server Component.
-// Handles: cart icon click → open drawer, badge count from Zustand store.
-
 export default function CartButton() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const totalItems = useCartStore(selectTotalItems);
 
-  // Listen for custom event from mobile bottom nav cart tab
   useEffect(() => {
     const handleOpenCart = () => setIsDrawerOpen(true);
     window.addEventListener("trionda:open-cart", handleOpenCart);
@@ -26,7 +19,7 @@ export default function CartButton() {
       <button
         type="button"
         onClick={() => setIsDrawerOpen(true)}
-        className="relative flex h-10 w-10 items-center justify-center text-muted transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="header-icon-btn relative"
         aria-label={`Cart${totalItems > 0 ? ` (${totalItems} items)` : ""}`}
       >
         <svg
@@ -43,9 +36,8 @@ export default function CartButton() {
           />
         </svg>
 
-        {/* Badge — small circle with count */}
         {totalItems > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-chrome-200 px-1 font-body text-[10px] font-medium text-background">
+          <span className="cart-badge">
             {totalItems > 99 ? "99+" : totalItems}
           </span>
         )}

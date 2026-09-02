@@ -6,7 +6,7 @@ import Link from "next/link";
 import Autoplay from "embla-carousel-autoplay";
 
 // ---------------------------------------------------------------------------
-// Slide content — editable clothing-brand copy
+// Slide content
 // ---------------------------------------------------------------------------
 
 interface Slide {
@@ -132,18 +132,18 @@ export default function HeroCarousel() {
 
   return (
     <section
-      className="relative overflow-hidden"
+      className="hero-section"
       role="region"
       aria-roledescription="carousel"
       aria-label="Trionda Wears hero carousel"
     >
       {/* Embla viewport */}
-      <div ref={emblaRef} className="overflow-hidden">
-        <div className="flex" style={{ touchAction: "pan-y pinch-zoom" }}>
+      <div ref={emblaRef} className="hero-viewport">
+        <div className="hero-track">
           {SLIDES.map((slide, index) => (
             <div
               key={index}
-              className="relative flex-shrink-0 w-full basis-full"
+              className="hero-slide"
               role="group"
               aria-roledescription="slide"
               aria-label={`Slide ${index + 1} of ${SLIDES.length}`}
@@ -151,7 +151,7 @@ export default function HeroCarousel() {
             >
               {/* Slide background */}
               <div
-                className="absolute inset-0 min-h-[90vh]"
+                className="hero-slide-bg"
                 style={{ background: slide.overlayGradient }}
                 aria-hidden="true"
               />
@@ -159,71 +159,45 @@ export default function HeroCarousel() {
               {/* Chrome vertical accent line — active slide only */}
               {index === selectedIndex && (
                 <div className="absolute inset-0 opacity-[0.07]" aria-hidden="true">
-                  <div
-                    className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom, transparent 0%, #A8A8A8 30%, #A8A8A8 70%, transparent 100%)",
-                    }}
-                  />
+                  <div className="hero-accent-line" />
                 </div>
               )}
 
-              {/* Chrome corner brackets — top left */}
-              <div className="absolute left-6 top-6 sm:left-10 sm:top-10" aria-hidden="true">
-                <div className="h-6 w-6 border-l border-t border-chrome-400 opacity-30" />
-              </div>
-              {/* Chrome corner brackets — top right */}
-              <div className="absolute right-6 top-6 sm:right-10 sm:top-10" aria-hidden="true">
-                <div className="h-6 w-6 border-r border-t border-chrome-400 opacity-30" />
-              </div>
-              {/* Chrome corner brackets — bottom left */}
-              <div className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10" aria-hidden="true">
-                <div className="h-6 w-6 border-b border-l border-chrome-400 opacity-30" />
-              </div>
-              {/* Chrome corner brackets — bottom right */}
-              <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-10" aria-hidden="true">
-                <div className="h-6 w-6 border-b border-r border-chrome-400 opacity-30" />
-              </div>
+              {/* Chrome corner brackets */}
+              <div className="hero-corner hero-corner--tl" aria-hidden="true" />
+              <div className="hero-corner hero-corner--tr" aria-hidden="true" />
+              <div className="hero-corner hero-corner--bl" aria-hidden="true" />
+              <div className="hero-corner hero-corner--br" aria-hidden="true" />
 
               {/* Slide content */}
-              <div className="relative z-10 mx-auto flex min-h-[90vh] max-w-4xl items-center justify-center px-6 text-center sm:px-8 lg:px-12">
+              <div className="hero-slide-content">
                 <div>
                   {/* Small diamond accent above heading */}
-                  <div
-                    className="mx-auto mb-6 h-2 w-2 rotate-45 bg-chrome-400 opacity-40"
-                    aria-hidden="true"
-                  />
+                  <div className="hero-diamond" aria-hidden="true" />
 
-                  {/* Heading with split-line treatment */}
-                  <h2 className="font-display text-5xl leading-[1.1] tracking-[0.18em] text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
-                    <span className="block">{slide.heading}</span>
+                  {/* Heading */}
+                  <h2 className="hero-heading">
+                    <span className="hero-heading-line">{slide.heading}</span>
                     {slide.headingAccent && (
-                      <span className="block mt-1 text-chrome-200">
+                      <span className="hero-heading-accent">
                         {slide.headingAccent}
                       </span>
                     )}
                   </h2>
 
-                  {/* Chrome divider between heading and subheading */}
-                  <div
-                    className="mx-auto mt-8 mb-6 h-px w-20 bg-gradient-to-r from-transparent via-chrome-300 to-transparent"
-                    aria-hidden="true"
-                  />
+                  {/* Chrome divider */}
+                  <div className="hero-divider" aria-hidden="true" />
 
-                  <p className="mx-auto max-w-lg font-body text-base leading-relaxed text-muted sm:text-lg md:text-xl">
+                  <p className="hero-subheading">
                     {slide.subheading}
                   </p>
 
                   {/* CTA button */}
                   <div className="mt-10">
-                    <Link
-                      href={slide.ctaHref}
-                      className="group inline-flex items-center gap-3 border border-chrome-400 bg-transparent px-10 py-4 font-body text-sm tracking-[0.2em] uppercase text-foreground transition-all duration-300 hover:border-chrome-200 hover:bg-chrome-500 hover:text-chrome-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    >
+                    <Link href={slide.ctaHref} className="hero-cta">
                       {slide.ctaLabel}
                       <svg
-                        className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                        className="hero-cta-arrow"
                         fill="none"
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
@@ -240,10 +214,7 @@ export default function HeroCarousel() {
                   </div>
 
                   {/* Small diamond accent below CTA */}
-                  <div
-                    className="mx-auto mt-8 h-2 w-2 rotate-45 bg-chrome-400 opacity-40"
-                    aria-hidden="true"
-                  />
+                  <div className="hero-diamond--bottom" aria-hidden="true" />
                 </div>
               </div>
             </div>
@@ -251,60 +222,40 @@ export default function HeroCarousel() {
         </div>
       </div>
 
-      {/* Navigation arrows — refined chrome style */}
+      {/* Navigation arrows */}
       <button
         type="button"
         onClick={scrollPrev}
-        className="absolute left-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-chrome-500 bg-background/50 backdrop-blur-sm text-muted transition-all duration-200 hover:border-chrome-300 hover:text-foreground sm:left-6 md:left-8"
+        className="hero-nav-btn hero-nav-btn--prev"
         aria-label="Previous slide"
       >
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15.75 19.5L8.25 12l7.5-7.5"
-          />
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
         </svg>
       </button>
 
       <button
         type="button"
         onClick={scrollNext}
-        className="absolute right-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-chrome-500 bg-background/50 backdrop-blur-sm text-muted transition-all duration-200 hover:border-chrome-300 hover:text-foreground sm:right-6 md:right-8"
+        className="hero-nav-btn hero-nav-btn--next"
         aria-label="Next slide"
       >
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M8.25 4.5l7.5 7.5-7.5 7.5"
-          />
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
         </svg>
       </button>
 
       {/* Bottom bar: dot indicators + progress */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 sm:bottom-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 sm:px-8 md:px-12">
+      <div className="hero-bottom-bar">
+        <div className="hero-bottom-inner">
           {/* Slide counter */}
-          <span className="hidden font-body text-xs tracking-wider text-chrome-400 sm:inline">
+          <span className="hero-counter">
             {String(selectedIndex + 1).padStart(2, "0")} / {String(SLIDES.length).padStart(2, "0")}
           </span>
 
           {/* Dot indicators */}
           <div
-            className="mx-auto flex items-center gap-3 sm:mx-0"
+            className="hero-dots"
             role="tablist"
             aria-label="Slide indicators"
           >
@@ -316,19 +267,19 @@ export default function HeroCarousel() {
                 role="tab"
                 aria-selected={index === selectedIndex}
                 aria-label={`Go to slide ${index + 1}`}
-                className={`h-1.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                className={`hero-dot ${
                   index === selectedIndex
-                    ? "w-8 bg-chrome-200"
-                    : "w-1.5 bg-chrome-500 hover:bg-chrome-400"
+                    ? "hero-dot--active"
+                    : "hero-dot--inactive"
                 }`}
               />
             ))}
           </div>
 
           {/* Progress bar for current slide */}
-          <div className="hidden w-24 overflow-hidden bg-chrome-500 sm:block" aria-hidden="true">
+          <div className="hero-progress-track" aria-hidden="true">
             <div
-              className="h-1.5 bg-chrome-200 transition-none"
+              className="hero-progress-bar"
               style={{ width: `${scrollProgress * 100}%` }}
             />
           </div>
@@ -336,14 +287,7 @@ export default function HeroCarousel() {
       </div>
 
       {/* Top chrome accent line */}
-      <div
-        className="absolute top-0 left-0 right-0 h-px z-20"
-        style={{
-          background:
-            "linear-gradient(to right, transparent 0%, #6E6E6E 20%, #A8A8A8 50%, #6E6E6E 80%, transparent 100%)",
-        }}
-        aria-hidden="true"
-      />
+      <div className="hero-top-line" aria-hidden="true" />
     </section>
   );
 }

@@ -16,6 +16,7 @@ export declare const PaymentMethod: {
     readonly JAZZCASH: 'JAZZCASH';
     readonly EASYPAISA: 'EASYPAISA';
     readonly COD: 'COD';
+    readonly CARD: 'CARD';
 };
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
 export declare const PaymentStatus: {

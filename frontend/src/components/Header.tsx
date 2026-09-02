@@ -17,10 +17,10 @@ const navLinks = [
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-30 w-full bg-surface border-b border-chrome-500">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="site-header">
+      <div className="header-inner">
         {/* Left — Logo lockup */}
-        <Link href="/" className="flex items-center gap-3 shrink-0">
+        <Link href="/" className="header-logo">
           <Image
             src="/logo/trionda-icon-mark.png"
             alt="Trionda Wears icon"
@@ -29,18 +29,18 @@ export default function Header() {
             className="h-10 w-auto"
             priority
           />
-          <span className="font-display text-lg tracking-[0.2em] text-foreground hidden sm:inline">
+          <span className="header-logo-text">
             TRIONDA WEARS
           </span>
         </Link>
 
         {/* Center — Desktop nav links */}
-        <nav className="hidden md:flex items-center gap-6 overflow-x-auto scrollbar-hide">
+        <nav className="header-nav">
           {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
-              className="text-sm font-body tracking-wide text-muted transition-colors duration-200 hover:text-chrome-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+              className="header-nav-link"
             >
               {link.label}
             </Link>
@@ -48,14 +48,12 @@ export default function Header() {
         </nav>
 
         {/* Right — Icons + Mobile menu */}
-        <div className="flex items-center gap-3">
-          {/* Account icon */}
+        <div className="header-actions">
           <AccountButton />
 
-          {/* Search icon */}
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center text-muted transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="header-icon-btn"
             aria-label="Search"
           >
             <svg
@@ -73,10 +71,8 @@ export default function Header() {
             </svg>
           </button>
 
-          {/* Cart / Bag icon + badge + drawer */}
           <CartButton />
 
-          {/* Mobile menu */}
           <MobileMenu />
         </div>
       </div>

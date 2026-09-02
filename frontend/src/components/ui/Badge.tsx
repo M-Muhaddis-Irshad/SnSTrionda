@@ -7,10 +7,10 @@ type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
   variant?: BadgeVariant;
 };
 
-const variantStyles: Record<BadgeVariant, string> = {
-  default: "border border-chrome-400 bg-transparent text-muted",
-  outline: "border border-chrome-300 bg-transparent text-foreground",
-  filled: "border border-chrome-500 bg-chrome-500 text-foreground",
+const variantClasses: Record<BadgeVariant, string> = {
+  default: "badge--default",
+  outline: "badge--outline",
+  filled: "badge--filled",
 };
 
 export default function Badge({
@@ -21,7 +21,7 @@ export default function Badge({
 }: BadgeProps) {
   return (
     <span
-      className={`inline-block px-3 py-1 font-body text-xs tracking-wider uppercase ${variantStyles[variant]} ${className}`}
+      className={`badge ${variantClasses[variant]} ${className}`}
       {...props}
     >
       {children}

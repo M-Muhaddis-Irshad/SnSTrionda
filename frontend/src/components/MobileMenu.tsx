@@ -26,17 +26,16 @@ export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="md:hidden">
+    <div className="mobile-menu-wrapper">
       {/* Hamburger button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative flex h-10 w-10 items-center justify-center text-foreground transition-colors hover:text-chrome-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="mobile-menu-toggle"
         aria-label={isOpen ? "Close menu" : "Open menu"}
         aria-expanded={isOpen}
       >
         <span className="sr-only">{isOpen ? "Close menu" : "Open menu"}</span>
-        {/* Hamburger / Close icon */}
         <svg
           className="h-5 w-5"
           fill="none"
@@ -63,7 +62,7 @@ export default function MobileMenu() {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          className="mobile-menu-overlay"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />
@@ -71,16 +70,16 @@ export default function MobileMenu() {
 
       {/* Slide-in panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-72 bg-surface border-l border-chrome-500 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`mobile-menu-panel ${
+          isOpen ? "mobile-menu-panel--open" : "mobile-menu-panel--closed"
         }`}
       >
-        <div className="flex flex-col pt-20 px-8">
+        <div className="mobile-menu-content">
           {/* Close button inside panel */}
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="absolute top-5 right-5 flex h-10 w-10 items-center justify-center text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="mobile-menu-close"
             aria-label="Close menu"
           >
             <svg
@@ -99,12 +98,12 @@ export default function MobileMenu() {
           </button>
 
           {/* Nav links */}
-          <nav className="flex flex-col gap-6">
+          <nav className="mobile-menu-nav">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="font-display text-2xl tracking-wide text-foreground transition-colors hover:text-chrome-200"
+                className="mobile-menu-link"
                 onClick={() => setIsOpen(false)}
               >
                 {link.label}
@@ -112,7 +111,7 @@ export default function MobileMenu() {
             ))}
             <Link
               href={accountHref}
-              className="font-display text-2xl tracking-wide text-chrome-200 transition-colors hover:text-foreground border-t border-chrome-500 pt-6"
+              className="mobile-menu-account-link"
               onClick={() => setIsOpen(false)}
             >
               {accountLabel}

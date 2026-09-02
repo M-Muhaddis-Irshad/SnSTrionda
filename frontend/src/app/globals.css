@@ -18,13 +18,20 @@
   --font-body: var(--font-inter);
 }
 
+/* =============================================================================
+   BASE
+   ============================================================================= */
+
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   overflow-x: hidden;
 }
 
-/* Hide scrollbar for horizontal scroll rails */
+/* =============================================================================
+   UTILITY CLASSES
+   ============================================================================= */
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -33,21 +40,1383 @@ body {
   display: none;
 }
 
-/* Auth page fade-in animation */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .animate-fadeIn {
   animation: fadeIn 0.6s ease-in;
 }
 
-/* Reduced motion: disable autoplay animations */
+/* =============================================================================
+   BADGE
+   ============================================================================= */
+
+.badge {
+  @apply inline-block px-3 py-1 font-body text-xs tracking-wider uppercase;
+}
+
+.badge--default {
+  @apply border border-chrome-400 bg-transparent text-muted;
+}
+
+.badge--outline {
+  @apply border border-chrome-300 bg-transparent text-foreground;
+}
+
+.badge--filled {
+  @apply border border-chrome-500 bg-chrome-500 text-foreground;
+}
+
+/* =============================================================================
+   BUTTON
+   ============================================================================= */
+
+.btn {
+  @apply inline-block font-body;
+}
+
+.btn--primary {
+  @apply border border-chrome-400 bg-transparent text-foreground
+         transition-all duration-300
+         hover:border-chrome-200 hover:bg-chrome-500 hover:text-chrome-100
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300
+         focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.btn--ghost {
+  @apply border-b border-chrome-400 pb-1 bg-transparent text-foreground
+         transition-colors duration-200
+         hover:border-chrome-200 hover:text-chrome-200
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300
+         focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.btn--filled {
+  @apply border border-chrome-500 bg-chrome-500 text-foreground
+         transition-colors duration-200
+         hover:bg-chrome-400
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.btn--default {
+  @apply px-10 py-4 text-sm tracking-[0.2em] uppercase;
+}
+
+.btn--sm {
+  @apply px-6 py-2 text-xs tracking-wider;
+}
+
+/* =============================================================================
+   INPUT
+   ============================================================================= */
+
+.input {
+  @apply flex-1 bg-surface border border-chrome-500 px-4 py-2 text-sm text-foreground
+         placeholder-muted focus:outline-none focus:border-chrome-300
+         focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2
+         focus-visible:ring-offset-background transition-colors;
+}
+
+/* =============================================================================
+   CARD
+   ============================================================================= */
+
+.card {
+  @apply relative overflow-hidden border border-chrome-500 transition-all duration-300;
+}
+
+.card--hoverable {
+  @apply hover:border-chrome-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.03)];
+}
+
+.card-image {
+  @apply relative aspect-[3/4] overflow-hidden bg-surface;
+}
+
+.card-content {
+  @apply mt-3 px-3 pb-3;
+}
+
+/* =============================================================================
+   FOCUS RING — shared focus-visible pattern
+   ============================================================================= */
+
+.focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300
+         focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+/* =============================================================================
+   HEADER
+   ============================================================================= */
+
+.site-header {
+  @apply sticky top-0 z-30 w-full bg-surface border-b border-chrome-500;
+}
+
+.header-inner {
+  @apply mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8;
+}
+
+.header-logo {
+  @apply flex items-center gap-3 shrink-0;
+}
+
+.header-logo-text {
+  @apply font-display text-lg tracking-[0.2em] text-foreground hidden sm:inline;
+}
+
+.header-nav {
+  @apply hidden md:flex items-center gap-6 overflow-x-auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.header-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.header-nav-link {
+  @apply text-sm font-body tracking-wide text-muted transition-colors duration-200
+         hover:text-chrome-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.header-actions {
+  @apply flex items-center gap-3;
+}
+
+.header-icon-btn {
+  @apply flex h-10 w-10 items-center justify-center text-muted
+         transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+/* =============================================================================
+   FOOTER
+   ============================================================================= */
+
+.site-footer {
+  @apply bg-background border-t border-chrome-500;
+}
+
+.footer-inner {
+  @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12;
+}
+
+.footer-brand {
+  @apply mb-10;
+}
+
+.footer-brand-lockup {
+  @apply flex items-center gap-3 mb-3;
+}
+
+.footer-brand-text {
+  @apply font-display text-lg tracking-[0.2em] text-foreground;
+}
+
+.footer-tagline {
+  @apply text-muted text-sm font-body;
+}
+
+.footer-columns {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10;
+}
+
+.footer-column-title {
+  @apply text-xs font-body tracking-[0.15em] uppercase text-foreground mb-4;
+}
+
+.footer-link-list {
+  @apply space-y-2;
+}
+
+.footer-link {
+  @apply text-sm text-muted hover:text-chrome-200 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.footer-newsletter-text {
+  @apply text-sm text-muted mb-4;
+}
+
+.footer-social {
+  @apply flex flex-wrap items-center gap-5 mb-8;
+}
+
+.footer-social-link {
+  @apply text-muted hover:text-foreground transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.footer-bottom {
+  @apply border-t border-chrome-500 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4;
+}
+
+.footer-copyright {
+  @apply text-xs text-muted;
+}
+
+.footer-legal-links {
+  @apply flex items-center gap-6;
+}
+
+.footer-legal-link {
+  @apply text-xs text-muted hover:text-chrome-200 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+/* =============================================================================
+   MOBILE MENU
+   ============================================================================= */
+
+.mobile-menu-wrapper {
+  @apply md:hidden;
+}
+
+.mobile-menu-toggle {
+  @apply relative flex h-10 w-10 items-center justify-center text-foreground
+         transition-colors hover:text-chrome-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.mobile-menu-overlay {
+  @apply fixed inset-0 z-40 bg-black/60 backdrop-blur-sm;
+}
+
+.mobile-menu-panel {
+  @apply fixed inset-y-0 right-0 z-50 w-72 bg-surface border-l border-chrome-500
+         transform transition-transform duration-300 ease-in-out;
+}
+
+.mobile-menu-panel--open {
+  @apply translate-x-0;
+}
+
+.mobile-menu-panel--closed {
+  @apply translate-x-full;
+}
+
+.mobile-menu-close {
+  @apply absolute top-5 right-5 flex h-10 w-10 items-center justify-center text-muted
+         transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.mobile-menu-content {
+  @apply flex flex-col pt-20 px-8;
+}
+
+.mobile-menu-nav {
+  @apply flex flex-col gap-6;
+}
+
+.mobile-menu-link {
+  @apply font-display text-2xl tracking-wide text-foreground transition-colors hover:text-chrome-200;
+}
+
+.mobile-menu-account-link {
+  @apply font-display text-2xl tracking-wide text-chrome-200 transition-colors
+         hover:text-foreground border-t border-chrome-500 pt-6;
+}
+
+/* =============================================================================
+   CART DRAWER
+   ============================================================================= */
+
+.cart-overlay {
+  @apply fixed inset-0 z-40 bg-black/60 backdrop-blur-sm;
+}
+
+.cart-panel {
+  @apply fixed inset-y-0 right-0 z-50 w-full max-w-md bg-surface border-l border-chrome-500
+         transform transition-transform duration-300 ease-in-out;
+}
+
+.cart-panel--open {
+  @apply translate-x-0;
+}
+
+.cart-panel--closed {
+  @apply translate-x-full;
+}
+
+.cart-panel-inner {
+  @apply flex h-full flex-col;
+}
+
+.cart-header {
+  @apply flex items-center justify-between border-b border-chrome-500 px-6 py-4;
+}
+
+.cart-title {
+  @apply font-display text-lg tracking-wider text-foreground;
+}
+
+.cart-close-btn {
+  @apply flex h-8 w-8 items-center justify-center text-muted transition-colors
+         hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.cart-items-area {
+  @apply flex-1 overflow-y-auto px-6 py-4;
+}
+
+.cart-empty {
+  @apply flex flex-col items-center justify-center h-full text-center;
+}
+
+.cart-empty-text {
+  @apply font-body text-sm text-muted;
+}
+
+.cart-empty-continue {
+  @apply mt-4 font-body text-sm tracking-wider text-muted underline
+         transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.cart-items-list {
+  @apply space-y-6;
+}
+
+.cart-item {
+  @apply flex gap-4;
+}
+
+.cart-item-image-wrap {
+  @apply h-20 w-16 flex-shrink-0 overflow-hidden border border-chrome-500;
+}
+
+.cart-item-image {
+  @apply h-full w-full object-cover;
+}
+
+.cart-item-image-placeholder {
+  @apply h-full w-full;
+  background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+}
+
+.cart-item-details {
+  @apply flex-1 min-w-0;
+}
+
+.cart-item-header {
+  @apply flex items-start justify-between gap-2;
+}
+
+.cart-item-name {
+  @apply font-body text-sm text-foreground hover:text-chrome-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.cart-item-variant {
+  @apply font-body text-xs text-muted mt-0.5;
+}
+
+.cart-item-measurement {
+  @apply font-body text-xs text-muted mt-0.5;
+}
+
+.cart-item-remove-btn {
+  @apply flex h-6 w-6 flex-shrink-0 items-center justify-center text-muted
+         transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.cart-item-footer {
+  @apply mt-2 flex items-center justify-between;
+}
+
+.cart-item-price {
+  @apply font-body text-sm text-foreground;
+}
+
+.cart-footer {
+  @apply border-t border-chrome-500 px-6 py-4 space-y-4;
+}
+
+.cart-subtotal-row {
+  @apply flex items-center justify-between;
+}
+
+.cart-subtotal-label {
+  @apply font-body text-sm text-muted;
+}
+
+.cart-subtotal-value {
+  @apply font-display text-lg tracking-wide text-foreground;
+}
+
+.cart-shipping-note {
+  @apply font-body text-xs text-muted;
+}
+
+.cart-checkout-btn {
+  @apply block w-full text-center font-body text-sm tracking-[0.2em] uppercase
+         border border-chrome-400 bg-transparent text-foreground px-10 py-4
+         transition-all duration-300 hover:border-chrome-200 hover:bg-chrome-500 hover:text-chrome-100
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+/* =============================================================================
+   CART BUTTON (Header)
+   ============================================================================= */
+
+.cart-badge {
+  @apply absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center
+         rounded-full bg-chrome-200 px-1 font-body text-[10px] font-medium text-background;
+}
+
+/* =============================================================================
+   HERO CAROUSEL
+   ============================================================================= */
+
+.hero-section {
+  @apply relative overflow-hidden;
+}
+
+.hero-viewport {
+  @apply overflow-hidden;
+}
+
+.hero-track {
+  @apply flex;
+  touch-action: pan-y pinch-zoom;
+}
+
+.hero-slide {
+  @apply relative flex-shrink-0 w-full basis-full;
+}
+
+.hero-slide-bg {
+  @apply absolute inset-0 min-h-[90vh];
+}
+
+.hero-slide-content {
+  @apply relative z-10 mx-auto flex min-h-[90vh] max-w-4xl items-center justify-center
+         px-6 text-center sm:px-8 lg:px-12;
+}
+
+.hero-diamond {
+  @apply mx-auto mb-6 h-2 w-2 rotate-45 bg-chrome-400 opacity-40;
+}
+
+.hero-diamond--bottom {
+  @apply mx-auto mt-8 h-2 w-2 rotate-45 bg-chrome-400 opacity-40;
+}
+
+.hero-heading {
+  @apply font-display text-5xl leading-[1.1] tracking-[0.18em] text-foreground
+         sm:text-6xl md:text-7xl lg:text-8xl;
+}
+
+.hero-heading-line {
+  @apply block;
+}
+
+.hero-heading-accent {
+  @apply block mt-1 text-chrome-200;
+}
+
+.hero-divider {
+  @apply mx-auto mt-8 mb-6 h-px w-20;
+  background: linear-gradient(to right, transparent, var(--color-chrome-300), transparent);
+}
+
+.hero-subheading {
+  @apply mx-auto max-w-lg font-body text-base leading-relaxed text-muted
+         sm:text-lg md:text-xl;
+}
+
+.hero-cta {
+  @apply inline-flex items-center gap-3 border border-chrome-400 bg-transparent
+         px-10 py-4 font-body text-sm tracking-[0.2em] uppercase text-foreground
+         transition-all duration-300 hover:border-chrome-200 hover:bg-chrome-500 hover:text-chrome-100
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.hero-cta-arrow {
+  @apply h-4 w-4 transition-transform duration-300;
+}
+.hero-cta:hover .hero-cta-arrow {
+  transform: translateX(4px);
+}
+
+.hero-nav-btn {
+  @apply absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center
+         border border-chrome-500 bg-background/50 backdrop-blur-sm text-muted
+         transition-all duration-200 hover:border-chrome-300 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.hero-nav-btn--prev {
+  @apply left-3 sm:left-6 md:left-8;
+}
+
+.hero-nav-btn--next {
+  @apply right-3 sm:right-6 md:right-8;
+}
+
+.hero-bottom-bar {
+  @apply absolute bottom-6 left-0 right-0 z-20 sm:bottom-8;
+}
+
+.hero-bottom-inner {
+  @apply mx-auto flex max-w-7xl items-center justify-between px-6 sm:px-8 md:px-12;
+}
+
+.hero-counter {
+  @apply hidden font-body text-xs tracking-wider text-chrome-400 sm:inline;
+}
+
+.hero-dots {
+  @apply mx-auto flex items-center gap-3 sm:mx-0;
+}
+
+.hero-dot {
+  @apply h-1.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.hero-dot--active {
+  @apply w-8 bg-chrome-200;
+}
+
+.hero-dot--inactive {
+  @apply w-1.5 bg-chrome-500 hover:bg-chrome-400;
+}
+
+.hero-progress-track {
+  @apply hidden w-24 overflow-hidden bg-chrome-500 sm:block;
+}
+
+.hero-progress-bar {
+  @apply h-1.5 bg-chrome-200 transition-none;
+}
+
+.hero-top-line {
+  @apply absolute top-0 left-0 right-0 h-px z-20;
+  background: linear-gradient(to right, transparent 0%, #6E6E6E 20%, #A8A8A8 50%, #6E6E6E 80%, transparent 100%);
+}
+
+.hero-corner {
+  @apply h-6 w-6 border-chrome-400 opacity-30;
+}
+
+.hero-corner--tl { @apply absolute left-6 top-6 sm:left-10 sm:top-10 border-l border-t; }
+.hero-corner--tr { @apply absolute right-6 top-6 sm:right-10 sm:top-10 border-r border-t; }
+.hero-corner--bl { @apply absolute bottom-6 left-6 sm:bottom-10 sm:left-10 border-b border-l; }
+.hero-corner--br { @apply absolute bottom-6 right-6 sm:bottom-10 sm:right-10 border-b border-r; }
+
+.hero-accent-line {
+  @apply absolute left-1/2 top-0 h-full w-px -translate-x-1/2;
+  background: linear-gradient(to bottom, transparent 0%, #A8A8A8 30%, #A8A8A8 70%, transparent 100%);
+}
+
+/* =============================================================================
+   AUTH PAGES — Login / Signup
+   ============================================================================= */
+
+.auth-layout {
+  @apply min-h-screen bg-black flex;
+}
+
+.auth-image-panel {
+  @apply hidden md:flex md:w-1/2 relative overflow-hidden;
+}
+
+.auth-image-overlay {
+  @apply absolute inset-0 bg-black/40;
+}
+
+.auth-branding {
+  @apply absolute bottom-8 left-8 flex items-center gap-3 z-10;
+}
+
+.auth-branding-text {
+  @apply text-white font-serif text-lg tracking-wide;
+}
+
+.auth-form-panel {
+  @apply w-full md:w-1/2 flex flex-col justify-center px-6 md:px-12 py-12;
+  animation: fadeIn 0.6s ease-in;
+}
+
+.auth-form-panel--scrollable {
+  @apply overflow-y-auto;
+}
+
+.auth-form-container {
+  @apply max-w-md mx-auto w-full;
+}
+
+.auth-logo-mobile {
+  @apply flex justify-center mb-6 md:hidden;
+}
+
+.auth-logo-desktop {
+  @apply hidden md:flex justify-start mb-8;
+}
+
+.auth-heading-group {
+  @apply mb-8 text-center md:text-left;
+}
+
+.auth-subheading {
+  @apply text-xs tracking-widest text-gray-400 mb-3;
+}
+
+.auth-title {
+  @apply text-5xl md:text-6xl font-serif text-white mb-4;
+}
+
+.auth-description {
+  @apply text-gray-400;
+}
+
+.auth-form {
+  @apply space-y-6;
+}
+
+.auth-form--compact {
+  @apply space-y-5;
+}
+
+.auth-field {
+  @apply block text-xs tracking-widest text-gray-300 mb-3;
+}
+
+.auth-field--compact {
+  @apply mb-2;
+}
+
+.auth-input {
+  @apply w-full px-4 py-3 bg-transparent border border-gray-600 text-white
+         placeholder-gray-500 focus:outline-none focus:border-white
+         focus-visible:ring-1 focus-visible:ring-white/50 transition;
+}
+
+.auth-input--small {
+  @apply text-sm;
+}
+
+.auth-input--with-icon {
+  @apply pr-10;
+}
+
+.auth-input--error {
+  @apply border-red-500;
+}
+
+.auth-input-toggle {
+  @apply absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white;
+}
+
+.auth-error {
+  @apply text-red-400 text-xs mt-2;
+}
+
+.auth-error--inline {
+  @apply mt-1;
+}
+
+.auth-error-banner {
+  @apply bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded text-sm;
+}
+
+.auth-error-banner--small {
+  @apply text-xs;
+}
+
+.auth-checkbox-row {
+  @apply flex items-center justify-between text-sm;
+}
+
+.auth-checkbox-label {
+  @apply flex items-center gap-2 cursor-pointer;
+}
+
+.auth-checkbox {
+  @apply w-4 h-4 border border-gray-600 bg-transparent cursor-pointer;
+}
+
+.auth-checkbox-text {
+  @apply text-gray-300;
+}
+
+.auth-forgot-link {
+  @apply text-gray-300 hover:text-white underline;
+}
+
+.auth-submit-btn {
+  @apply w-full py-3 bg-white text-black font-semibold tracking-widest
+         hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition
+         flex items-center justify-center gap-2;
+}
+
+.auth-submit-btn--small {
+  @apply text-sm;
+}
+
+.auth-divider {
+  @apply flex items-center gap-4 my-6;
+}
+
+.auth-divider-line {
+  @apply flex-1 h-px bg-gray-600;
+}
+
+.auth-divider-text {
+  @apply text-xs text-gray-400 tracking-widest;
+}
+
+.auth-google-btn {
+  @apply w-full py-3 border border-gray-600 text-white font-semibold tracking-widest
+         hover:bg-white/5 transition flex items-center justify-center gap-2;
+}
+
+.auth-google-btn--small {
+  @apply text-sm;
+}
+
+.auth-switch-text {
+  @apply text-center text-gray-400 text-sm mt-8;
+}
+
+.auth-switch-link {
+  @apply text-white underline hover:no-underline;
+}
+
+.auth-terms-label {
+  @apply flex items-start gap-3 cursor-pointer;
+}
+
+.auth-terms-checkbox {
+  @apply w-4 h-4 border border-gray-600 bg-transparent cursor-pointer mt-1;
+}
+
+.auth-terms-text {
+  @apply text-xs text-gray-300;
+}
+
+.auth-terms-link {
+  @apply underline hover:no-underline;
+}
+
+/* Password strength */
+
+.auth-password-strength {
+  @apply mt-3 space-y-2;
+}
+
+.auth-password-strength-title {
+  @apply text-xs text-gray-400;
+}
+
+.auth-password-strength-list {
+  @apply space-y-1;
+}
+
+.auth-strength-item {
+  @apply flex items-center gap-2 text-xs;
+}
+
+.auth-strength-pass {
+  @apply text-green-400;
+}
+
+.auth-strength-fail {
+  @apply text-gray-500;
+}
+
+/* Auth loading fallback */
+
+.auth-loading {
+  @apply flex items-center justify-center min-h-screen bg-black;
+}
+
+.auth-loading-inner {
+  @apply text-center;
+}
+
+.auth-spinner {
+  @apply w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4;
+}
+
+.auth-spinner--small {
+  @apply w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin;
+}
+
+.auth-loading-text {
+  @apply text-white text-sm;
+}
+
+/* =============================================================================
+   PRODUCT CARD
+   ============================================================================= */
+
+.product-card {
+  @apply block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.product-card--rail {
+  @apply w-56 sm:w-64 flex-shrink-0;
+}
+
+.product-card--grid {
+  @apply w-full;
+}
+
+.product-card-inner {
+  @apply relative overflow-hidden border border-chrome-500 bg-background
+         transition-all duration-300 hover:border-chrome-300;
+}
+
+.product-card-image-area {
+  @apply relative aspect-[3/4] overflow-hidden bg-surface;
+}
+
+.product-card-img {
+  @apply h-full w-full object-cover transition-transform duration-700;
+}
+.product-card:hover .product-card-img,
+.product-card:hover .category-card-img {
+  transform: scale(1.05);
+}
+
+.product-card-placeholder {
+  @apply h-full w-full;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%);
+}
+
+.product-card-gradient {
+  @apply absolute inset-0 pointer-events-none;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, transparent 60%);
+}
+
+.product-card-badge-wrap {
+  @apply absolute top-3 left-3 z-10;
+}
+
+.product-card-badge {
+  @apply px-2.5 py-1 font-body text-[10px] font-semibold uppercase tracking-[0.15em] text-background;
+}
+
+.product-card-badge--default {
+  @apply bg-foreground/80;
+}
+
+.product-card-badge--sale {
+  @apply bg-foreground/90;
+}
+
+.product-card-badge--new {
+  @apply bg-foreground/90;
+}
+
+.product-card-soldout-overlay {
+  @apply absolute inset-0 z-10 flex items-center justify-center;
+}
+
+.product-card-soldout-text {
+  @apply font-body text-sm font-semibold uppercase tracking-[0.2em] text-foreground/70;
+}
+
+.product-card-wishlist-btn {
+  @apply absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center
+         rounded-full bg-background/60 backdrop-blur-sm transition-all duration-200
+         hover:bg-background/80 focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-chrome-300;
+}
+
+.product-card-hover-line {
+  @apply absolute bottom-0 left-0 right-0 h-px bg-chrome-300 opacity-0
+         transition-opacity duration-300;
+}
+.product-card:hover .product-card-hover-line {
+  opacity: 1;
+}
+
+.product-card-content {
+  @apply px-3 pb-3 pt-3;
+}
+
+.product-card-name {
+  @apply font-body text-sm font-medium text-foreground leading-snug
+         transition-colors duration-200;
+}
+.product-card:hover .product-card-name {
+  color: var(--color-chrome-200);
+}
+
+.product-card-subtext {
+  @apply mt-1 font-body text-[11px] uppercase tracking-[0.12em] text-muted;
+}
+
+.product-card-price {
+  @apply mt-2 flex items-baseline gap-2;
+}
+
+.product-card-price-original {
+  @apply font-body text-sm text-muted line-through;
+}
+
+.product-card-price-current {
+  @apply font-body text-sm font-medium text-foreground;
+}
+
+/* =============================================================================
+   CATEGORY CARDS (Home)
+   ============================================================================= */
+
+.category-section {
+  @apply bg-background py-12 sm:py-16;
+}
+
+.category-grid {
+  @apply mt-8 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+.category-card {
+  @apply relative block aspect-[3/2] overflow-hidden bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.category-card-img {
+  @apply absolute inset-0 h-full w-full object-cover transition-transform duration-700;
+}
+
+.category-card-overlay {
+  @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent;
+}
+
+.category-card-hover-line {
+  @apply absolute left-0 right-0 top-0 h-px bg-chrome-400 opacity-0
+         transition-opacity duration-300;
+}
+.category-card:hover .category-card-hover-line {
+  opacity: 1;
+}
+
+.category-card-content {
+  @apply absolute bottom-0 left-0 right-0 p-5 sm:p-6;
+}
+
+.category-card-title {
+  @apply font-display text-xl tracking-[0.12em] uppercase text-foreground sm:text-2xl;
+}
+
+.category-card-explore {
+  @apply mt-2 inline-flex items-center gap-2 text-xs tracking-[0.15em] uppercase
+         text-chrome-300 transition-colors duration-300;
+}
+.category-card:hover .category-card-explore {
+  color: var(--color-chrome-200);
+}
+
+.category-card-arrow {
+  @apply h-3 w-3 transition-transform duration-300;
+}
+.category-card:hover .category-card-arrow {
+  transform: translateX(3px);
+}
+
+/* =============================================================================
+   FEATURED COLLECTION (Home)
+   ============================================================================= */
+
+.featured-section {
+  @apply bg-background py-16 sm:py-20;
+}
+
+.featured-scroll {
+  @apply mt-10 overflow-x-auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.featured-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.featured-track {
+  @apply flex gap-5 px-4 pb-4 sm:px-6 lg:px-8 xl:px-[max(2rem,calc((100%-80rem)/2+2rem))];
+}
+
+.featured-empty {
+  @apply text-muted text-sm py-8;
+}
+
+/* =============================================================================
+   BRAND STORY (Home)
+   ============================================================================= */
+
+.brand-story-section {
+  @apply bg-background py-20 sm:py-28;
+}
+
+.brand-story-grid {
+  @apply grid items-center gap-12 md:grid-cols-2 md:gap-16;
+}
+
+.brand-story-label {
+  @apply font-body text-xs tracking-[0.2em] uppercase text-muted;
+}
+
+.brand-story-heading {
+  @apply mt-4 font-display text-3xl tracking-[0.08em] leading-snug text-foreground sm:text-4xl;
+}
+
+.brand-story-divider {
+  @apply mt-4 h-px w-16 bg-chrome-400;
+}
+
+.brand-story-text {
+  @apply mt-6 max-w-md font-body text-base leading-relaxed text-muted;
+}
+
+.brand-story-cta {
+  @apply mt-8;
+}
+
+.brand-story-visual {
+  @apply relative aspect-[4/5] w-full max-w-md md:ml-auto;
+}
+
+.brand-story-frame-outer {
+  @apply absolute inset-0;
+  border: 1px solid #6E6E6E;
+  background: linear-gradient(135deg, rgba(110,110,110,0.1) 0%, transparent 50%, rgba(110,110,110,0.1) 100%);
+}
+
+.brand-story-frame-inner {
+  @apply absolute inset-3;
+  border: 1px solid #3A3A3A;
+}
+
+.brand-story-frame-content {
+  @apply absolute inset-6;
+}
+
+.brand-story-frame-placeholder {
+  @apply h-full w-full;
+  background: linear-gradient(160deg, #0d0d0d 0%, #1a1a1a 50%, #0d0d0d 100%);
+}
+
+.brand-story-corner {
+  @apply absolute h-8 w-8 border-chrome-300;
+}
+
+.brand-story-corner--tl { @apply left-0 top-0 border-l border-t; }
+.brand-story-corner--tr { @apply right-0 top-0 border-r border-t; }
+.brand-story-corner--bl { @apply bottom-0 left-0 border-b border-l; }
+.brand-story-corner--br { @apply bottom-0 right-0 border-b border-r; }
+
+/* =============================================================================
+   SECTION HEADING — shared across pages
+   ============================================================================= */
+
+.section-heading {
+  @apply font-display text-3xl tracking-[0.1em] text-foreground sm:text-4xl;
+}
+
+.section-heading--sm {
+  @apply text-2xl sm:text-3xl;
+}
+
+.section-divider {
+  @apply mt-3 h-px w-16 bg-chrome-400;
+}
+
+.section-divider--sm {
+  @apply mt-2 h-px w-12;
+}
+
+/* =============================================================================
+   PAGE LAYOUT — shared page containers
+   ============================================================================= */
+
+.page-main {
+  @apply min-h-screen bg-background;
+}
+
+.page-container {
+  @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16;
+}
+
+.page-container--narrow {
+  @apply mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16;
+}
+
+/* =============================================================================
+   SHOP / CATEGORY PAGES
+   ============================================================================= */
+
+.shop-page-heading {
+  @apply font-display text-4xl tracking-[0.1em] text-foreground sm:text-5xl;
+}
+
+.shop-empty-state {
+  @apply mt-16 text-center;
+}
+
+.shop-empty-text {
+  @apply text-muted text-sm;
+}
+
+.shop-browse-link {
+  @apply mt-4 inline-block text-sm text-chrome-200 underline underline-offset-4
+         hover:text-foreground transition-colors duration-200;
+}
+
+/* =============================================================================
+   PRODUCT DETAIL PAGE
+   ============================================================================= */
+
+.product-detail-breadcrumb {
+  @apply mb-8 font-body text-sm text-muted;
+}
+
+.product-detail-breadcrumb-link {
+  @apply hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.product-detail-breadcrumb-sep {
+  @apply mx-2;
+}
+
+.product-detail-breadcrumb-current {
+  @apply text-foreground;
+}
+
+.product-detail-grid {
+  @apply grid grid-cols-1 gap-12 lg:grid-cols-2;
+}
+
+.product-detail-images {
+  @apply space-y-4;
+}
+
+.product-detail-image-wrap {
+  @apply relative aspect-[3/4] overflow-hidden border border-chrome-500;
+}
+
+.product-detail-image-placeholder {
+  @apply aspect-[3/4] border border-chrome-500;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%);
+}
+
+.product-detail-info {
+  @apply flex flex-col;
+}
+
+.product-detail-name {
+  @apply font-display text-3xl tracking-[0.08em] text-foreground sm:text-4xl;
+}
+
+.product-detail-desc {
+  @apply mt-6 font-body text-base leading-relaxed text-muted;
+}
+
+.product-detail-related {
+  @apply mt-24;
+}
+
+.product-detail-related-scroll {
+  @apply mt-8 overflow-x-auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.product-detail-related-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.product-detail-related-track {
+  @apply flex gap-5 pb-4;
+}
+
+/* =============================================================================
+   CHECKOUT
+   ============================================================================= */
+
+.checkout-section-title {
+  @apply font-display text-lg tracking-wider text-foreground mb-4;
+}
+
+.checkout-section {
+  @apply space-y-8;
+}
+
+.checkout-fields {
+  @apply space-y-3;
+}
+
+.checkout-label {
+  @apply block font-body text-xs text-muted mb-1;
+}
+
+.checkout-select {
+  @apply w-full bg-surface border border-chrome-500 px-4 py-2 text-sm text-foreground
+         focus:outline-none focus:border-chrome-300 focus-visible:ring-2
+         focus-visible:ring-chrome-300 focus-visible:ring-offset-2
+         focus-visible:ring-offset-background transition-colors;
+}
+
+.checkout-name-row {
+  @apply grid grid-cols-1 gap-3 sm:grid-cols-2;
+}
+
+.checkout-address-row {
+  @apply grid grid-cols-2 gap-3 sm:grid-cols-3;
+}
+
+.checkout-address-row-first {
+  @apply col-span-2 sm:col-span-1;
+}
+
+.checkout-hint {
+  @apply font-body text-xs text-muted;
+}
+
+.checkout-hint a {
+  @apply text-chrome-200 underline hover:text-foreground transition-colors;
+}
+
+.checkout-shipping-empty {
+  @apply font-body text-sm text-muted border border-chrome-500 p-4;
+}
+
+.checkout-shipping-option {
+  @apply border border-chrome-300 p-4 flex items-center justify-between;
+}
+
+.checkout-shipping-name {
+  @apply font-body text-sm text-foreground;
+}
+
+.checkout-shipping-time {
+  @apply font-body text-xs text-muted;
+}
+
+.checkout-shipping-price {
+  @apply font-body text-sm text-foreground font-medium;
+}
+
+.checkout-payment-label {
+  @apply flex items-center gap-4 border p-4 cursor-pointer transition-all duration-200;
+}
+
+.checkout-payment-label--selected {
+  @apply border-chrome-200 bg-chrome-500;
+}
+
+.checkout-payment-label--unselected {
+  @apply border-chrome-500 hover:border-chrome-400;
+}
+
+.checkout-radio-dot {
+  @apply flex h-4 w-4 items-center justify-center rounded-full border;
+}
+
+.checkout-radio-dot--selected {
+  @apply border-chrome-200;
+}
+
+.checkout-radio-dot--unselected {
+  @apply border-chrome-400;
+}
+
+.checkout-radio-fill {
+  @apply h-2 w-2 rounded-full bg-chrome-200;
+}
+
+.checkout-payment-name {
+  @apply font-body text-sm text-foreground;
+}
+
+.checkout-payment-desc {
+  @apply font-body text-xs text-muted;
+}
+
+.checkout-error {
+  @apply font-body text-sm text-red-400;
+}
+
+.checkout-loading {
+  @apply flex items-center gap-3 p-4 border border-chrome-500 bg-surface;
+}
+
+.checkout-loading-spinner {
+  @apply h-4 w-4 animate-spin rounded-full border-2 border-chrome-400 border-t-transparent;
+}
+
+.checkout-loading-text {
+  @apply font-body text-sm text-muted;
+}
+
+/* =============================================================================
+   FAQ PAGE
+   ============================================================================= */
+
+.faq-description {
+  @apply mt-6 font-body text-base leading-relaxed text-muted;
+}
+
+.faq-description a {
+  @apply text-chrome-200 underline underline-offset-2 hover:text-foreground transition-colors;
+}
+
+.faq-accordion {
+  @apply mt-10;
+}
+
+/* =============================================================================
+   MOBILE BOTTOM NAV
+   ============================================================================= */
+
+.mobile-bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 z-30 border-t border-chrome-500 bg-surface md:hidden;
+}
+
+.mobile-bottom-nav-inner {
+  @apply flex h-14 items-center justify-around px-2;
+}
+
+.mobile-bottom-nav-tab {
+  @apply relative flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-body
+         transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+}
+
+.mobile-bottom-nav-tab--active {
+  @apply text-chrome-200;
+}
+
+.mobile-bottom-nav-tab--inactive {
+  @apply text-muted hover:text-foreground;
+}
+
+.mobile-bottom-nav-badge {
+  @apply absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center
+         rounded-full bg-chrome-200 px-1 text-[9px] font-medium text-background;
+}
+
+/* =============================================================================
+   ACCOUNT / ORDERS
+   ============================================================================= */
+
+.account-section-title {
+  @apply font-display text-lg tracking-wider text-foreground mb-4;
+}
+
+/* =============================================================================
+   EMPTY STATE
+   ============================================================================= */
+
+.empty-state {
+  @apply flex flex-col items-center justify-center py-16 text-center;
+}
+
+.empty-state-icon {
+  @apply h-12 w-12 text-chrome-400 mb-4;
+}
+
+.empty-state-text {
+  @apply font-body text-sm text-muted;
+}
+
+/* =============================================================================
+   REDUCED MOTION
+   ============================================================================= */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

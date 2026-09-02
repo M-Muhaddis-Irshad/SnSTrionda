@@ -12,11 +12,7 @@ export default function AccountButton() {
   const label = !authenticated ? "Sign In" : admin ? "Admin" : "Account";
 
   return (
-    <Link
-      href={href}
-      className="flex h-10 w-10 items-center justify-center text-muted transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-      aria-label={label}
-    >
+    <Link href={href} className="header-icon-btn" aria-label={label}>
       <svg
         className="h-5 w-5"
         fill="none"

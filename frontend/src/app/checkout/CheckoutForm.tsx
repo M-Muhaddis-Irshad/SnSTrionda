@@ -149,12 +149,10 @@ export default function CheckoutForm() {
         return;
       }
 
-      // Store email for order confirmation page's email verification
       if (form.email.trim()) {
         localStorage.setItem(`trionda-order-email-${data.data.orderNumber}`, form.email.trim());
       }
 
-      // For card payments: create Safepay session and redirect to hosted checkout
       if (paymentMethod === "CARD") {
         setLoadingStep("Redirecting to payment...");
         try {
@@ -188,7 +186,6 @@ export default function CheckoutForm() {
         }
       }
 
-      // Non-card payments: clear cart and redirect to confirmation
       setLoadingStep("Order placed! Redirecting...");
       clearCart();
       router.push(`/order-confirmation/${data.data.orderNumber}`);
@@ -198,58 +195,45 @@ export default function CheckoutForm() {
     }
   }
 
-  // Shipping options are only shown after address is filled
   const hasAddress = form.address.trim() && form.city.trim() && form.province.trim();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* ── Contact ── */}
+    <form onSubmit={handleSubmit} className="checkout-section">
+      {/* Contact */}
       <section>
-        <h2 className="font-display text-lg tracking-wider text-foreground mb-4">
-          Contact
-        </h2>
-        <div className="space-y-3">
+        <h2 className="checkout-section-title">Contact</h2>
+        <div className="checkout-fields">
           <Input
             type="email"
             value={form.email}
             onChange={(e) => handleChange("email", e.target.value)}
             placeholder="Email for order updates"
           />
-          <p className="font-body text-xs text-muted">
+          <p className="checkout-hint">
             Already have an account?{" "}
-            <Link href="/login" className="text-chrome-200 underline hover:text-foreground transition-colors">
-              Sign in
-            </Link>
+            <Link href="/login">Sign in</Link>
           </p>
         </div>
       </section>
 
-      {/* ── Delivery ── */}
+      {/* Delivery */}
       <section>
-        <h2 className="font-display text-lg tracking-wider text-foreground mb-4">
-          Delivery
-        </h2>
-        <div className="space-y-3">
-          {/* Country */}
+        <h2 className="checkout-section-title">Delivery</h2>
+        <div className="checkout-fields">
           <div>
-            <label className="block font-body text-xs text-muted mb-1">
-              Country / Region
-            </label>
+            <label className="checkout-label">Country / Region</label>
             <select
               value={form.country}
               onChange={(e) => handleChange("country", e.target.value)}
-              className="w-full bg-surface border border-chrome-500 px-4 py-2 text-sm text-foreground focus:outline-none focus:border-chrome-300 focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
+              className="checkout-select"
             >
               <option value="Pakistan">Pakistan</option>
             </select>
           </div>
 
-          {/* Name row */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="checkout-name-row">
             <div>
-              <label className="block font-body text-xs text-muted mb-1">
-                First name *
-              </label>
+              <label className="checkout-label">First name *</label>
               <Input
                 type="text"
                 value={form.firstName}
@@ -259,9 +243,7 @@ export default function CheckoutForm() {
               />
             </div>
             <div>
-              <label className="block font-body text-xs text-muted mb-1">
-                Last name *
-              </label>
+              <label className="checkout-label">Last name *</label>
               <Input
                 type="text"
                 value={form.lastName}
@@ -272,11 +254,8 @@ export default function CheckoutForm() {
             </div>
           </div>
 
-          {/* Address */}
           <div>
-            <label className="block font-body text-xs text-muted mb-1">
-              Address *
-            </label>
+            <label className="checkout-label">Address *</label>
             <Input
               type="text"
               value={form.address}
@@ -286,11 +265,8 @@ export default function CheckoutForm() {
             />
           </div>
 
-          {/* Apartment */}
           <div>
-            <label className="block font-body text-xs text-muted mb-1">
-              Apartment, suite, etc.
-            </label>
+            <label className="checkout-label">Apartment, suite, etc.</label>
             <Input
               type="text"
               value={form.apartment}
@@ -299,12 +275,9 @@ export default function CheckoutForm() {
             />
           </div>
 
-          {/* City / Province / Postal */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="col-span-2 sm:col-span-1">
-              <label className="block font-body text-xs text-muted mb-1">
-                City *
-              </label>
+          <div className="checkout-address-row">
+            <div className="checkout-address-row-first">
+              <label className="checkout-label">City *</label>
               <Input
                 type="text"
                 value={form.city}
@@ -314,9 +287,7 @@ export default function CheckoutForm() {
               />
             </div>
             <div>
-              <label className="block font-body text-xs text-muted mb-1">
-                Province *
-              </label>
+              <label className="checkout-label">Province *</label>
               <Input
                 type="text"
                 value={form.province}
@@ -326,9 +297,7 @@ export default function CheckoutForm() {
               />
             </div>
             <div>
-              <label className="block font-body text-xs text-muted mb-1">
-                Postal code
-              </label>
+              <label className="checkout-label">Postal code</label>
               <Input
                 type="text"
                 value={form.postalCode}
@@ -338,11 +307,8 @@ export default function CheckoutForm() {
             </div>
           </div>
 
-          {/* Phone */}
           <div>
-            <label className="block font-body text-xs text-muted mb-1">
-              Phone *
-            </label>
+            <label className="checkout-label">Phone *</label>
             <Input
               type="tel"
               value={form.phone}
@@ -354,40 +320,36 @@ export default function CheckoutForm() {
         </div>
       </section>
 
-      {/* ── Shipping method ── */}
+      {/* Shipping method */}
       <section>
-        <h2 className="font-display text-lg tracking-wider text-foreground mb-4">
-          Shipping method
-        </h2>
+        <h2 className="checkout-section-title">Shipping method</h2>
         {!hasAddress ? (
-          <p className="font-body text-sm text-muted border border-chrome-500 p-4">
+          <p className="checkout-shipping-empty">
             Enter your address to see shipping options.
           </p>
         ) : (
-          <div className="border border-chrome-300 p-4 flex items-center justify-between">
+          <div className="checkout-shipping-option">
             <div>
-              <p className="font-body text-sm text-foreground">Standard shipping</p>
-              <p className="font-body text-xs text-muted">3–5 business days</p>
+              <p className="checkout-shipping-name">Standard shipping</p>
+              <p className="checkout-shipping-time">3–5 business days</p>
             </div>
-            <span className="font-body text-sm text-foreground font-medium">
+            <span className="checkout-shipping-price">
               {formatPrice(SHIPPING_COST)}
             </span>
           </div>
         )}
       </section>
 
-      {/* ── Payment ── */}
+      {/* Payment */}
       <section>
-        <h2 className="font-display text-lg tracking-wider text-foreground mb-4">
-          Payment
-        </h2>
+        <h2 className="checkout-section-title">Payment</h2>
         <div className="space-y-3">
           {/* Card */}
           <label
-            className={`flex items-center gap-4 border p-4 cursor-pointer transition-all duration-200 ${
+            className={`checkout-payment-label ${
               paymentMethod === "CARD"
-                ? "border-chrome-200 bg-chrome-500"
-                : "border-chrome-500 hover:border-chrome-400"
+                ? "checkout-payment-label--selected"
+                : "checkout-payment-label--unselected"
             }`}
           >
             <input
@@ -398,32 +360,22 @@ export default function CheckoutForm() {
               onChange={() => setPaymentMethod("CARD")}
               className="sr-only"
             />
-            <div
-              className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                paymentMethod === "CARD" ? "border-chrome-200" : "border-chrome-400"
-              }`}
-            >
-              {paymentMethod === "CARD" && (
-                <div className="h-2 w-2 rounded-full bg-chrome-200" />
-              )}
+            <div className={`checkout-radio-dot ${paymentMethod === "CARD" ? "checkout-radio-dot--selected" : "checkout-radio-dot--unselected"}`}>
+              {paymentMethod === "CARD" && <div className="checkout-radio-fill" />}
             </div>
             <div className="flex-1">
-              <p className="font-body text-sm text-foreground">Credit / Debit Card</p>
-              <p className="font-body text-xs text-muted">
-                Pay securely via Safepay
-              </p>
+              <p className="checkout-payment-name">Credit / Debit Card</p>
+              <p className="checkout-payment-desc">Pay securely via Safepay</p>
             </div>
-            {paymentMethod === "CARD" && (
-              <Badge variant="outline">Selected</Badge>
-            )}
+            {paymentMethod === "CARD" && <Badge variant="outline">Selected</Badge>}
           </label>
 
           {/* COD */}
           <label
-            className={`flex items-center gap-4 border p-4 cursor-pointer transition-all duration-200 ${
+            className={`checkout-payment-label ${
               paymentMethod === "COD"
-                ? "border-chrome-200 bg-chrome-500"
-                : "border-chrome-500 hover:border-chrome-400"
+                ? "checkout-payment-label--selected"
+                : "checkout-payment-label--unselected"
             }`}
           >
             <input
@@ -434,38 +386,28 @@ export default function CheckoutForm() {
               onChange={() => setPaymentMethod("COD")}
               className="sr-only"
             />
-            <div
-              className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                paymentMethod === "COD" ? "border-chrome-200" : "border-chrome-400"
-              }`}
-            >
-              {paymentMethod === "COD" && (
-                <div className="h-2 w-2 rounded-full bg-chrome-200" />
-              )}
+            <div className={`checkout-radio-dot ${paymentMethod === "COD" ? "checkout-radio-dot--selected" : "checkout-radio-dot--unselected"}`}>
+              {paymentMethod === "COD" && <div className="checkout-radio-fill" />}
             </div>
             <div className="flex-1">
-              <p className="font-body text-sm text-foreground">Cash on Delivery</p>
-              <p className="font-body text-xs text-muted">
-                Pay when your order arrives
-              </p>
+              <p className="checkout-payment-name">Cash on Delivery</p>
+              <p className="checkout-payment-desc">Pay when your order arrives</p>
             </div>
-            {paymentMethod === "COD" && (
-              <Badge variant="outline">Selected</Badge>
-            )}
+            {paymentMethod === "COD" && <Badge variant="outline">Selected</Badge>}
           </label>
         </div>
       </section>
 
       {/* Error */}
       {status === "error" && (
-        <p className="font-body text-sm text-red-400">{errorMessage}</p>
+        <p className="checkout-error">{errorMessage}</p>
       )}
 
       {/* Loading progress */}
       {status === "loading" && (
-        <div className="flex items-center gap-3 p-4 border border-chrome-500 bg-surface">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-chrome-400 border-t-transparent" />
-          <span className="font-body text-sm text-muted">{loadingStep}</span>
+        <div className="checkout-loading">
+          <div className="checkout-loading-spinner" />
+          <span className="checkout-loading-text">{loadingStep}</span>
         </div>
       )}
 

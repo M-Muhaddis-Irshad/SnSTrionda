@@ -13,9 +13,7 @@ export default function Card({
 }: CardProps) {
   return (
     <div
-      className={`group relative overflow-hidden border border-chrome-500 transition-all duration-300 ${
-        hoverable ? "hover:border-chrome-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.03)]" : ""
-      } ${className}`}
+      className={`card ${hoverable ? "card--hoverable" : ""} ${className}`}
       {...props}
     >
       {children}
@@ -29,20 +27,14 @@ type CardImageProps = HTMLAttributes<HTMLDivElement> & {
 
 export function CardImage({ children, className = "", ...props }: CardImageProps) {
   return (
-    <div
-      className={`relative aspect-[3/4] overflow-hidden bg-surface ${className}`}
-      {...props}
-    >
+    <div className={`card-image ${className}`} {...props}>
       {children}
-      {/* Dark gradient overlay on hover for text readability */}
       <div
         className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background:
-            "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%)",
+          background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%)",
         }}
       />
-      {/* Chrome accent line on hover */}
       <div
         className="absolute bottom-0 left-0 right-0 h-px bg-chrome-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       />
@@ -56,7 +48,7 @@ type CardContentProps = HTMLAttributes<HTMLDivElement> & {
 
 export function CardContent({ children, className = "", ...props }: CardContentProps) {
   return (
-    <div className={`mt-3 px-3 pb-3 ${className}`} {...props}>
+    <div className={`card-content ${className}`} {...props}>
       {children}
     </div>
   );

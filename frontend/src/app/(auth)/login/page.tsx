@@ -1,11 +1,14 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
+
+const LOGIN_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788284310/trionda-wears/auth/auth-login.jpg';
+const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
 
 interface LoginFormInputs {
   email: string;
@@ -19,13 +22,11 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/shop';
-  
-  const [imageUrl, setImageUrl] = useState<string>('');
+
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [pageLoading, setPageLoading] = useState(true);
-  const [error, setError] = useState<string>('');
-  
+  const [error, setError] = useState('');
+
   const {
     register,
     handleSubmit,
@@ -33,24 +34,6 @@ function LoginForm() {
   } = useForm<LoginFormInputs>({
     mode: 'onSubmit',
   });
-
-  useEffect(() => {
-    const fetchImage = async () => {
-      try {
-        const res = await fetch('/api/auth/images/login');
-        if (!res.ok) throw new Error('Failed to fetch image');
-        const data = await res.json();
-        setImageUrl(data.imageUrl);
-      } catch (err) {
-        console.error('Image fetch error:', err);
-        setImageUrl('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&fit=crop');
-      } finally {
-        setPageLoading(false);
-      }
-    };
-
-    fetchImage();
-  }, []);
 
   const onSubmit = async (data: LoginFormInputs) => {
     setIsLoading(true);
@@ -70,48 +53,69 @@ function LoginForm() {
     }
   };
 
-  if (pageLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-sm">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="auth-layout">
       {/* Left: Background Image with Overlay */}
-      <div className="hidden md:flex md:w-1/2 relative overflow-hidden">
-        {imageUrl && (
-          <>
-            <Image
-              src={imageUrl}
-              alt="Login Background"
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-black/40"></div>
-          </>
-        )}
+      <div className="auth-image-panel">
+        <Image
+          src={LOGIN_BG}
+          alt="Login Background"
+          fill
+          className="object-cover"
+          priority
+          unoptimized
+        />
+        <div className="auth-image-overlay" />
+        <div className="auth-branding">
+          <Image
+            src={LOGO_URL}
+            alt="Trionda Logo"
+            width={90}
+            height={90}
+            className="rounded"
+            unoptimized
+          />
+          <span className="auth-branding-text">TRIONDA WEARS</span>
+        </div>
       </div>
 
       {/* Right: Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-12 py-12 animate-fadeIn">
-        <div className="max-w-md mx-auto w-full">
-          <div className="mb-8 text-center">
-            <p className="text-xs tracking-widest text-gray-400 mb-3">WELCOME BACK</p>
-            <h1 className="text-5xl md:text-6xl font-serif text-white mb-4">SIGN IN</h1>
-            <p className="text-gray-400">Sign in to your Trionda Wears account to continue.</p>
+      <div className="auth-form-panel">
+        <div className="auth-form-container">
+          {/* Logo (mobile only) */}
+          <div className="auth-logo-mobile">
+            <Image
+              src={LOGO_URL}
+              alt="Trionda Logo"
+              width={56}
+              height={56}
+              className="rounded"
+              unoptimized
+            />
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Desktop logo */}
+          <div className="auth-logo-desktop">
+            <Image
+              src={LOGO_URL}
+              alt="Trionda Logo"
+              width={48}
+              height={48}
+              className="rounded"
+              unoptimized
+            />
+          </div>
+
+          <div className="auth-heading-group">
+            <p className="auth-subheading">WELCOME BACK</p>
+            <h1 className="auth-title">SIGN IN</h1>
+            <p className="auth-description">Sign in to your Trionda Wears account to continue.</p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
             {/* Email */}
             <div>
-              <label className="block text-xs tracking-widest text-gray-300 mb-3">EMAIL ADDRESS</label>
+              <label className="auth-field">EMAIL ADDRESS</label>
               <input
                 type="email"
                 placeholder="you@example.com"
@@ -119,54 +123,50 @@ function LoginForm() {
                   required: 'Email is required',
                   pattern: { value: emailRegex, message: 'Invalid email format' },
                 })}
-                className={`w-full px-4 py-3 bg-transparent border ${
-                  errors.email ? 'border-red-500' : 'border-gray-600'
-                } text-white placeholder-gray-500 focus:outline-none focus:border-white focus-visible:ring-1 focus-visible:ring-white/50 transition`}
+                className={`auth-input ${errors.email ? 'auth-input--error' : ''}`}
               />
-              {errors.email && <p className="text-red-400 text-xs mt-2">{errors.email.message}</p>}
+              {errors.email && <p className="auth-error">{errors.email.message}</p>}
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs tracking-widest text-gray-300 mb-3">PASSWORD</label>
+              <label className="auth-field">PASSWORD</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   {...register('password', { required: 'Password is required' })}
-                  className={`w-full px-4 py-3 pr-10 bg-transparent border ${
-                    errors.password ? 'border-red-500' : 'border-gray-600'
-                  } text-white placeholder-gray-500 focus:outline-none focus:border-white focus-visible:ring-1 focus-visible:ring-white/50 transition`}
+                  className={`auth-input auth-input--with-icon ${errors.password ? 'auth-input--error' : ''}`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="auth-input-toggle"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-400 text-xs mt-2">{errors.password.message}</p>}
+              {errors.password && <p className="auth-error">{errors.password.message}</p>}
             </div>
 
             {/* Remember Me */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
+            <div className="auth-checkbox-row">
+              <label className="auth-checkbox-label">
                 <input
                   type="checkbox"
                   {...register('rememberMe')}
-                  className="w-4 h-4 border border-gray-600 bg-transparent cursor-pointer"
+                  className="auth-checkbox"
                 />
-                <span className="text-gray-300">Remember me</span>
+                <span className="auth-checkbox-text">Remember me</span>
               </label>
-              <a href="/forgot-password" className="text-gray-300 hover:text-white underline">
+              <a href="/forgot-password" className="auth-forgot-link">
                 Forgot password?
               </a>
             </div>
 
             {/* Error */}
             {error && (
-              <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded text-sm">
+              <div className="auth-error-banner">
                 {error}
               </div>
             )}
@@ -175,26 +175,26 @@ function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-white text-black font-semibold tracking-widest hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+              className="auth-submit-btn"
             >
               {isLoading && (
-                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                <div className="auth-spinner--small" />
               )}
               {isLoading ? 'SIGNING IN...' : 'SIGN IN'}
             </button>
 
             {/* Divider */}
-            <div className="flex items-center gap-4 my-6">
-              <div className="flex-1 h-px bg-gray-600"></div>
-              <span className="text-xs text-gray-400 tracking-widest">OR</span>
-              <div className="flex-1 h-px bg-gray-600"></div>
+            <div className="auth-divider">
+              <div className="auth-divider-line" />
+              <span className="auth-divider-text">OR</span>
+              <div className="auth-divider-line" />
             </div>
 
             {/* Google */}
             <button
               type="button"
               onClick={() => signIn('google', { callbackUrl })}
-              className="w-full py-3 border border-gray-600 text-white font-semibold tracking-widest hover:bg-white/5 transition flex items-center justify-center gap-2"
+              className="auth-google-btn"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -206,9 +206,9 @@ function LoginForm() {
             </button>
 
             {/* Signup Link */}
-            <p className="text-center text-gray-400 text-sm mt-8">
+            <p className="auth-switch-text">
               NEW TO TRIONDA WEARS?{' '}
-              <a href="/signup" className="text-white underline hover:no-underline">
+              <a href="/signup" className="auth-switch-link">
                 CREATE AN ACCOUNT
               </a>
             </p>
@@ -223,10 +223,10 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center min-h-screen bg-black">
-          <div className="text-center">
-            <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-white text-sm">Loading...</p>
+        <div className="auth-loading">
+          <div className="auth-loading-inner">
+            <div className="auth-spinner" />
+            <p className="auth-loading-text">Loading...</p>
           </div>
         </div>
       }

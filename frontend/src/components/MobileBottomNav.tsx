@@ -112,7 +112,6 @@ export default function MobileBottomNav({ onMenuToggle }: MobileBottomNavProps) 
 
   function handleTabClick(item: NavItem) {
     if (item.href === "__cart__") {
-      // Dispatch custom event that CartButton listens to
       window.dispatchEvent(new CustomEvent("trionda:open-cart"));
     } else if (item.href === "__menu__") {
       onMenuToggle?.();
@@ -122,33 +121,30 @@ export default function MobileBottomNav({ onMenuToggle }: MobileBottomNavProps) 
   }
 
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-30 border-t border-chrome-500 bg-surface md:hidden"
-      aria-label="Mobile navigation"
-    >
-      <div className="flex h-14 items-center justify-around px-2">
+    <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
+      <div className="mobile-bottom-nav-inner">
         {tabs.map((item) => {
-          const active = item.href === "__cart__" || item.href === "__menu__"
-            ? false
-            : isActive(item.href);
+          const active =
+            item.href === "__cart__" || item.href === "__menu__"
+              ? false
+              : isActive(item.href);
 
           return (
             <button
               key={item.label}
               type="button"
               onClick={() => handleTabClick(item)}
-              className={`relative flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-body transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+              className={`mobile-bottom-nav-tab ${
                 active
-                  ? "text-chrome-200"
-                  : "text-muted hover:text-foreground"
+                  ? "mobile-bottom-nav-tab--active"
+                  : "mobile-bottom-nav-tab--inactive"
               }`}
               aria-label={item.label}
             >
               <span className="relative">
                 {item.icon}
-                {/* Cart badge */}
                 {item.label === "Cart" && totalItems > 0 && (
-                  <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-chrome-200 px-1 text-[9px] font-medium text-background">
+                  <span className="mobile-bottom-nav-badge">
                     {totalItems > 99 ? "99+" : totalItems}
                   </span>
                 )}

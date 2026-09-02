@@ -25,7 +25,8 @@ exports.OrderStatus = {
 exports.PaymentMethod = {
     JAZZCASH: 'JAZZCASH',
     EASYPAISA: 'EASYPAISA',
-    COD: 'COD'
+    COD: 'COD',
+    CARD: 'CARD'
 };
 exports.PaymentStatus = {
     PENDING: 'PENDING',

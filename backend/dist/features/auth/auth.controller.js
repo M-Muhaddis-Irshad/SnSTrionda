@@ -7,7 +7,10 @@ exports.handleRegister = handleRegister;
 exports.handleLogin = handleLogin;
 exports.handleRefresh = handleRefresh;
 exports.handleLogout = handleLogout;
+exports.handleMe = handleMe;
+exports.handleAdminCheck = handleAdminCheck;
 const auth_service_1 = require("./auth.service");
+const db_1 = require("../../db");
 // ---------------------------------------------------------------------------
 // Helper: extract and validate request body
 // ---------------------------------------------------------------------------
@@ -112,5 +115,43 @@ function handleLogout(req, res) {
         console.error("Logout error:", err);
         res.status(500).json({ error: "Internal server error" });
     }
+}
+// ---------------------------------------------------------------------------
+// GET /api/auth/me
+// ---------------------------------------------------------------------------
+async function handleMe(req, res) {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required." });
+        }
+        const user = await db_1.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                phone: true,
+                role: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+        res.json({ user });
+    }
+    catch (err) {
+        console.error("Get profile error:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+// ---------------------------------------------------------------------------
+// GET /api/auth/admin-check
+// ---------------------------------------------------------------------------
+function handleAdminCheck(req, res) {
+    res.json({ message: "Admin access confirmed.", user: req.user });
 }
 //# sourceMappingURL=auth.controller.js.map

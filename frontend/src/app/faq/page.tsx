@@ -76,28 +76,23 @@ const FAQ_ITEMS: FaqItem[] = [
 
 export default function FaqPage() {
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        {/* Page heading */}
-        <h1 className="font-display text-4xl tracking-[0.1em] text-foreground sm:text-5xl">
+    <main className="page-main">
+      <div className="page-container--narrow">
+        <h1 className="shop-page-heading">
           Frequently Asked Questions
         </h1>
-        <div className="mt-3 h-px w-16 bg-chrome-400" />
+        <div className="section-divider" />
 
-        <p className="mt-6 font-body text-base leading-relaxed text-muted">
+        <p className="faq-description">
           Find answers to common questions about ordering, shipping, payments,
           and our tailoring process. If you need further help,{" "}
-          <Link
-            href="/#contact"
-            className="text-chrome-200 underline underline-offset-2 hover:text-foreground transition-colors"
-          >
+          <Link href="/#contact">
             get in touch
           </Link>
           .
         </p>
 
-        {/* Accordion */}
-        <div className="mt-10">
+        <div className="faq-accordion">
           <FaqAccordion items={FAQ_ITEMS} />
         </div>
       </div>

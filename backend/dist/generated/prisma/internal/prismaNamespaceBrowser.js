@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.OrderItemScalarFieldEnum = exports.OrderScalarFieldEnum = exports.AddressScalarFieldEnum = exports.UserScalarFieldEnum = exports.CustomMeasurementScalarFieldEnum = exports.ProductImageScalarFieldEnum = exports.ProductVariantScalarFieldEnum = exports.ProductScalarFieldEnum = exports.CategoryScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.OrderItemScalarFieldEnum = exports.OrderScalarFieldEnum = exports.AddressScalarFieldEnum = exports.AuthImageScalarFieldEnum = exports.VerificationTokenScalarFieldEnum = exports.SessionScalarFieldEnum = exports.AccountScalarFieldEnum = exports.UserScalarFieldEnum = exports.CustomMeasurementScalarFieldEnum = exports.ProductImageScalarFieldEnum = exports.ProductVariantScalarFieldEnum = exports.ProductScalarFieldEnum = exports.CategoryScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -81,6 +81,10 @@ exports.ModelName = {
     ProductImage: 'ProductImage',
     CustomMeasurement: 'CustomMeasurement',
     User: 'User',
+    Account: 'Account',
+    Session: 'Session',
+    VerificationToken: 'VerificationToken',
+    AuthImage: 'AuthImage',
     Address: 'Address',
     Order: 'Order',
     OrderItem: 'OrderItem'
@@ -155,12 +159,45 @@ exports.CustomMeasurementScalarFieldEnum = {
 };
 exports.UserScalarFieldEnum = {
     id: 'id',
+    name: 'name',
     email: 'email',
-    passwordHash: 'passwordHash',
-    firstName: 'firstName',
-    lastName: 'lastName',
+    emailVerified: 'emailVerified',
+    image: 'image',
+    password: 'password',
     phone: 'phone',
     role: 'role',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.AccountScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    type: 'type',
+    provider: 'provider',
+    providerAccountId: 'providerAccountId',
+    refresh_token: 'refresh_token',
+    access_token: 'access_token',
+    expires_at: 'expires_at',
+    token_type: 'token_type',
+    scope: 'scope',
+    id_token: 'id_token',
+    session_state: 'session_state'
+};
+exports.SessionScalarFieldEnum = {
+    id: 'id',
+    sessionToken: 'sessionToken',
+    userId: 'userId',
+    expires: 'expires'
+};
+exports.VerificationTokenScalarFieldEnum = {
+    identifier: 'identifier',
+    token: 'token',
+    expires: 'expires'
+};
+exports.AuthImageScalarFieldEnum = {
+    id: 'id',
+    pageType: 'pageType',
+    imageUrl: 'imageUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

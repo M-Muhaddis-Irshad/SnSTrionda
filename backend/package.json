@@ -26,7 +26,8 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.38.0",
     "multer": "^2.2.0",
-    "next-auth": "^4.24.15"
+    "next-auth": "^4.24.15",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

@@ -66,17 +66,8 @@ function Badge({
   label: string;
   variant?: "default" | "sale" | "new";
 }) {
-  const bg =
-    variant === "sale"
-      ? "bg-foreground/90"
-      : variant === "new"
-        ? "bg-foreground/90"
-        : "bg-foreground/80";
-
   return (
-    <span
-      className={`${bg} px-2.5 py-1 font-body text-[10px] font-semibold uppercase tracking-[0.15em] text-background`}
-    >
+    <span className={`product-card-badge product-card-badge--${variant}`}>
       {label}
     </span>
   );
@@ -101,13 +92,13 @@ function PriceDisplay({
   const lowestPrice = hasSale ? Math.min(...variantPrices) : null;
 
   return (
-    <div className="flex items-baseline gap-2">
+    <div className="product-card-price">
       {hasSale && lowestPrice !== null && (
-        <span className="font-body text-sm text-muted line-through">
+        <span className="product-card-price-original">
           Rs. {basePrice.toLocaleString("en-PK")}
         </span>
       )}
-      <span className="font-body text-sm font-medium text-foreground">
+      <span className="product-card-price-current">
         Rs. {(hasSale && lowestPrice !== null ? lowestPrice : basePrice).toLocaleString("en-PK")}
       </span>
     </div>
@@ -143,12 +134,10 @@ export default function ProductCard({
   const imgAlt = primaryImage?.altText || product.name;
 
   const isSoldOut = product.variants.every((v) => v.stockQuantity <= 0);
-  const isNew = false; // No "new" flag in DB — set to true when a "new" field is added
+  const isNew = false;
 
   const categoryText = product.category.name.toUpperCase();
-  const variantInfo = product.variants.find(
-    (v) => v.size || v.color
-  );
+  const variantInfo = product.variants.find((v) => v.size || v.color);
   const subText = [categoryText, variantInfo?.size, variantInfo?.color]
     .filter(Boolean)
     .join(" / ");
@@ -166,84 +155,68 @@ export default function ProductCard({
     badge = { label: "New", variant: "new" };
   }
 
-  const widthClass = layout === "rail" ? "w-56 sm:w-64 flex-shrink-0" : "w-full";
-
   return (
     <Link
       href={`/products/${product.slug}`}
-      className={`group block ${widthClass} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background`}
+      className={`product-card product-card--${layout}`}
     >
-      <div className="relative overflow-hidden border border-chrome-500 bg-background transition-all duration-300 hover:border-chrome-300">
-        {/* Image area — aspect ratio 3/4 */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-surface">
+      <div className="product-card-inner">
+        {/* Image area */}
+        <div className="product-card-image-area">
           {imgSrc && !imgError ? (
             <img
               src={imgSrc}
               alt={imgAlt}
               loading="lazy"
               onError={() => setImgError(true)}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="product-card-img"
             />
           ) : (
-            <div
-              className="h-full w-full"
-              style={{
-                background:
-                  "linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%)",
-              }}
-            />
+            <div className="product-card-placeholder" />
           )}
 
-          {/* Dark gradient overlay — always present for moody aesthetic */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, transparent 60%)",
-            }}
-          />
+          {/* Dark gradient overlay */}
+          <div className="product-card-gradient" />
 
-          {/* Badge — top left */}
+          {/* Badge */}
           {badge && (
-            <div className="absolute top-3 left-3 z-10">
+            <div className="product-card-badge-wrap">
               <Badge label={badge.label} variant={badge.variant} />
             </div>
           )}
 
-          {/* Sold out overlay text */}
+          {/* Sold out overlay */}
           {isSoldOut && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center">
-              <span className="font-body text-sm font-semibold uppercase tracking-[0.2em] text-foreground/70">
-                Sold Out
-              </span>
+            <div className="product-card-soldout-overlay">
+              <span className="product-card-soldout-text">Sold Out</span>
             </div>
           )}
 
-          {/* Wishlist heart — always visible, top right */}
+          {/* Wishlist heart */}
           <button
             type="button"
             onClick={handleWishlist}
             aria-label={isWished ? "Remove from wishlist" : "Add to wishlist"}
-            className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-background/60 backdrop-blur-sm transition-all duration-200 hover:bg-background/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300"
+            className="product-card-wishlist-btn"
           >
             <HeartIcon filled={isWished} />
           </button>
 
           {/* Chrome accent line on hover */}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-chrome-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="product-card-hover-line" />
         </div>
 
         {/* Content */}
-        <div className="px-3 pb-3 pt-3">
-          <h3 className="font-body text-sm font-medium text-foreground leading-snug group-hover:text-chrome-200 transition-colors duration-200">
+        <div className="product-card-content">
+          <h3 className="product-card-name">
             {product.name}
           </h3>
           {subText && (
-            <p className="mt-1 font-body text-[11px] uppercase tracking-[0.12em] text-muted">
+            <p className="product-card-subtext">
               {subText}
             </p>
           )}
-          <div className="mt-2">
+          <div>
             <PriceDisplay basePrice={product.basePrice} variants={product.variants} />
           </div>
         </div>

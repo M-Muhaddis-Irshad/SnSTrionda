@@ -184,6 +184,50 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
         omit: OmitOpts;
     }>;
     /**
+     * `prisma.account`: Exposes CRUD operations for the **Account** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Accounts
+      * const accounts = await prisma.account.findMany()
+      * ```
+      */
+    get account(): Prisma.AccountDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.session`: Exposes CRUD operations for the **Session** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Sessions
+      * const sessions = await prisma.session.findMany()
+      * ```
+      */
+    get session(): Prisma.SessionDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.verificationToken`: Exposes CRUD operations for the **VerificationToken** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more VerificationTokens
+      * const verificationTokens = await prisma.verificationToken.findMany()
+      * ```
+      */
+    get verificationToken(): Prisma.VerificationTokenDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.authImage`: Exposes CRUD operations for the **AuthImage** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more AuthImages
+      * const authImages = await prisma.authImage.findMany()
+      * ```
+      */
+    get authImage(): Prisma.AuthImageDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
      * `prisma.address`: Exposes CRUD operations for the **Address** model.
       * Example usage:
       * ```ts
