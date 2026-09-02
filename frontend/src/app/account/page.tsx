@@ -67,7 +67,7 @@ export default function AccountOverviewPage() {
         <div className="space-y-2">
           <p className="font-body text-sm text-foreground">
             <span className="text-muted">Name: </span>
-            {user?.firstName} {user?.lastName}
+            {user?.name}
           </p>
           <p className="font-body text-sm text-foreground">
             <span className="text-muted">Email: </span>

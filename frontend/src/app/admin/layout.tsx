@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
+import { useAuthStore } from '@/stores/authStore';
 
 const NAV_ITEMS = [
   { section: 'Main', items: [
@@ -31,36 +31,32 @@ const NAV_ITEMS = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const { user, accessToken, clearAuth } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const isAuthenticated = !!accessToken && !!user;
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     if (pathname === '/admin/login') return;
-    if (status === 'unauthenticated') {
+    if (!isAuthenticated) {
       router.replace('/login');
     }
-  }, [pathname, status, router]);
+  }, [pathname, isAuthenticated, router]);
 
   // Login page renders without the admin shell
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  // Loading state
-  if (status === 'loading') {
+  // Not authenticated
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  // Not authenticated
-  if (status === 'unauthenticated') {
-    return null;
-  }
-
-  const isAdmin = session?.user?.role === 'ADMIN';
 
   // Not admin — redirect
   if (!isAdmin) {
@@ -134,13 +130,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="border-t border-gray-800 px-4 py-4">
             <div className="flex items-center gap-3 px-3">
               <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm">
-                {session?.user?.name?.charAt(0) || 'A'}
+                {user?.name?.charAt(0) || 'A'}
               </div>
               <div>
-                <p className="text-sm text-white">{session?.user?.name || 'Admin'}</p>
+                <p className="text-sm text-white">{user?.name || 'Admin'}</p>
                 <p className="text-xs text-gray-500">super_admin</p>
               </div>
             </div>
+            <button
+              onClick={() => { clearAuth(); router.push('/login'); }}
+              className="w-full mt-3 py-2 text-gray-400 hover:text-white text-sm text-left px-3 transition"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </aside>
@@ -171,7 +173,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="bg-gray-900 text-white text-sm px-4 py-2 rounded border border-gray-800 focus:outline-none focus:border-gray-600"
             />
             <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs">
-              {session?.user?.name?.charAt(0) || 'A'}
+              {user?.name?.charAt(0) || 'A'}
             </div>
           </div>
         </div>

@@ -12,6 +12,7 @@ router.post("/register", auth_controller_1.handleRegister);
 router.post("/login", auth_controller_1.handleLogin);
 router.post("/refresh", auth_controller_1.handleRefresh);
 router.post("/logout", auth_controller_1.handleLogout);
+router.get("/images/:pageType", auth_controller_1.handleGetAuthImage);
 // Protected routes — require valid access token
 router.get("/me", auth_middleware_1.authenticate, auth_controller_1.handleMe);
 // Admin-only routes — require authenticate + ADMIN role

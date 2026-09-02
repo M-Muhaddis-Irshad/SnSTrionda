@@ -10,6 +10,7 @@ import {
   handleLogout,
   handleMe,
   handleAdminCheck,
+  handleGetAuthImage,
 } from "./auth.controller";
 import { authenticate, requireRole } from "./auth.middleware";
 
@@ -20,6 +21,7 @@ router.post("/register", handleRegister);
 router.post("/login", handleLogin);
 router.post("/refresh", handleRefresh);
 router.post("/logout", handleLogout);
+router.get("/images/:pageType", handleGetAuthImage);
 
 // Protected routes — require valid access token
 router.get("/me", authenticate, handleMe);

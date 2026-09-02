@@ -4,7 +4,7 @@
 
 import { useAuthStore } from "@/stores/authStore";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export async function adminFetch<T = any>(
   path: string,

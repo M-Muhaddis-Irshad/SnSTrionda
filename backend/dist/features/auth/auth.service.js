@@ -26,7 +26,7 @@ const BCRYPT_SALT_ROUNDS = 12;
 // Helper: strip passwordHash from a user object
 // ---------------------------------------------------------------------------
 function sanitizeUser(user) {
-    const { passwordHash, ...rest } = user;
+    const { password, ...rest } = user;
     return rest;
 }
 // ---------------------------------------------------------------------------
@@ -60,21 +60,20 @@ function generateTokens(user) {
 // Register
 // ---------------------------------------------------------------------------
 async function register(body) {
-    const { email, password, firstName, lastName, phone } = body;
+    const { email, password, name, phone } = body;
     // Check if user already exists
     const existingUser = await db_1.prisma.user.findUnique({ where: { email } });
     if (existingUser) {
         throw new AppError("An account with this email already exists", 409);
     }
     // Hash password
-    const passwordHash = await bcryptjs_1.default.hash(password, BCRYPT_SALT_ROUNDS);
+    const hashedPassword = await bcryptjs_1.default.hash(password, BCRYPT_SALT_ROUNDS);
     // Create user
     const user = await db_1.prisma.user.create({
         data: {
             email,
-            passwordHash,
-            firstName,
-            lastName,
+            password: hashedPassword,
+            name: name || null,
             phone: phone || null,
         },
     });
@@ -96,7 +95,7 @@ async function login(body) {
         throw new AppError("Invalid email or password", 401);
     }
     // Verify password
-    const isPasswordValid = await bcryptjs_1.default.compare(password, user.passwordHash);
+    const isPasswordValid = await bcryptjs_1.default.compare(password, user.password || '');
     if (!isPasswordValid) {
         // Generic error — don't reveal whether email or password was wrong
         throw new AppError("Invalid email or password", 401);

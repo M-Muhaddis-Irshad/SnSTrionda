@@ -2,8 +2,7 @@
 export interface RegisterRequestBody {
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
+    name: string;
     phone?: string;
 }
 /** Request body for POST /api/auth/login */
@@ -19,8 +18,7 @@ export interface RefreshRequestBody {
 export interface AuthUser {
     id: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    name: string | null;
     phone: string | null;
     role: string;
     createdAt: Date;

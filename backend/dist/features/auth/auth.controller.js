@@ -9,6 +9,7 @@ exports.handleRefresh = handleRefresh;
 exports.handleLogout = handleLogout;
 exports.handleMe = handleMe;
 exports.handleAdminCheck = handleAdminCheck;
+exports.handleGetAuthImage = handleGetAuthImage;
 const auth_service_1 = require("./auth.service");
 const db_1 = require("../../db");
 // ---------------------------------------------------------------------------
@@ -24,10 +25,10 @@ async function handleRegister(req, res) {
     try {
         const body = getBody(req);
         // Basic validation
-        if (!body.email || !body.password || !body.firstName || !body.lastName) {
+        if (!body.email || !body.password || !body.name) {
             return res.status(400).json({
                 error: "Missing required fields",
-                required: ["email", "password", "firstName", "lastName"],
+                required: ["email", "password", "name"],
                 optional: ["phone"],
             });
         }
@@ -130,8 +131,7 @@ async function handleMe(req, res) {
             select: {
                 id: true,
                 email: true,
-                firstName: true,
-                lastName: true,
+                name: true,
                 phone: true,
                 role: true,
                 createdAt: true,
@@ -153,5 +153,24 @@ async function handleMe(req, res) {
 // ---------------------------------------------------------------------------
 function handleAdminCheck(req, res) {
     res.json({ message: "Admin access confirmed.", user: req.user });
+}
+// ---------------------------------------------------------------------------
+// GET /api/auth/images/:pageType
+// ---------------------------------------------------------------------------
+async function handleGetAuthImage(req, res) {
+    try {
+        const pageType = req.params.pageType;
+        const image = await db_1.prisma.authImage.findFirst({
+            where: { pageType },
+        });
+        if (!image) {
+            return res.status(404).json({ error: "Image not found" });
+        }
+        res.json(image);
+    }
+    catch (err) {
+        console.error("Auth image error:", err);
+        res.status(500).json({ error: "Failed to fetch image" });
+    }
 }
 //# sourceMappingURL=auth.controller.js.map

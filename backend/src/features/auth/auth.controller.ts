@@ -34,10 +34,10 @@ export async function handleRegister(req: Request, res: Response) {
     const body = getBody<RegisterRequestBody>(req);
 
     // Basic validation
-    if (!body.email || !body.password || !body.firstName || !body.lastName) {
+    if (!body.email || !body.password || !body.name) {
       return res.status(400).json({
         error: "Missing required fields",
-        required: ["email", "password", "firstName", "lastName"],
+        required: ["email", "password", "name"],
         optional: ["phone"],
       });
     }
@@ -156,8 +156,7 @@ export async function handleMe(req: Request, res: Response) {
       select: {
         id: true,
         email: true,
-        firstName: true,
-        lastName: true,
+        name: true,
         phone: true,
         role: true,
         createdAt: true,
@@ -182,4 +181,26 @@ export async function handleMe(req: Request, res: Response) {
 
 export function handleAdminCheck(req: Request, res: Response) {
   res.json({ message: "Admin access confirmed.", user: req.user });
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/auth/images/:pageType
+// ---------------------------------------------------------------------------
+
+export async function handleGetAuthImage(req: Request, res: Response) {
+  try {
+    const pageType = req.params.pageType as string;
+    const image = await prisma.authImage.findFirst({
+      where: { pageType },
+    });
+
+    if (!image) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+
+    res.json(image);
+  } catch (err: any) {
+    console.error("Auth image error:", err);
+    res.status(500).json({ error: "Failed to fetch image" });
+  }
 }

@@ -12,8 +12,7 @@ import { persist } from "zustand/middleware";
 export interface AuthUser {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   phone?: string | null;
   role: string;
   createdAt?: string;

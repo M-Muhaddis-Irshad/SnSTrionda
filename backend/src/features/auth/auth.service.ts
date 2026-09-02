@@ -30,7 +30,7 @@ const BCRYPT_SALT_ROUNDS = 12;
 // ---------------------------------------------------------------------------
 
 function sanitizeUser(user: any): AuthUser {
-  const { passwordHash, ...rest } = user;
+  const { password, ...rest } = user;
   return rest as AuthUser;
 }
 
@@ -70,7 +70,7 @@ function generateTokens(user: { id: string; email: string; role: string }) {
 // ---------------------------------------------------------------------------
 
 export async function register(body: RegisterRequestBody): Promise<AuthTokensResponse> {
-  const { email, password, firstName, lastName, phone } = body;
+  const { email, password, name, phone } = body;
 
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -79,15 +79,14 @@ export async function register(body: RegisterRequestBody): Promise<AuthTokensRes
   }
 
   // Hash password
-  const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
   // Create user
   const user = await prisma.user.create({
     data: {
       email,
-      passwordHash,
-      firstName,
-      lastName,
+      password: hashedPassword,
+      name: name || null,
       phone: phone || null,
     },
   });
@@ -115,7 +114,7 @@ export async function login(body: LoginRequestBody): Promise<AuthTokensResponse>
   }
 
   // Verify password
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  const isPasswordValid = await bcrypt.compare(password, user.password || '');
   if (!isPasswordValid) {
     // Generic error — don't reveal whether email or password was wrong
     throw new AppError("Invalid email or password", 401);

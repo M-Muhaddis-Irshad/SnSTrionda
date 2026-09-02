@@ -52,7 +52,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
             My Account
           </h1>
           <p className="font-body text-sm text-muted mt-2">
-            Welcome back, {user?.firstName || "there"}
+            Welcome back, {user?.name || "there"}
           </p>
         </div>
 
