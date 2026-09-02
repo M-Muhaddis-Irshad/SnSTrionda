@@ -4,15 +4,19 @@
 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 import { prisma } from "../../db";
 import type {
   RegisterRequestBody,
   LoginRequestBody,
+  GoogleLoginRequestBody,
   AuthUser,
   AuthTokensResponse,
   AccessTokenPayload,
   RefreshTokenPayload,
 } from "./auth.types";
+
+const googleClient = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
 // ---------------------------------------------------------------------------
 // Config — these come from environment variables
@@ -187,6 +191,60 @@ export async function refreshToken(token: string): Promise<AuthTokensResponse> {
 export function logout(): { message: string } {
   return {
     message: "Successfully logged out. Please discard your access and refresh tokens.",
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Google Login
+// ---------------------------------------------------------------------------
+
+export async function googleLogin(body: GoogleLoginRequestBody): Promise<AuthTokensResponse> {
+  const { credential } = body;
+
+  // Verify the Google ID token
+  let ticket;
+  try {
+    ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    });
+  } catch (err) {
+    throw new AppError("Invalid Google token", 401);
+  }
+
+  const payload = ticket.getPayload();
+  if (!payload || !payload.email) {
+    throw new AppError("Could not extract Google user info", 401);
+  }
+
+  const { email, name, picture } = payload;
+
+  // Find or create user
+  let user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    // Create new user from Google data
+    user = await prisma.user.create({
+      data: {
+        email,
+        name: name || null,
+        image: picture || null,
+        emailVerified: new Date(),
+      },
+    });
+  } else if (!user.name && name) {
+    // Update name if user exists but has no name
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { name, image: user.image || picture || null },
+    });
+  }
+
+  const tokens = generateTokens(user);
+
+  return {
+    user: sanitizeUser(user),
+    ...tokens,
   };
 }
 

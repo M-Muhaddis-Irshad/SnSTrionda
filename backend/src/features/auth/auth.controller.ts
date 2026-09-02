@@ -6,6 +6,7 @@ import { Request, Response } from "express";
 import {
   register,
   login,
+  googleLogin,
   refreshToken,
   logout,
   AppError,
@@ -14,6 +15,7 @@ import { prisma } from "../../db";
 import type {
   RegisterRequestBody,
   LoginRequestBody,
+  GoogleLoginRequestBody,
   RefreshRequestBody,
 } from "./auth.types";
 
@@ -181,6 +183,35 @@ export async function handleMe(req: Request, res: Response) {
 
 export function handleAdminCheck(req: Request, res: Response) {
   res.json({ message: "Admin access confirmed.", user: req.user });
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/auth/google
+// ---------------------------------------------------------------------------
+
+export async function handleGoogleLogin(req: Request, res: Response) {
+  try {
+    const body = getBody<GoogleLoginRequestBody>(req);
+
+    if (!body.credential) {
+      return res.status(400).json({
+        error: "Google credential is required",
+      });
+    }
+
+    const result = await googleLogin(body);
+
+    res.json({
+      message: "Google login successful",
+      ...result,
+    });
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Google login error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error", details: err?.message });
+  }
 }
 
 // ---------------------------------------------------------------------------

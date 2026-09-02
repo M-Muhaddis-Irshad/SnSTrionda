@@ -1,4 +1,4 @@
-import type { RegisterRequestBody, LoginRequestBody, AuthTokensResponse } from "./auth.types";
+import type { RegisterRequestBody, LoginRequestBody, GoogleLoginRequestBody, AuthTokensResponse } from "./auth.types";
 export declare function register(body: RegisterRequestBody): Promise<AuthTokensResponse>;
 export declare function login(body: LoginRequestBody): Promise<AuthTokensResponse>;
 /**
@@ -23,6 +23,7 @@ export declare function refreshToken(token: string): Promise<AuthTokensResponse>
 export declare function logout(): {
     message: string;
 };
+export declare function googleLogin(body: GoogleLoginRequestBody): Promise<AuthTokensResponse>;
 export declare class AppError extends Error {
     statusCode: number;
     constructor(message: string, statusCode: number);

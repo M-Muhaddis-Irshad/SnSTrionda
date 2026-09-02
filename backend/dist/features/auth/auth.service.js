@@ -11,9 +11,12 @@ exports.register = register;
 exports.login = login;
 exports.refreshToken = refreshToken;
 exports.logout = logout;
+exports.googleLogin = googleLogin;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const google_auth_library_1 = require("google-auth-library");
 const db_1 = require("../../db");
+const googleClient = new google_auth_library_1.OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 // ---------------------------------------------------------------------------
 // Config — these come from environment variables
 // ---------------------------------------------------------------------------
@@ -159,6 +162,53 @@ async function refreshToken(token) {
 function logout() {
     return {
         message: "Successfully logged out. Please discard your access and refresh tokens.",
+    };
+}
+// ---------------------------------------------------------------------------
+// Google Login
+// ---------------------------------------------------------------------------
+async function googleLogin(body) {
+    const { credential } = body;
+    // Verify the Google ID token
+    let ticket;
+    try {
+        ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        });
+    }
+    catch (err) {
+        throw new AppError("Invalid Google token", 401);
+    }
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+        throw new AppError("Could not extract Google user info", 401);
+    }
+    const { email, name, picture } = payload;
+    // Find or create user
+    let user = await db_1.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+        // Create new user from Google data
+        user = await db_1.prisma.user.create({
+            data: {
+                email,
+                name: name || null,
+                image: picture || null,
+                emailVerified: new Date(),
+            },
+        });
+    }
+    else if (!user.name && name) {
+        // Update name if user exists but has no name
+        user = await db_1.prisma.user.update({
+            where: { id: user.id },
+            data: { name, image: user.image || picture || null },
+        });
+    }
+    const tokens = generateTokens(user);
+    return {
+        user: sanitizeUser(user),
+        ...tokens,
     };
 }
 // ---------------------------------------------------------------------------

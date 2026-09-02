@@ -10,6 +10,7 @@ const router = (0, express_1.Router)();
 // Public routes
 router.post("/register", auth_controller_1.handleRegister);
 router.post("/login", auth_controller_1.handleLogin);
+router.post("/google", auth_controller_1.handleGoogleLogin);
 router.post("/refresh", auth_controller_1.handleRefresh);
 router.post("/logout", auth_controller_1.handleLogout);
 router.get("/images/:pageType", auth_controller_1.handleGetAuthImage);

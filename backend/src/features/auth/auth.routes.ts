@@ -6,6 +6,7 @@ import { Router } from "express";
 import {
   handleRegister,
   handleLogin,
+  handleGoogleLogin,
   handleRefresh,
   handleLogout,
   handleMe,
@@ -19,6 +20,7 @@ const router = Router();
 // Public routes
 router.post("/register", handleRegister);
 router.post("/login", handleLogin);
+router.post("/google", handleGoogleLogin);
 router.post("/refresh", handleRefresh);
 router.post("/logout", handleLogout);
 router.get("/images/:pageType", handleGetAuthImage);

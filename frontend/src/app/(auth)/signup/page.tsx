@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
@@ -11,6 +11,7 @@ const SIGNUP_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788284311/
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 interface SignupFormInputs {
   firstName: string;
@@ -25,6 +26,38 @@ interface SignupFormInputs {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
+/* ---------- Google button renderer ---------- */
+function GoogleSignInButton({ onSuccess }: { onSuccess: (credential: string) => void }) {
+  const btnRef = useRef<HTMLDivElement>(null);
+  const rendered = useRef(false);
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID || rendered.current) return;
+
+    const checkGoogle = setInterval(() => {
+      if (window.google?.accounts?.id && btnRef.current) {
+        clearInterval(checkGoogle);
+        rendered.current = true;
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (response: { credential: string }) => onSuccess(response.credential),
+        });
+        window.google.accounts.id.renderButton(btnRef.current, {
+          theme: 'outline',
+          size: 'large',
+          width: btnRef.current.offsetWidth,
+          text: 'continue_with',
+        });
+      }
+    }, 100);
+
+    return () => clearInterval(checkGoogle);
+  }, [onSuccess]);
+
+  return <div ref={btnRef} className="w-full" />;
+}
+
+/* ---------- Signup Form ---------- */
 export default function SignupPage() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -45,9 +78,7 @@ export default function SignupPage() {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<SignupFormInputs>({
-    mode: 'onSubmit',
-  });
+  } = useForm<SignupFormInputs>({ mode: 'onSubmit' });
 
   const password = watch('password');
   const confirmPassword = watch('confirmPassword');
@@ -81,7 +112,6 @@ export default function SignupPage() {
     setError('');
 
     try {
-      // Register via backend API
       const registerRes = await fetch(`${BACKEND_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +131,7 @@ export default function SignupPage() {
         return;
       }
 
-      // Auto-login after registration
+      // Auto-login
       const loginRes = await fetch(`${BACKEND_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -116,20 +146,44 @@ export default function SignupPage() {
         return;
       }
 
-      // Store auth in zustand
       setAuth(loginData.user, loginData.accessToken, loginData.refreshToken);
-
       router.push('/shop');
-    } catch (err) {
+    } catch {
       setError('An error occurred during registration');
-      console.error(err);
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credential: string) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        setError(result.message || result.error || 'Google sign-up failed');
+        setIsLoading(false);
+        return;
+      }
+
+      setAuth(result.user, result.accessToken, result.refreshToken);
+      router.push('/shop');
+    } catch {
+      setError('Google sign-up failed. Please try again.');
       setIsLoading(false);
     }
   };
 
   return (
     <div className="auth-layout">
-      {/* Left: Background Image */}
+      {/* Left: Background Image with Overlay */}
       <div className="auth-image-panel">
         <Image
           src={SIGNUP_BG}
@@ -141,14 +195,7 @@ export default function SignupPage() {
         />
         <div className="auth-image-overlay" />
         <div className="auth-branding">
-          <Image
-            src={LOGO_URL}
-            alt="Trionda Logo"
-            width={40}
-            height={40}
-            className="rounded"
-            unoptimized
-          />
+          <Image src={LOGO_URL} alt="Trionda Logo" width={40} height={40} className="rounded" unoptimized />
           <span className="auth-branding-text">TRIONDA WEARS</span>
         </div>
       </div>
@@ -158,26 +205,12 @@ export default function SignupPage() {
         <div className="auth-form-container">
           {/* Logo (mobile only) */}
           <div className="auth-logo-mobile">
-            <Image
-              src={LOGO_URL}
-              alt="Trionda Logo"
-              width={56}
-              height={56}
-              className="rounded"
-              unoptimized
-            />
+            <Image src={LOGO_URL} alt="Trionda Logo" width={56} height={56} className="rounded" unoptimized />
           </div>
 
           {/* Desktop logo */}
           <div className="auth-logo-desktop">
-            <Image
-              src={LOGO_URL}
-              alt="Trionda Logo"
-              width={48}
-              height={48}
-              className="rounded"
-              unoptimized
-            />
+            <Image src={LOGO_URL} alt="Trionda Logo" width={70} height={70} className="rounded" unoptimized />
           </div>
 
           <div className="auth-heading-group">
@@ -326,28 +359,28 @@ export default function SignupPage() {
             {errors.agreeToTerms && <p className="auth-error auth-error--inline">{errors.agreeToTerms.message}</p>}
 
             {/* Error */}
-            {error && (
-              <div className="auth-error-banner auth-error-banner--small">
-                {error}
-              </div>
-            )}
+            {error && <div className="auth-error-banner auth-error-banner--small">{error}</div>}
 
             {/* Submit */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="auth-submit-btn auth-submit-btn--small"
-            >
+            <button type="submit" disabled={isLoading} className="auth-submit-btn auth-submit-btn--small">
               {isLoading && <div className="auth-spinner--small" />}
               {isLoading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
             </button>
 
+            {/* Divider */}
+            <div className="auth-divider">
+              <div className="auth-divider-line" />
+              <span className="auth-divider-text">OR</span>
+              <div className="auth-divider-line" />
+            </div>
+
+            {/* Google */}
+            <GoogleSignInButton onSuccess={handleGoogleSuccess} />
+
             {/* Login Link */}
             <p className="auth-switch-text">
               ALREADY HAVE AN ACCOUNT?{' '}
-              <a href="/login" className="auth-switch-link">
-                SIGN IN
-              </a>
+              <a href="/login" className="auth-switch-link">SIGN IN</a>
             </p>
           </form>
         </div>

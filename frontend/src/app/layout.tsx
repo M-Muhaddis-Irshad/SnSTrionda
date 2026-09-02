@@ -24,6 +24,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${bodoniModa.variable} ${inter.variable}`}>
+      <head>
+        <script
+          src="https://accounts.google.com/gsi/client"
+          async
+          defer
+        />
+      </head>
       <body className="min-h-screen overflow-x-hidden bg-background text-foreground font-body antialiased pb-14 md:pb-0">
         <ConditionalShell>
           {children}

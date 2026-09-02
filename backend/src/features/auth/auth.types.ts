@@ -21,6 +21,11 @@ export interface RefreshRequestBody {
   refreshToken: string;
 }
 
+/** Request body for POST /api/auth/google */
+export interface GoogleLoginRequestBody {
+  credential: string; // Google ID token from frontend
+}
+
 /** User object returned in auth responses (excludes passwordHash) */
 export interface AuthUser {
   id: string;

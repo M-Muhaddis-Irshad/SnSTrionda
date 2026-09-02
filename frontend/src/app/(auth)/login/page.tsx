@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
@@ -11,6 +11,7 @@ const LOGIN_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788284310/t
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 interface LoginFormInputs {
   email: string;
@@ -20,6 +21,38 @@ interface LoginFormInputs {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/* ---------- Google button renderer ---------- */
+function GoogleSignInButton({ onSuccess }: { onSuccess: (credential: string) => void }) {
+  const btnRef = useRef<HTMLDivElement>(null);
+  const rendered = useRef(false);
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID || rendered.current) return;
+
+    const checkGoogle = setInterval(() => {
+      if (window.google?.accounts?.id && btnRef.current) {
+        clearInterval(checkGoogle);
+        rendered.current = true;
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (response: { credential: string }) => onSuccess(response.credential),
+        });
+        window.google.accounts.id.renderButton(btnRef.current, {
+          theme: 'outline',
+          size: 'large',
+          width: btnRef.current.offsetWidth,
+          text: 'continue_with',
+        });
+      }
+    }, 100);
+
+    return () => clearInterval(checkGoogle);
+  }, [onSuccess]);
+
+  return <div ref={btnRef} className="w-full" />;
+}
+
+/* ---------- Login Form ---------- */
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,9 +67,7 @@ function LoginForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormInputs>({
-    mode: 'onSubmit',
-  });
+  } = useForm<LoginFormInputs>({ mode: 'onSubmit' });
 
   const onSubmit = async (data: LoginFormInputs) => {
     setIsLoading(true);
@@ -57,18 +88,47 @@ function LoginForm() {
         return;
       }
 
-      // Store auth in zustand
       setAuth(result.user, result.accessToken, result.refreshToken);
 
-      // Redirect to callback URL
-      const role = result.user?.role;
-      if (role === 'ADMIN') {
+      if (result.user?.role === 'ADMIN') {
         router.push('/admin');
       } else {
         router.push(callbackUrl);
       }
-    } catch (err) {
+    } catch {
       setError('Could not connect to server. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credential: string) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        setError(result.message || result.error || 'Google login failed');
+        setIsLoading(false);
+        return;
+      }
+
+      setAuth(result.user, result.accessToken, result.refreshToken);
+
+      if (result.user?.role === 'ADMIN') {
+        router.push('/admin');
+      } else {
+        router.push(callbackUrl);
+      }
+    } catch {
+      setError('Google login failed. Please try again.');
       setIsLoading(false);
     }
   };
@@ -104,26 +164,12 @@ function LoginForm() {
         <div className="auth-form-container">
           {/* Logo (mobile only) */}
           <div className="auth-logo-mobile">
-            <Image
-              src={LOGO_URL}
-              alt="Trionda Logo"
-              width={56}
-              height={56}
-              className="rounded"
-              unoptimized
-            />
+            <Image src={LOGO_URL} alt="Trionda Logo" width={56} height={56} className="rounded" unoptimized />
           </div>
 
           {/* Desktop logo */}
           <div className="auth-logo-desktop">
-            <Image
-              src={LOGO_URL}
-              alt="Trionda Logo"
-              width={48}
-              height={48}
-              className="rounded"
-              unoptimized
-            />
+            <Image src={LOGO_URL} alt="Trionda Logo" width={70} height={70} className="rounded" unoptimized />
           </div>
 
           <div className="auth-heading-group">
@@ -172,43 +218,35 @@ function LoginForm() {
             {/* Remember Me */}
             <div className="auth-checkbox-row">
               <label className="auth-checkbox-label">
-                <input
-                  type="checkbox"
-                  {...register('rememberMe')}
-                  className="auth-checkbox"
-                />
+                <input type="checkbox" {...register('rememberMe')} className="auth-checkbox" />
                 <span className="auth-checkbox-text">Remember me</span>
               </label>
-              <a href="/forgot-password" className="auth-forgot-link">
-                Forgot password?
-              </a>
+              <a href="/forgot-password" className="auth-forgot-link">Forgot password?</a>
             </div>
 
             {/* Error */}
-            {error && (
-              <div className="auth-error-banner">
-                {error}
-              </div>
-            )}
+            {error && <div className="auth-error-banner">{error}</div>}
 
             {/* Submit */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="auth-submit-btn"
-            >
-              {isLoading && (
-                <div className="auth-spinner--small" />
-              )}
+            <button type="submit" disabled={isLoading} className="auth-submit-btn">
+              {isLoading && <div className="auth-spinner--small" />}
               {isLoading ? 'SIGNING IN...' : 'SIGN IN'}
             </button>
+
+            {/* Divider */}
+            <div className="auth-divider">
+              <div className="auth-divider-line" />
+              <span className="auth-divider-text">OR</span>
+              <div className="auth-divider-line" />
+            </div>
+
+            {/* Google */}
+            <GoogleSignInButton onSuccess={handleGoogleSuccess} />
 
             {/* Signup Link */}
             <p className="auth-switch-text">
               NEW TO TRIONDA WEARS?{' '}
-              <a href="/signup" className="auth-switch-link">
-                CREATE AN ACCOUNT
-              </a>
+              <a href="/signup" className="auth-switch-link">CREATE AN ACCOUNT</a>
             </p>
           </form>
         </div>

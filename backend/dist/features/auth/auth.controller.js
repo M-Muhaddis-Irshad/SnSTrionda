@@ -9,6 +9,7 @@ exports.handleRefresh = handleRefresh;
 exports.handleLogout = handleLogout;
 exports.handleMe = handleMe;
 exports.handleAdminCheck = handleAdminCheck;
+exports.handleGoogleLogin = handleGoogleLogin;
 exports.handleGetAuthImage = handleGetAuthImage;
 const auth_service_1 = require("./auth.service");
 const db_1 = require("../../db");
@@ -153,6 +154,31 @@ async function handleMe(req, res) {
 // ---------------------------------------------------------------------------
 function handleAdminCheck(req, res) {
     res.json({ message: "Admin access confirmed.", user: req.user });
+}
+// ---------------------------------------------------------------------------
+// POST /api/auth/google
+// ---------------------------------------------------------------------------
+async function handleGoogleLogin(req, res) {
+    try {
+        const body = getBody(req);
+        if (!body.credential) {
+            return res.status(400).json({
+                error: "Google credential is required",
+            });
+        }
+        const result = await (0, auth_service_1.googleLogin)(body);
+        res.json({
+            message: "Google login successful",
+            ...result,
+        });
+    }
+    catch (err) {
+        if (err instanceof auth_service_1.AppError) {
+            return res.status(err.statusCode).json({ error: err.message });
+        }
+        console.error("Google login error:", err?.message || err);
+        res.status(500).json({ error: "Internal server error", details: err?.message });
+    }
 }
 // ---------------------------------------------------------------------------
 // GET /api/auth/images/:pageType
