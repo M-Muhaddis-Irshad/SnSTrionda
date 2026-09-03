@@ -67,4 +67,19 @@ export type Order = Prisma.OrderModel;
  *
  */
 export type OrderItem = Prisma.OrderItemModel;
+/**
+ * Model Activity
+ *
+ */
+export type Activity = Prisma.ActivityModel;
+/**
+ * Model Image
+ *
+ */
+export type Image = Prisma.ImageModel;
+/**
+ * Model Campaign
+ *
+ */
+export type Campaign = Prisma.CampaignModel;
 //# sourceMappingURL=browser.d.ts.map

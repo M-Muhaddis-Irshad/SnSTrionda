@@ -284,6 +284,21 @@ export type EnumPaymentStatusWithAggregatesFilter<$PrismaModel = never> = {
     _min?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>;
     _max?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>;
 };
+export type EnumSiteMediaCategoryFilter<$PrismaModel = never> = {
+    equals?: $Enums.SiteMediaCategory | Prisma.EnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    in?: $Enums.SiteMediaCategory[] | Prisma.ListEnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    notIn?: $Enums.SiteMediaCategory[] | Prisma.ListEnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    not?: Prisma.NestedEnumSiteMediaCategoryFilter<$PrismaModel> | $Enums.SiteMediaCategory;
+};
+export type EnumSiteMediaCategoryWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SiteMediaCategory | Prisma.EnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    in?: $Enums.SiteMediaCategory[] | Prisma.ListEnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    notIn?: $Enums.SiteMediaCategory[] | Prisma.ListEnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    not?: Prisma.NestedEnumSiteMediaCategoryWithAggregatesFilter<$PrismaModel> | $Enums.SiteMediaCategory;
+    _count?: Prisma.NestedIntFilter<$PrismaModel>;
+    _min?: Prisma.NestedEnumSiteMediaCategoryFilter<$PrismaModel>;
+    _max?: Prisma.NestedEnumSiteMediaCategoryFilter<$PrismaModel>;
+};
 export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | Prisma.StringFieldRefInput<$PrismaModel>;
     in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>;
@@ -578,5 +593,20 @@ export type NestedEnumPaymentStatusWithAggregatesFilter<$PrismaModel = never> = 
     _count?: Prisma.NestedIntFilter<$PrismaModel>;
     _min?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>;
     _max?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>;
+};
+export type NestedEnumSiteMediaCategoryFilter<$PrismaModel = never> = {
+    equals?: $Enums.SiteMediaCategory | Prisma.EnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    in?: $Enums.SiteMediaCategory[] | Prisma.ListEnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    notIn?: $Enums.SiteMediaCategory[] | Prisma.ListEnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    not?: Prisma.NestedEnumSiteMediaCategoryFilter<$PrismaModel> | $Enums.SiteMediaCategory;
+};
+export type NestedEnumSiteMediaCategoryWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SiteMediaCategory | Prisma.EnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    in?: $Enums.SiteMediaCategory[] | Prisma.ListEnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    notIn?: $Enums.SiteMediaCategory[] | Prisma.ListEnumSiteMediaCategoryFieldRefInput<$PrismaModel>;
+    not?: Prisma.NestedEnumSiteMediaCategoryWithAggregatesFilter<$PrismaModel> | $Enums.SiteMediaCategory;
+    _count?: Prisma.NestedIntFilter<$PrismaModel>;
+    _min?: Prisma.NestedEnumSiteMediaCategoryFilter<$PrismaModel>;
+    _max?: Prisma.NestedEnumSiteMediaCategoryFilter<$PrismaModel>;
 };
 //# sourceMappingURL=commonInputTypes.d.ts.map

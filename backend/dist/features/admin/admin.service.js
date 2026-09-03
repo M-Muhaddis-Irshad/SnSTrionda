@@ -50,7 +50,7 @@ async function getDashboardStats() {
             take: 10,
             orderBy: { createdAt: "desc" },
             include: {
-                user: { select: { email: true, firstName: true, lastName: true } },
+                user: { select: { email: true, name: true } },
                 items: {
                     select: { quantity: true },
                 },
@@ -143,7 +143,7 @@ async function listOrders(params) {
             take: limit,
             orderBy: { createdAt: "desc" },
             include: {
-                user: { select: { id: true, email: true, firstName: true, lastName: true } },
+                user: { select: { id: true, email: true, name: true } },
                 items: {
                     select: { quantity: true, priceAtPurchase: true },
                 },
@@ -171,7 +171,7 @@ async function getOrderById(orderId) {
     const order = await db_1.prisma.order.findUnique({
         where: { id: orderId },
         include: {
-            user: { select: { id: true, email: true, firstName: true, lastName: true } },
+            user: { select: { id: true, email: true, name: true } },
             items: {
                 include: {
                     productVariant: {
@@ -213,7 +213,7 @@ async function updateOrderStatus(orderId, body) {
         where: { id: orderId },
         data: updateData,
         include: {
-            user: { select: { id: true, email: true, firstName: true, lastName: true } },
+            user: { select: { id: true, email: true, name: true } },
             items: {
                 include: {
                     productVariant: {

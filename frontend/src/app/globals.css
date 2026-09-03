@@ -1425,6 +1425,119 @@ body {
    REDUCED MOTION
    ============================================================================= */
 
+/* =============================================================================
+   CHECKOUT — ENHANCED (floating labels, inline errors, steps, promo)
+   ============================================================================= */
+
+/* Accessible disabled state (WCAG AA): keep text readable instead of opacity fade */
+.input:disabled,
+.checkout-select:disabled,
+.checkout-float-input:disabled {
+  @apply cursor-not-allowed border-chrome-400 bg-surface/50 text-muted opacity-100;
+}
+
+.checkout-field-error {
+  @apply mt-1.5 font-body text-xs text-red-400;
+}
+
+.checkout-float-wrap {
+  @apply relative;
+}
+
+.checkout-float-input {
+  @apply w-full rounded-none border bg-surface px-4 pb-2 pt-6 text-sm text-foreground
+         focus:outline-none focus:border-chrome-200 focus-visible:ring-2
+         focus-visible:ring-chrome-300 focus-visible:ring-offset-2
+         focus-visible:ring-offset-background transition-colors;
+}
+
+.checkout-float-select {
+  @apply w-full appearance-none rounded-none border bg-surface px-4 pb-2 pt-6 text-sm text-foreground
+         focus:outline-none focus:border-chrome-200 focus-visible:ring-2
+         focus-visible:ring-chrome-300 focus-visible:ring-offset-2
+         focus-visible:ring-offset-background transition-colors;
+}
+
+.checkout-float-label {
+  @apply pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-body
+         text-sm text-muted transition-all duration-150;
+}
+
+.checkout-float-label--up {
+  @apply top-4 -translate-y-1/2 font-body text-[10px] uppercase tracking-[0.15em] text-chrome-200;
+}
+
+.checkout-float-label--error {
+  color: #f87171; /* red-400 */
+}
+
+.checkout-float-input--error,
+.checkout-float-select--error {
+  @apply border-red-500;
+}
+
+.checkout-float-input--error:focus,
+.checkout-float-select--error:focus {
+  @apply border-red-400;
+}
+
+.checkout-required-asterisk {
+  color: #f87171;
+}
+
+.checkout-method-card {
+  @apply flex w-full items-center gap-4 border p-4 text-left transition-all duration-200
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300
+         focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+}
+
+.checkout-method-card--selected {
+  @apply border-chrome-200 bg-chrome-500;
+}
+
+.checkout-method-card--unselected {
+  @apply border-chrome-500 hover:border-chrome-300;
+}
+
+.checkout-method-details {
+  @apply overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out;
+}
+
+.checkout-chevron {
+  @apply text-chrome-300 transition-transform duration-200;
+}
+
+.checkout-promo-applied {
+  @apply flex items-center justify-between gap-3 border border-chrome-300 bg-chrome-500 px-4 py-3;
+}
+
+.checkout-step-nav {
+  @apply mt-8 flex items-center justify-between gap-4;
+}
+
+.checkout-draft-note {
+  @apply fixed bottom-4 right-4 z-50 border border-chrome-500 bg-surface px-4 py-2 font-body
+         text-xs text-muted shadow-lg transition-opacity duration-300;
+}
+
+.checkout-review-line {
+  @apply flex items-start justify-between gap-6 py-3;
+}
+
+.checkout-review-divider {
+  @apply border-t border-chrome-500;
+}
+
+.checkout-summary-edit {
+  @apply font-body text-xs text-chrome-300 underline underline-offset-2
+         hover:text-foreground focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-chrome-300 rounded-sm transition-colors;
+}
+
+/* =============================================================================
+   REDUCED MOTION
+   ============================================================================= */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

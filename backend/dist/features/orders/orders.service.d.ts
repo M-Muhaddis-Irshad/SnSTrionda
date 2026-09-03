@@ -19,7 +19,20 @@ export interface CreateOrderInput {
     shippingAddress: ShippingAddressInput;
     paymentMethod: "JAZZCASH" | "EASYPAISA" | "COD" | "CARD";
     email?: string;
+    promoCode?: string;
 }
+export declare const PROMO_CODES: Record<string, number>;
+export declare function validatePromoCode(code?: string): {
+    valid: boolean;
+    message: string;
+    code?: undefined;
+    discountPercent?: undefined;
+} | {
+    valid: boolean;
+    code: string;
+    discountPercent: number;
+    message: string;
+};
 export declare class OrderError extends Error {
     statusCode: number;
     constructor(message: string, statusCode: number);
@@ -88,9 +101,8 @@ export declare function getOrderByNumber(orderNumber: string, email?: string): P
     };
     user: {
         email: string;
-        firstName: never;
         id: string;
-        lastName: never;
+        name: string | null;
     };
 } & {
     id: string;
@@ -98,6 +110,8 @@ export declare function getOrderByNumber(orderNumber: string, email?: string): P
     status: import("../../generated/prisma/enums").OrderStatus;
     subtotal: import("@prisma/client-runtime-utils").Decimal;
     shippingCost: import("@prisma/client-runtime-utils").Decimal;
+    discount: import("@prisma/client-runtime-utils").Decimal;
+    promoCode: string | null;
     total: import("@prisma/client-runtime-utils").Decimal;
     paymentMethod: import("../../generated/prisma/enums").PaymentMethod;
     paymentStatus: import("../../generated/prisma/enums").PaymentStatus;
@@ -170,9 +184,8 @@ export declare function getMyOrderByNumber(orderNumber: string, userId: string):
     };
     user: {
         email: string;
-        firstName: never;
         id: string;
-        lastName: never;
+        name: string | null;
     };
 } & {
     id: string;
@@ -180,6 +193,8 @@ export declare function getMyOrderByNumber(orderNumber: string, userId: string):
     status: import("../../generated/prisma/enums").OrderStatus;
     subtotal: import("@prisma/client-runtime-utils").Decimal;
     shippingCost: import("@prisma/client-runtime-utils").Decimal;
+    discount: import("@prisma/client-runtime-utils").Decimal;
+    promoCode: string | null;
     total: import("@prisma/client-runtime-utils").Decimal;
     paymentMethod: import("../../generated/prisma/enums").PaymentMethod;
     paymentStatus: import("../../generated/prisma/enums").PaymentStatus;
@@ -239,6 +254,8 @@ export declare function getMyOrders(userId: string): Promise<({
     status: import("../../generated/prisma/enums").OrderStatus;
     subtotal: import("@prisma/client-runtime-utils").Decimal;
     shippingCost: import("@prisma/client-runtime-utils").Decimal;
+    discount: import("@prisma/client-runtime-utils").Decimal;
+    promoCode: string | null;
     total: import("@prisma/client-runtime-utils").Decimal;
     paymentMethod: import("../../generated/prisma/enums").PaymentMethod;
     paymentStatus: import("../../generated/prisma/enums").PaymentStatus;
@@ -311,9 +328,8 @@ export declare function createOrder(input: CreateOrderInput, authUserId?: string
     };
     user: {
         email: string;
-        firstName: never;
         id: string;
-        lastName: never;
+        name: string | null;
     };
 } & {
     id: string;
@@ -321,6 +337,8 @@ export declare function createOrder(input: CreateOrderInput, authUserId?: string
     status: import("../../generated/prisma/enums").OrderStatus;
     subtotal: import("@prisma/client-runtime-utils").Decimal;
     shippingCost: import("@prisma/client-runtime-utils").Decimal;
+    discount: import("@prisma/client-runtime-utils").Decimal;
+    promoCode: string | null;
     total: import("@prisma/client-runtime-utils").Decimal;
     paymentMethod: import("../../generated/prisma/enums").PaymentMethod;
     paymentStatus: import("../../generated/prisma/enums").PaymentStatus;

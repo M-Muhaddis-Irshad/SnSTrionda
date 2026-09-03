@@ -3,7 +3,22 @@
 // =============================================================================
 
 import { Request, Response } from "express";
-import { createOrder, getOrderByNumber, getMyOrderByNumber, getMyOrders, OrderError } from "./orders.service";
+import { createOrder, getOrderByNumber, getMyOrderByNumber, getMyOrders, OrderError, validatePromoCode } from "./orders.service";
+
+// ---------------------------------------------------------------------------
+// GET /api/orders/promo/validate?code=TRIONDA10 — public promo validation
+// ---------------------------------------------------------------------------
+
+export async function handleValidatePromo(req: Request, res: Response) {
+  try {
+    const code = (req.query.code as string) || "";
+    const result = validatePromoCode(code);
+    res.status(result.valid ? 200 : 400).json(result);
+  } catch (err: any) {
+    console.error("Validate promo error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
 
 // ---------------------------------------------------------------------------
 
@@ -95,13 +110,13 @@ export async function handleGetOrder(req: Request, res: Response) {
 
 export async function handleCreateOrder(req: Request, res: Response) {
   try {
-    const { items, shippingAddress, paymentMethod, email } = req.body;
+    const { items, shippingAddress, paymentMethod, email, promoCode } = req.body;
 
     // If user is authenticated, their userId will be used; otherwise guest user is created
     const authUserId = req.user?.userId;
 
     const order = await createOrder(
-      { items, shippingAddress, paymentMethod, email },
+      { items, shippingAddress, paymentMethod, email, promoCode },
       authUserId
     );
 

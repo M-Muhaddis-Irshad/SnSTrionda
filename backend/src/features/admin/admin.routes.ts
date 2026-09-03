@@ -19,6 +19,8 @@ import {
   handleUpdateVariant,
   handleDeleteVariant,
 } from "./admin.controller";
+import imageRouter from "./image.routes";
+import campaignRouter from "./campaign.routes";
 
 const router = Router();
 
@@ -51,6 +53,13 @@ router.get("/products/:productId", handleGetProduct);
 router.post("/products", handleCreateProduct);
 router.put("/products/:productId", handleUpdateProduct);
 router.delete("/products/:productId", handleDeleteProduct);
+
+// ---------------------------------------------------------------------------
+// Site media — images & campaigns
+// ---------------------------------------------------------------------------
+
+router.use("/images", imageRouter);
+router.use("/campaigns", campaignRouter);
 
 // ---------------------------------------------------------------------------
 // Categories (read-only for admin forms)

@@ -6,13 +6,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderError = void 0;
+exports.OrderError = exports.PROMO_CODES = void 0;
+exports.validatePromoCode = validatePromoCode;
 exports.getOrderByNumber = getOrderByNumber;
 exports.getMyOrderByNumber = getMyOrderByNumber;
 exports.getMyOrders = getMyOrders;
 exports.createOrder = createOrder;
 const db_1 = require("../../db");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+// ---------------------------------------------------------------------------
+// Promo codes — server-validated, percent discount off subtotal
+// ---------------------------------------------------------------------------
+exports.PROMO_CODES = {
+    TRIONDA10: 10,
+    TRIONDA20: 20,
+};
+function validatePromoCode(code) {
+    if (!code || !code.trim()) {
+        return { valid: false, message: "Enter a promo code." };
+    }
+    const normalized = code.trim().toUpperCase();
+    const percent = exports.PROMO_CODES[normalized];
+    if (!percent) {
+        return { valid: false, message: "Invalid or expired promo code." };
+    }
+    return { valid: true, code: normalized, discountPercent: percent, message: `Promo applied — ${percent}% off your subtotal.` };
+}
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -67,9 +86,8 @@ async function findOrCreateGuestUser(email) {
     const user = await db_1.prisma.user.create({
         data: {
             email: guestEmail,
-            passwordHash,
-            firstName: "Guest",
-            lastName: "Customer",
+            password: passwordHash,
+            name: "Guest Customer",
             role: "CUSTOMER",
         },
     });
@@ -118,7 +136,7 @@ async function getOrderByNumber(orderNumber, email) {
                 },
             },
             shippingAddress: true,
-            user: { select: { id: true, email: true, firstName: true, lastName: true } },
+            user: { select: { id: true, email: true, name: true } },
         },
     });
     if (!order)
@@ -151,7 +169,7 @@ async function getMyOrderByNumber(orderNumber, userId) {
                 },
             },
             shippingAddress: true,
-            user: { select: { id: true, email: true, firstName: true, lastName: true } },
+            user: { select: { id: true, email: true, name: true } },
         },
     });
     if (!order)
@@ -219,8 +237,19 @@ async function createOrder(input, authUserId) {
             customMeasurementId: item.customMeasurementId || null,
         };
     });
+    // Promo code — server validated, percent discount off subtotal
+    let discount = 0;
+    let promoCode = null;
+    if (input.promoCode && input.promoCode.trim()) {
+        const promo = validatePromoCode(input.promoCode);
+        if (!promo.valid || !promo.code) {
+            throw new OrderError("Invalid or expired promo code.", 400);
+        }
+        discount = (subtotal * promo.discountPercent) / 100;
+        promoCode = promo.code;
+    }
     const shippingCost = SHIPPING_COST;
-    const total = subtotal + shippingCost;
+    const total = Math.max(0, subtotal + shippingCost - discount);
     const userId = authUserId || (await findOrCreateGuestUser(input.email));
     const orderNumber = await generateOrderNumber();
     const order = await db_1.prisma.$transaction(async (tx) => {
@@ -248,6 +277,8 @@ async function createOrder(input, authUserId) {
                 total,
                 paymentMethod: input.paymentMethod,
                 paymentStatus: "PENDING",
+                discount,
+                promoCode,
                 userId,
                 shippingAddressId: address.id,
             },
@@ -278,7 +309,7 @@ async function createOrder(input, authUserId) {
                     },
                 },
                 shippingAddress: true,
-                user: { select: { id: true, email: true, firstName: true, lastName: true } },
+                user: { select: { id: true, email: true, name: true } },
             },
         });
     });

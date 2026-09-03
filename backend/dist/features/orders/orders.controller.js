@@ -3,11 +3,26 @@
 // Orders Feature — Request Handlers (Controller)
 // =============================================================================
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.handleValidatePromo = handleValidatePromo;
 exports.handleGetMyOrders = handleGetMyOrders;
 exports.handleGetMyOrder = handleGetMyOrder;
 exports.handleGetOrder = handleGetOrder;
 exports.handleCreateOrder = handleCreateOrder;
 const orders_service_1 = require("./orders.service");
+// ---------------------------------------------------------------------------
+// GET /api/orders/promo/validate?code=TRIONDA10 — public promo validation
+// ---------------------------------------------------------------------------
+async function handleValidatePromo(req, res) {
+    try {
+        const code = req.query.code || "";
+        const result = (0, orders_service_1.validatePromoCode)(code);
+        res.status(result.valid ? 200 : 400).json(result);
+    }
+    catch (err) {
+        console.error("Validate promo error:", err?.message || err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // GET /api/orders/mine — customer's own orders (list)
@@ -81,10 +96,10 @@ async function handleGetOrder(req, res) {
 // ---------------------------------------------------------------------------
 async function handleCreateOrder(req, res) {
     try {
-        const { items, shippingAddress, paymentMethod, email } = req.body;
+        const { items, shippingAddress, paymentMethod, email, promoCode } = req.body;
         // If user is authenticated, their userId will be used; otherwise guest user is created
         const authUserId = req.user?.userId;
-        const order = await (0, orders_service_1.createOrder)({ items, shippingAddress, paymentMethod, email }, authUserId);
+        const order = await (0, orders_service_1.createOrder)({ items, shippingAddress, paymentMethod, email, promoCode }, authUserId);
         res.status(201).json({
             message: "Order placed successfully",
             data: order,

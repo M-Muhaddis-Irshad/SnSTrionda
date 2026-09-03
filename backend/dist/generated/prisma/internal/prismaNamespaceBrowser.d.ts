@@ -39,6 +39,9 @@ export declare const ModelName: {
     readonly Address: 'Address';
     readonly Order: 'Order';
     readonly OrderItem: 'OrderItem';
+    readonly Activity: 'Activity';
+    readonly Image: 'Image';
+    readonly Campaign: 'Campaign';
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -184,6 +187,8 @@ export declare const OrderScalarFieldEnum: {
     readonly status: 'status';
     readonly subtotal: 'subtotal';
     readonly shippingCost: 'shippingCost';
+    readonly discount: 'discount';
+    readonly promoCode: 'promoCode';
     readonly total: 'total';
     readonly paymentMethod: 'paymentMethod';
     readonly paymentStatus: 'paymentStatus';
@@ -204,6 +209,39 @@ export declare const OrderItemScalarFieldEnum: {
     readonly updatedAt: 'updatedAt';
 };
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum];
+export declare const ActivityScalarFieldEnum: {
+    readonly id: 'id';
+    readonly type: 'type';
+    readonly message: 'message';
+    readonly metadata: 'metadata';
+    readonly userId: 'userId';
+    readonly createdAt: 'createdAt';
+};
+export type ActivityScalarFieldEnum = (typeof ActivityScalarFieldEnum)[keyof typeof ActivityScalarFieldEnum];
+export declare const ImageScalarFieldEnum: {
+    readonly id: 'id';
+    readonly name: 'name';
+    readonly url: 'url';
+    readonly alt: 'alt';
+    readonly category: 'category';
+    readonly active: 'active';
+    readonly createdAt: 'createdAt';
+    readonly updatedAt: 'updatedAt';
+};
+export type ImageScalarFieldEnum = (typeof ImageScalarFieldEnum)[keyof typeof ImageScalarFieldEnum];
+export declare const CampaignScalarFieldEnum: {
+    readonly id: 'id';
+    readonly title: 'title';
+    readonly description: 'description';
+    readonly imageId: 'imageId';
+    readonly startDate: 'startDate';
+    readonly endDate: 'endDate';
+    readonly discount: 'discount';
+    readonly active: 'active';
+    readonly createdAt: 'createdAt';
+    readonly updatedAt: 'updatedAt';
+};
+export type CampaignScalarFieldEnum = (typeof CampaignScalarFieldEnum)[keyof typeof CampaignScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: 'asc';
     readonly desc: 'desc';

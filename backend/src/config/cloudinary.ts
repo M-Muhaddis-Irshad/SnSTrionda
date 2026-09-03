@@ -11,5 +11,6 @@ cloudinary.config({
 });
 
 export const CLOUDINARY_FOLDER = "trionda-wears/products";
+export const CLOUDINARY_SITE_FOLDER = "trionda-wears/site";
 
 export default cloudinary;

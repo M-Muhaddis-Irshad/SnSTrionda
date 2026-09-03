@@ -11,5 +11,8 @@ export type * from './models/AuthImage';
 export type * from './models/Address';
 export type * from './models/Order';
 export type * from './models/OrderItem';
+export type * from './models/Activity';
+export type * from './models/Image';
+export type * from './models/Campaign';
 export type * from './commonInputTypes';
 //# sourceMappingURL=models.d.ts.map

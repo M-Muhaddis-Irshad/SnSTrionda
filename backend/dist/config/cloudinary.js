@@ -3,7 +3,7 @@
 // Cloudinary Configuration
 // =============================================================================
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CLOUDINARY_FOLDER = void 0;
+exports.CLOUDINARY_SITE_FOLDER = exports.CLOUDINARY_FOLDER = void 0;
 const cloudinary_1 = require("cloudinary");
 cloudinary_1.v2.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,5 +11,6 @@ cloudinary_1.v2.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 exports.CLOUDINARY_FOLDER = "trionda-wears/products";
+exports.CLOUDINARY_SITE_FOLDER = "trionda-wears/site";
 exports.default = cloudinary_1.v2;
 //# sourceMappingURL=cloudinary.js.map

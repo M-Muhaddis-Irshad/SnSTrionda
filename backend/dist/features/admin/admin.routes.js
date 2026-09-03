@@ -2,10 +2,15 @@
 // =============================================================================
 // Admin Feature — Route Definitions
 // =============================================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const auth_middleware_1 = require("../auth/auth.middleware");
 const admin_controller_1 = require("./admin.controller");
+const image_routes_1 = __importDefault(require("./image.routes"));
+const campaign_routes_1 = __importDefault(require("./campaign.routes"));
 const router = (0, express_1.Router)();
 // ---------------------------------------------------------------------------
 // All admin routes require authentication + ADMIN role
@@ -29,6 +34,11 @@ router.get("/products/:productId", admin_controller_1.handleGetProduct);
 router.post("/products", admin_controller_1.handleCreateProduct);
 router.put("/products/:productId", admin_controller_1.handleUpdateProduct);
 router.delete("/products/:productId", admin_controller_1.handleDeleteProduct);
+// ---------------------------------------------------------------------------
+// Site media — images & campaigns
+// ---------------------------------------------------------------------------
+router.use("/images", image_routes_1.default);
+router.use("/campaigns", campaign_routes_1.default);
 // ---------------------------------------------------------------------------
 // Categories (read-only for admin forms)
 // ---------------------------------------------------------------------------

@@ -13,8 +13,7 @@ export declare function getDashboardStats(): Promise<{
         }[];
         user: {
             email: string;
-            firstName: never;
-            lastName: never;
+            name: string | null;
         };
     } & {
         id: string;
@@ -22,6 +21,8 @@ export declare function getDashboardStats(): Promise<{
         status: import("../../generated/prisma/enums").OrderStatus;
         subtotal: import("@prisma/client-runtime-utils").Decimal;
         shippingCost: import("@prisma/client-runtime-utils").Decimal;
+        discount: import("@prisma/client-runtime-utils").Decimal;
+        promoCode: string | null;
         total: import("@prisma/client-runtime-utils").Decimal;
         paymentMethod: import("../../generated/prisma/enums").PaymentMethod;
         paymentStatus: import("../../generated/prisma/enums").PaymentStatus;
@@ -74,9 +75,8 @@ export declare function listOrders(params: OrderListParams): Promise<{
         };
         user: {
             email: string;
-            firstName: never;
             id: string;
-            lastName: never;
+            name: string | null;
         };
     } & {
         id: string;
@@ -84,6 +84,8 @@ export declare function listOrders(params: OrderListParams): Promise<{
         status: import("../../generated/prisma/enums").OrderStatus;
         subtotal: import("@prisma/client-runtime-utils").Decimal;
         shippingCost: import("@prisma/client-runtime-utils").Decimal;
+        discount: import("@prisma/client-runtime-utils").Decimal;
+        promoCode: string | null;
         total: import("@prisma/client-runtime-utils").Decimal;
         paymentMethod: import("../../generated/prisma/enums").PaymentMethod;
         paymentStatus: import("../../generated/prisma/enums").PaymentStatus;
@@ -166,9 +168,8 @@ export declare function getOrderById(orderId: string): Promise<{
     };
     user: {
         email: string;
-        firstName: never;
         id: string;
-        lastName: never;
+        name: string | null;
     };
 } & {
     id: string;
@@ -176,6 +177,8 @@ export declare function getOrderById(orderId: string): Promise<{
     status: import("../../generated/prisma/enums").OrderStatus;
     subtotal: import("@prisma/client-runtime-utils").Decimal;
     shippingCost: import("@prisma/client-runtime-utils").Decimal;
+    discount: import("@prisma/client-runtime-utils").Decimal;
+    promoCode: string | null;
     total: import("@prisma/client-runtime-utils").Decimal;
     paymentMethod: import("../../generated/prisma/enums").PaymentMethod;
     paymentStatus: import("../../generated/prisma/enums").PaymentStatus;
@@ -233,9 +236,8 @@ export declare function updateOrderStatus(orderId: string, body: {
     };
     user: {
         email: string;
-        firstName: never;
         id: string;
-        lastName: never;
+        name: string | null;
     };
 } & {
     id: string;
@@ -243,6 +245,8 @@ export declare function updateOrderStatus(orderId: string, body: {
     status: import("../../generated/prisma/enums").OrderStatus;
     subtotal: import("@prisma/client-runtime-utils").Decimal;
     shippingCost: import("@prisma/client-runtime-utils").Decimal;
+    discount: import("@prisma/client-runtime-utils").Decimal;
+    promoCode: string | null;
     total: import("@prisma/client-runtime-utils").Decimal;
     paymentMethod: import("../../generated/prisma/enums").PaymentMethod;
     paymentStatus: import("../../generated/prisma/enums").PaymentStatus;

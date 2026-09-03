@@ -260,6 +260,39 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
     get orderItem(): Prisma.OrderItemDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
+    /**
+     * `prisma.activity`: Exposes CRUD operations for the **Activity** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Activities
+      * const activities = await prisma.activity.findMany()
+      * ```
+      */
+    get activity(): Prisma.ActivityDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.image`: Exposes CRUD operations for the **Image** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Images
+      * const images = await prisma.image.findMany()
+      * ```
+      */
+    get image(): Prisma.ImageDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.campaign`: Exposes CRUD operations for the **Campaign** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Campaigns
+      * const campaigns = await prisma.campaign.findMany()
+      * ```
+      */
+    get campaign(): Prisma.CampaignDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
 }
 export declare function getPrismaClientClass(): PrismaClientConstructor;
 //# sourceMappingURL=class.d.ts.map

@@ -17,6 +17,9 @@ const NAV_ITEMS = [
     { href: '/admin/collections', label: 'Collections', icon: '🎨' },
     { href: '/admin/reviews', label: 'Reviews', icon: '⭐' },
   ]},
+  { section: 'Content', items: [
+    { href: '/admin/media', label: 'Media & Campaigns', icon: '🖼️' },
+  ]},
   { section: 'Marketing', items: [
     { href: '/admin/discounts', label: 'Discounts', icon: '🏷️' },
     { href: '/admin/campaigns', label: 'Email Campaigns', icon: '📧' },

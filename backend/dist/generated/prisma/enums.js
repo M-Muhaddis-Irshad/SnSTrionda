@@ -9,7 +9,7 @@
 * 🟢 You can import this file directly.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentStatus = exports.PaymentMethod = exports.OrderStatus = exports.UserRole = void 0;
+exports.SiteMediaCategory = exports.PaymentStatus = exports.PaymentMethod = exports.OrderStatus = exports.UserRole = void 0;
 exports.UserRole = {
     CUSTOMER: 'CUSTOMER',
     ADMIN: 'ADMIN'
@@ -33,5 +33,12 @@ exports.PaymentStatus = {
     PAID: 'PAID',
     FAILED: 'FAILED',
     REFUNDED: 'REFUNDED'
+};
+exports.SiteMediaCategory = {
+    HERO: 'HERO',
+    BANNER: 'BANNER',
+    COLLECTION: 'COLLECTION',
+    CAROUSEL: 'CAROUSEL',
+    CAMPAIGN: 'CAMPAIGN'
 };
 //# sourceMappingURL=enums.js.map

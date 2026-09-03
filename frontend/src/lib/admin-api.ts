@@ -163,3 +163,90 @@ export function updateAdminOrderStatus(orderId: string, data: { status?: string;
     body: JSON.stringify(data),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Site media — images
+// ---------------------------------------------------------------------------
+
+export function fetchAdminImages(params?: {
+  page?: number;
+  limit?: number;
+  category?: string;
+  search?: string;
+}) {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  if (params?.category) query.set("category", params.category);
+  if (params?.search) query.set("search", params.search);
+  return adminFetch(`/images?${query.toString()}`);
+}
+
+export async function createAdminImage(formData: FormData) {
+  const { accessToken } = useAuthStore.getState();
+  if (!accessToken) throw new Error("Not authenticated");
+
+  const res = await fetch(`${API_URL}/api/admin/images`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Image creation failed");
+  }
+  return res.json();
+}
+
+export function updateAdminImage(imageId: string, data: any) {
+  return adminFetch(`/images/${imageId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteAdminImage(imageId: string) {
+  return adminFetch(`/images/${imageId}`, { method: "DELETE" });
+}
+
+export function fetchAdminImageUsage(imageId: string) {
+  return adminFetch(`/images/${imageId}/usage`);
+}
+
+// ---------------------------------------------------------------------------
+// Site media — campaigns
+// ---------------------------------------------------------------------------
+
+export function fetchAdminCampaigns(params?: { page?: number; limit?: number; search?: string }) {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  if (params?.search) query.set("search", params.search);
+  return adminFetch(`/campaigns?${query.toString()}`);
+}
+
+export function createAdminCampaign(data: any) {
+  return adminFetch("/campaigns", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateAdminCampaign(campaignId: string, data: any) {
+  return adminFetch(`/campaigns/${campaignId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteAdminCampaign(campaignId: string) {
+  return adminFetch(`/campaigns/${campaignId}`, { method: "DELETE" });
+}
+
+export function bulkUpdateCampaigns(ids: string[], active: boolean) {
+  return adminFetch("/campaigns/bulk-status", {
+    method: "PATCH",
+    body: JSON.stringify({ ids, active }),
+  });
+}

@@ -1,33 +1,957 @@
-import CheckoutForm from "./CheckoutForm";
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useCartStore, selectSubtotal } from "@/stores/cartStore";
+import { useAuthStore } from "@/stores/authStore";
+import { useCheckoutStore } from "@/stores/checkoutStore";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import {
+  SHIPPING_COST,
+  API_URL,
+  formatPrice,
+  computeTotals,
+  isValidEmail,
+  isValidPhone,
+  isValidPostalCode,
+} from "@/lib/checkout";
+import StepIndicator from "./components/StepIndicator";
+import FormStep from "./components/FormStep";
+import Field from "./components/Field";
+import PromoCodeField from "./components/PromoCodeField";
 import OrderSummaryPanel from "./OrderSummaryPanel";
 
 // ---------------------------------------------------------------------------
-// CheckoutPage — Server Component shell with two-column layout
+// Types & constants
+// ---------------------------------------------------------------------------
+
+type PaymentMethod = "CARD" | "COD";
+
+interface CheckoutFormData {
+  email: string;
+  country: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  apartment: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  phone: string;
+}
+
+const STEPS = [
+  { id: "contact", label: "Contact" },
+  { id: "shipping", label: "Shipping" },
+  { id: "promo", label: "Promo" },
+  { id: "method", label: "Shipping method" },
+  { id: "payment", label: "Payment" },
+  { id: "review", label: "Review" },
+] as const;
+
+type StepId = (typeof STEPS)[number]["id"];
+
+const DRAFT_KEY = "trionda-checkout-draft";
+
+const INITIAL_FORM: CheckoutFormData = {
+  email: "",
+  country: "Pakistan",
+  firstName: "",
+  lastName: "",
+  address: "",
+  apartment: "",
+  city: "",
+  province: "",
+  postalCode: "",
+  phone: "",
+};
+
+type ErrorsMap = Record<string, string>;
+
+// ---------------------------------------------------------------------------
+// Per-step validation
+// ---------------------------------------------------------------------------
+
+function validateStep(stepId: StepId, form: CheckoutFormData): ErrorsMap {
+  const errors: ErrorsMap = {};
+
+  if (stepId === "contact") {
+    if (!form.email.trim()) {
+      errors.email = "Email is required for order updates.";
+    } else if (!isValidEmail(form.email)) {
+      errors.email = "Enter a valid email address.";
+    }
+  }
+
+  if (stepId === "shipping") {
+    if (!form.firstName.trim()) errors.firstName = "First name is required.";
+    if (!form.lastName.trim()) errors.lastName = "Last name is required.";
+    if (!form.address.trim()) errors.address = "Street address is required.";
+    if (!form.city.trim()) errors.city = "City is required.";
+    if (!form.province.trim()) errors.province = "Province is required.";
+    if (!form.phone.trim()) {
+      errors.phone = "Phone number is required.";
+    } else if (!isValidPhone(form.phone)) {
+      errors.phone = "Enter a valid Pakistan phone number (e.g. 03001234567).";
+    }
+    if (form.postalCode.trim() && !isValidPostalCode(form.postalCode)) {
+      errors.postalCode = "Postal code must be 5 digits (e.g. 54000).";
+    }
+  }
+
+  return errors;
+}
+
+function fieldForStep(stepId: StepId): string[] {
+  return Object.keys(validateStep(stepId, INITIAL_FORM));
+}
+
+// ---------------------------------------------------------------------------
+// Page
 // ---------------------------------------------------------------------------
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const items = useCartStore((state) => state.items);
+  const subtotal = useCartStore(selectSubtotal);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const authUser = useAuthStore((state) => state.user);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const { promoCode, discountPercent, applyPromo, clearPromo } = useCheckoutStore();
+
+  const [form, setForm] = useState<CheckoutFormData>(INITIAL_FORM);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [maxReached, setMaxReached] = useState(0);
+  const [errors, setErrors] = useState<ErrorsMap>({});
+  const [shippingMethod, setShippingMethod] = useState("standard");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
+
+  // Submit states
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [loadingStep, setLoadingStep] = useState("");
+  const [serverError, setServerError] = useState("");
+
+  // Draft autosave
+  const [draftNote, setDraftNote] = useState(false);
+  const dirtyRef = useRef(false);
+  const draftTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const noteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stepRef = useRef<HTMLDivElement | null>(null);
+
+  // Refs kept in sync so the autosave interval reads the latest values
+  const formRef = useRef(form);
+  formRef.current = form;
+  const stepIndexRef = useRef(stepIndex);
+  stepIndexRef.current = stepIndex;
+
+  const totals = useMemo(
+    () => computeTotals(subtotal, discountPercent),
+    [subtotal, discountPercent]
+  );
+
+  // -------------------------------------------------------------------------
+  // Draft restore + autosave (every 2s while dirty)
+  // -------------------------------------------------------------------------
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved?.form) {
+          setForm((prev) => ({ ...prev, ...saved.form }));
+        }
+        if (typeof saved?.stepIndex === "number" && saved.stepIndex < STEPS.length) {
+          setStepIndex(saved.stepIndex);
+          setMaxReached(saved.stepIndex);
+        }
+        if (saved?.promoCode && saved?.discountPercent) {
+          applyPromo(saved.promoCode, saved.discountPercent);
+        }
+      } else if (authUser?.email) {
+        setForm((prev) => ({ ...prev, email: authUser.email || "" }));
+      }
+    } catch {
+      /* ignore corrupted drafts */
+    }
+
+    draftTimerRef.current = setInterval(() => {
+      if (!dirtyRef.current) return;
+      dirtyRef.current = false;
+      try {
+        const { promoCode: code, discountPercent: pct } =
+          useCheckoutStore.getState();
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({
+            form: formRef.current,
+            stepIndex: stepIndexRef.current,
+            promoCode: code,
+            discountPercent: pct,
+          })
+        );
+        setDraftNote(true);
+      } catch {
+        /* storage full / unavailable */
+      }
+    }, 2000);
+
+    return () => {
+      if (draftTimerRef.current) clearInterval(draftTimerRef.current);
+      if (noteTimerRef.current) clearTimeout(noteTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!draftNote) return;
+    noteTimerRef.current = setTimeout(() => setDraftNote(false), 1600);
+    return () => {
+      if (noteTimerRef.current) clearTimeout(noteTimerRef.current);
+    };
+  }, [draftNote]);
+
+  // -------------------------------------------------------------------------
+  // Field change / blur handlers
+  // -------------------------------------------------------------------------
+
+  function handleChange(field: keyof CheckoutFormData, value: string) {
+    dirtyRef.current = true;
+    setForm((prev) => ({ ...prev, [field]: value }));
+    // Clear this field's error while the user corrects it
+    setErrors((prev) => {
+      if (!(field in prev)) return prev;
+      const copy = { ...prev };
+      delete copy[field];
+      return copy;
+    });
+  }
+
+  function handleBlur(field: keyof CheckoutFormData) {
+    // Validate the blurred field once (only if non-empty or required)
+    const currentId = STEPS[stepIndex].id as StepId;
+    const single = validateStep(currentId, form)[field];
+    setErrors((prev) => {
+      const copy = { ...prev };
+      if (single) {
+        copy[field] = single;
+      } else {
+        delete copy[field];
+      }
+      return copy;
+    });
+  }
+
+  function fieldError(field: string): string | undefined {
+    return errors[field];
+  }
+
+  // -------------------------------------------------------------------------
+  // Step navigation
+  // -------------------------------------------------------------------------
+
+  function goToStep(index: number) {
+    setStepIndex(index);
+    setMaxReached((m) => Math.max(m, index));
+    setErrors({});
+    requestAnimationFrame(() => {
+      stepRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function handleNext() {
+    const currentId = STEPS[stepIndex].id as StepId;
+    if (currentId === "review") return;
+
+    // Shipping-method step requires a selection (defaults to standard)
+    if (currentId === "method" && !shippingMethod) {
+      setErrors({ shippingMethod: "Choose a shipping method." });
+      return;
+    }
+    if (currentId === "payment" && !paymentMethod) {
+      setErrors({ paymentMethod: "Choose a payment method." });
+      return;
+    }
+
+    const validation = validateStep(currentId, form);
+    const currentFields = fieldForStep(currentId);
+    const stepErrors: ErrorsMap = {};
+    for (const f of currentFields) {
+      if (validation[f]) stepErrors[f] = validation[f];
+    }
+
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      return;
+    }
+
+    goToStep(Math.min(stepIndex + 1, STEPS.length - 1));
+  }
+
+  // -------------------------------------------------------------------------
+  // Place order
+  // -------------------------------------------------------------------------
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    // Guard: re-validate contact + shipping before placing
+    const allErrors = {
+      ...validateStep("contact", form),
+      ...validateStep("shipping", form),
+    };
+    if (Object.keys(allErrors).length > 0) {
+      setErrors(allErrors);
+      setStepIndex(0);
+      requestAnimationFrame(() => {
+        stepRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      return;
+    }
+
+    if (items.length === 0) {
+      setServerError("Your cart is empty. Please add items before checking out.");
+      return;
+    }
+
+    setStatus("loading");
+    setLoadingStep("Placing your order...");
+    setServerError("");
+
+    try {
+      const payload = {
+        items: items.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          quantity: item.quantity,
+          customMeasurementId: item.customMeasurementId || null,
+        })),
+        shippingAddress: {
+          fullName: `${form.firstName.trim()} ${form.lastName.trim()}`,
+          phone: form.phone.trim(),
+          addressLine1: form.address.trim(),
+          addressLine2: form.apartment.trim() || undefined,
+          city: form.city.trim(),
+          province: form.province.trim(),
+          postalCode: form.postalCode.trim() || undefined,
+          country: form.country,
+        },
+        paymentMethod,
+        email: form.email.trim(),
+        promoCode: promoCode || undefined,
+      };
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+
+      const res = await fetch(`${API_URL}/api/orders`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setStatus("error");
+        setServerError(data.error || "Failed to place order.");
+        return;
+      }
+
+      localStorage.setItem(
+        `trionda-order-email-${data.data.orderNumber}`,
+        form.email.trim()
+      );
+      localStorage.removeItem(DRAFT_KEY);
+      clearPromo();
+
+      if (paymentMethod === "CARD") {
+        setLoadingStep("Redirecting to payment...");
+        try {
+          const paymentRes = await fetch(
+            `${API_URL}/api/payments/safepay/create`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderId: data.data.id }),
+            }
+          );
+          const paymentData = await paymentRes.json();
+
+          if (!paymentRes.ok) {
+            setStatus("error");
+            setServerError(
+              paymentData.error ||
+                "Failed to initiate card payment. Your order has been placed — please contact support."
+            );
+            clearCart();
+            router.push(`/order-confirmation/${data.data.orderNumber}`);
+            return;
+          }
+
+          clearCart();
+          window.location.href = paymentData.data.checkoutUrl;
+          return;
+        } catch {
+          setStatus("error");
+          setServerError(
+            "Could not connect to payment service. Your order has been placed — please contact support."
+          );
+          clearCart();
+          router.push(`/order-confirmation/${data.data.orderNumber}`);
+          return;
+        }
+      }
+
+      setLoadingStep("Order placed! Redirecting...");
+      clearCart();
+      router.push(`/order-confirmation/${data.data.orderNumber}`);
+    } catch {
+      setStatus("error");
+      setServerError("Could not connect to the server. Please try again.");
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Render helpers
+  // -------------------------------------------------------------------------
+
+  const deliveryLabel = `${form.firstName.trim()} ${form.lastName.trim()}${
+    form.address.trim()
+      ? `, ${form.address.trim()}${form.apartment.trim() ? `, ${form.apartment.trim()}` : ""}, ${form.city.trim()}, ${form.province.trim()}${
+          form.postalCode.trim() ? ` ${form.postalCode.trim()}` : ""
+        }`
+      : ""
+  }`;
+
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-        {/* Page heading */}
-        <h1 className="font-display text-3xl tracking-[0.1em] text-foreground">
-          Checkout
-        </h1>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl tracking-[0.1em] text-foreground">
+              Checkout
+            </h1>
+            <p className="mt-2 font-body text-sm text-muted">
+              {items.length} {items.length === 1 ? "item" : "items"} in your cart
+            </p>
+          </div>
+          {authUser?.email && (
+            <p className="hidden font-body text-xs text-muted sm:block">
+              Signed in as <span className="text-chrome-200">{authUser.email}</span>
+            </p>
+          )}
+        </div>
         <div className="mt-3 h-px w-16 bg-chrome-400" />
 
-        {/* Two-column layout */}
-        <div className="mt-10 flex flex-col lg:flex-row gap-10 lg:gap-12">
-          {/* Left column — form */}
-          <div className="flex-1 min-w-0 order-2 lg:order-1">
-            <CheckoutForm />
-          </div>
-
-          {/* Right column — order summary (sticky on desktop, accordion on mobile) */}
-          <div className="w-full lg:w-[380px] flex-shrink-0 order-1 lg:order-2">
-            <OrderSummaryPanel />
-          </div>
+        {/* Sticky progress indicator */}
+        <div className="mt-6">
+          <StepIndicator
+            steps={STEPS}
+            currentIndex={stepIndex}
+            maxReached={maxReached}
+            onNavigate={goToStep}
+          />
         </div>
+
+        {items.length === 0 ? (
+          <div className="border border-chrome-500 p-10 text-center mt-8">
+            <p className="font-body text-muted mb-6">Your cart is empty.</p>
+            <Button as="a" href="/shop" variant="primary">
+              Continue shopping
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-8 flex flex-col lg:flex-row gap-10 lg:gap-12">
+            {/* Left column — form (first on mobile so summary sits below) */}
+            <div ref={stepRef} className="flex-1 min-w-0 scroll-mt-16">
+              <form onSubmit={handleSubmit} noValidate>
+                {/* ── STEP 1 · CONTACT ── */}
+                {stepIndex === 0 && (
+                  <FormStep stepNumber={1} title="Contact" subtitle="Where should we send order updates?">
+                    <div className="checkout-fields">
+                      <Field
+                        id="email"
+                        label="Email address"
+                        type="email"
+                        inputMode="email"
+                        required
+                        autoComplete="email"
+                        value={form.email}
+                        onChange={(v) => handleChange("email", v)}
+                        onBlur={() => handleBlur("email")}
+                        error={fieldError("email")}
+                        hint={
+                          <span>
+                            Already have an account?{" "}
+                            <Link href="/login" className="text-chrome-200 underline hover:text-foreground transition-colors">
+                              Sign in
+                            </Link>{" "}
+                            to speed this up.
+                          </span>
+                        }
+                      />
+                    </div>
+                  </FormStep>
+                )}
+
+                {/* ── STEP 2 · SHIPPING ── */}
+                {stepIndex === 1 && (
+                  <FormStep stepNumber={2} title="Shipping address">
+                    <div className="checkout-fields">
+                      <Field
+                        id="country"
+                        label="Country / Region"
+                        value={form.country}
+                        onChange={(v) => handleChange("country", v)}
+                        selectOptions={[{ value: "Pakistan", label: "Pakistan" }]}
+                      />
+                      <div className="checkout-name-row">
+                        <Field
+                          id="firstName"
+                          label="First name"
+                          required
+                          autoComplete="given-name"
+                          value={form.firstName}
+                          onChange={(v) => handleChange("firstName", v)}
+                          onBlur={() => handleBlur("firstName")}
+                          error={fieldError("firstName")}
+                        />
+                        <Field
+                          id="lastName"
+                          label="Last name"
+                          required
+                          autoComplete="family-name"
+                          value={form.lastName}
+                          onChange={(v) => handleChange("lastName", v)}
+                          onBlur={() => handleBlur("lastName")}
+                          error={fieldError("lastName")}
+                        />
+                      </div>
+                      <Field
+                        id="address"
+                        label="Street address"
+                        required
+                        autoComplete="address-line1"
+                        value={form.address}
+                        onChange={(v) => handleChange("address", v)}
+                        onBlur={() => handleBlur("address")}
+                        error={fieldError("address")}
+                      />
+                      <Field
+                        id="apartment"
+                        label="Apartment, suite, etc. (optional)"
+                        autoComplete="address-line2"
+                        value={form.apartment}
+                        onChange={(v) => handleChange("apartment", v)}
+                      />
+                      <div className="checkout-address-row">
+                        <div className="checkout-address-row-first">
+                          <Field
+                            id="city"
+                            label="City"
+                            required
+                            autoComplete="address-level2"
+                            value={form.city}
+                            onChange={(v) => handleChange("city", v)}
+                            onBlur={() => handleBlur("city")}
+                            error={fieldError("city")}
+                          />
+                        </div>
+                        <Field
+                          id="province"
+                          label="Province"
+                          required
+                          autoComplete="address-level1"
+                          value={form.province}
+                          onChange={(v) => handleChange("province", v)}
+                          onBlur={() => handleBlur("province")}
+                          error={fieldError("province")}
+                        />
+                        <Field
+                          id="postalCode"
+                          label="Postal code (optional)"
+                          inputMode="numeric"
+                          autoComplete="postal-code"
+                          value={form.postalCode}
+                          onChange={(v) => handleChange("postalCode", v)}
+                          onBlur={() => handleBlur("postalCode")}
+                          error={fieldError("postalCode")}
+                        />
+                      </div>
+                      <Field
+                        id="phone"
+                        label="Phone number"
+                        type="tel"
+                        inputMode="tel"
+                        required
+                        autoComplete="tel"
+                        value={form.phone}
+                        onChange={(v) => handleChange("phone", v)}
+                        onBlur={() => handleBlur("phone")}
+                        error={fieldError("phone")}
+                        hint="Delivery agents may call this number."
+                      />
+                    </div>
+                  </FormStep>
+                )}
+
+                {/* ── STEP 3 · PROMO ── */}
+                {stepIndex === 2 && (
+                  <FormStep
+                    stepNumber={3}
+                    title="Promo code"
+                    subtitle="Have a promo code? Apply it here before you pay."
+                  >
+                    <PromoCodeField />
+                    {discountPercent ? (
+                      <p className="mt-3 font-body text-xs text-muted">
+                        You're saving{" "}
+                        <span className="text-chrome-200">{formatPrice(totals.discount)}</span>{" "}
+                        on this order.
+                      </p>
+                    ) : null}
+                  </FormStep>
+                )}
+
+                {/* ── STEP 4 · SHIPPING METHOD ── */}
+                {stepIndex === 3 && (
+                  <FormStep stepNumber={4} title="Shipping method">
+                    <div className="space-y-3">
+                      <ShippingMethodCard
+                        title="Standard shipping"
+                        time="3–5 business days"
+                        price={SHIPPING_COST}
+                        selected={shippingMethod === "standard"}
+                        onSelect={() => setShippingMethod("standard")}
+                      />
+                      {errors.shippingMethod && (
+                        <p className="checkout-field-error" role="alert">
+                          {errors.shippingMethod}
+                        </p>
+                      )}
+                      <p className="font-body text-xs text-muted">
+                        Delivery within Pakistan only.
+                      </p>
+                    </div>
+                  </FormStep>
+                )}
+
+                {/* ── STEP 5 · PAYMENT ── */}
+                {stepIndex === 4 && (
+                  <FormStep stepNumber={5} title="Payment" subtitle="How would you like to pay?">
+                    <div className="space-y-3">
+                      <PaymentMethodCard
+                        value="CARD"
+                        title="Credit / Debit Card"
+                        description="Pay securely via Safepay"
+                        selected={paymentMethod === "CARD"}
+                        onSelect={() => setPaymentMethod("CARD")}
+                        expandedNote="After placing your order you'll be redirected to Safepay to complete the payment securely."
+                      />
+                      <PaymentMethodCard
+                        value="COD"
+                        title="Cash on Delivery"
+                        description="Pay when your order arrives"
+                        selected={paymentMethod === "COD"}
+                        onSelect={() => setPaymentMethod("COD")}
+                        expandedNote="Have the exact amount ready when your order is delivered."
+                      />
+                      {errors.paymentMethod && (
+                        <p className="checkout-field-error" role="alert">
+                          {errors.paymentMethod}
+                        </p>
+                      )}
+                    </div>
+                  </FormStep>
+                )}
+
+                {/* ── STEP 6 · REVIEW ── */}
+                {stepIndex === 5 && (
+                  <FormStep stepNumber={6} title="Review" subtitle="Confirm your details before placing the order.">
+                    <div className="space-y-0">
+                      <ReviewLine label="Contact" onEdit={() => goToStep(0)}>
+                        <p className="font-body text-sm text-foreground">{form.email}</p>
+                      </ReviewLine>
+                      <div className="checkout-review-divider" />
+                      <ReviewLine label="Shipping address" onEdit={() => goToStep(1)}>
+                        <p className="font-body text-sm text-foreground leading-relaxed">
+                          {deliveryLabel || "—"}
+                        </p>
+                      </ReviewLine>
+                      <div className="checkout-review-divider" />
+                      <ReviewLine label="Promo code" onEdit={() => goToStep(2)}>
+                        {promoCode ? (
+                          <p className="font-body text-sm text-chrome-200">
+                            {promoCode} — {discountPercent}% off
+                          </p>
+                        ) : (
+                          <p className="font-body text-sm text-muted">None</p>
+                        )}
+                      </ReviewLine>
+                      <div className="checkout-review-divider" />
+                      <ReviewLine label="Shipping method" onEdit={() => goToStep(3)}>
+                        <p className="font-body text-sm text-foreground">
+                          Standard shipping — {formatPrice(SHIPPING_COST)}
+                        </p>
+                      </ReviewLine>
+                      <div className="checkout-review-divider" />
+                      <ReviewLine label="Payment" onEdit={() => goToStep(4)}>
+                        <p className="font-body text-sm text-foreground">
+                          {paymentMethod === "CARD"
+                            ? "Credit / Debit Card (Safepay)"
+                            : "Cash on Delivery"}
+                        </p>
+                      </ReviewLine>
+                      <div className="checkout-review-divider" />
+
+                      {/* Totals */}
+                      <div className="space-y-2 py-4">
+                        <div className="flex justify-between">
+                          <span className="font-body text-sm text-muted">Subtotal</span>
+                          <span className="font-body text-sm text-foreground">
+                            {formatPrice(totals.subtotal)}
+                          </span>
+                        </div>
+                        {totals.discount > 0 && (
+                          <div className="flex justify-between">
+                            <span className="font-body text-sm text-muted">Discount</span>
+                            <span className="font-body text-sm text-chrome-200">
+                              −{formatPrice(totals.discount)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="font-body text-sm text-muted">Shipping</span>
+                          <span className="font-body text-sm text-foreground">
+                            {formatPrice(totals.shipping)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-t border-chrome-500 pt-3">
+                          <span className="font-body text-sm font-medium text-foreground">Total</span>
+                          <span className="font-display text-2xl tracking-wide text-foreground">
+                            {formatPrice(totals.total)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </FormStep>
+                )}
+
+                {/* Server error */}
+                {serverError && (
+                  <div className="checkout-error border border-red-500/50 bg-red-500/10 p-4 mt-6" role="alert">
+                    {serverError}
+                  </div>
+                )}
+
+                {/* Loading */}
+                {status === "loading" && (
+                  <div className="checkout-loading mt-6">
+                    <div className="checkout-loading-spinner" aria-hidden="true" />
+                    <span className="checkout-loading-text">{loadingStep}</span>
+                  </div>
+                )}
+
+                {/* Prev / Next / Submit */}
+                <div className="checkout-step-nav">
+                  {stepIndex > 0 ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="default"
+                      onClick={() => goToStep(stepIndex - 1)}
+                      disabled={status === "loading"}
+                    >
+                      ← Back
+                    </Button>
+                  ) : (
+                    <span />
+                  )}
+
+                  {stepIndex < STEPS.length - 1 ? (
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="default"
+                      onClick={handleNext}
+                      disabled={status === "loading"}
+                    >
+                      Continue →
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="default"
+                      disabled={status === "loading"}
+                    >
+                      {status === "loading" ? "Processing..." : `Complete order · ${formatPrice(totals.total)}`}
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Right column — order summary (below form on mobile) */}
+            <div className="w-full lg:w-[380px] flex-shrink-0">
+              <OrderSummaryPanel />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Draft saved toast */}
+      <div
+        className={`checkout-draft-note ${draftNote ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        role="status"
+        aria-live="polite"
+      >
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-chrome-200 align-middle mr-2" />
+        Draft saved
       </div>
     </main>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+function ReviewLine({
+  label,
+  children,
+  onEdit,
+}: {
+  label: string;
+  children: React.ReactNode;
+  onEdit: () => void;
+}) {
+  return (
+    <div className="checkout-review-line">
+      <div className="flex-1 min-w-0">
+        <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted mb-1">
+          {label}
+        </p>
+        {children}
+      </div>
+      <button type="button" onClick={onEdit} className="checkout-summary-edit">
+        Edit
+      </button>
+    </div>
+  );
+}
+
+function ShippingMethodCard({
+  title,
+  time,
+  price,
+  selected,
+  onSelect,
+}: {
+  title: string;
+  time: string;
+  price: number;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={onSelect}
+      className={`checkout-method-card ${
+        selected ? "checkout-method-card--selected" : "checkout-method-card--unselected"
+      }`}
+    >
+      <span
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+          selected ? "border-chrome-100" : "border-chrome-400"
+        }`}
+        aria-hidden="true"
+      >
+        {selected && <span className="h-2 w-2 rounded-full bg-chrome-100" />}
+      </span>
+      <span className="flex-1 text-left">
+        <span className="block font-body text-sm text-foreground">{title}</span>
+        <span className="block font-body text-xs text-muted">{time}</span>
+      </span>
+      <span className="font-body text-sm text-foreground font-medium">
+        {formatPrice(price)}
+      </span>
+    </button>
+  );
+}
+
+function PaymentMethodCard({
+  value,
+  title,
+  description,
+  selected,
+  onSelect,
+  expandedNote,
+}: {
+  value: PaymentMethod;
+  title: string;
+  description: string;
+  selected: boolean;
+  onSelect: () => void;
+  expandedNote: string;
+}) {
+  return (
+    <div>
+      <button
+        type="button"
+        role="radio"
+        aria-checked={selected}
+        onClick={onSelect}
+        className={`checkout-method-card ${
+          selected ? "checkout-method-card--selected" : "checkout-method-card--unselected"
+        }`}
+      >
+        <span
+          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+            selected ? "border-chrome-100" : "border-chrome-400"
+          }`}
+          aria-hidden="true"
+        >
+          {selected && <span className="h-2 w-2 rounded-full bg-chrome-100" />}
+        </span>
+        <span className="flex-1 text-left">
+          <span className="block font-body text-sm text-foreground">{title}</span>
+          <span className="block font-body text-xs text-muted">{description}</span>
+        </span>
+        {selected ? (
+          <Badge variant="outline">Selected</Badge>
+        ) : (
+          <svg
+            className="checkout-chevron"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden="true"
+          >
+            <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </button>
+      {/* Expandable note */}
+      <div
+        className={`checkout-method-details ${selected ? "max-h-24 opacity-100" : "max-h-0 opacity-0"}`}
+      >
+        <p className="border border-t-0 border-chrome-500 bg-surface px-4 py-3 font-body text-xs text-muted">
+          {expandedNote}
+        </p>
+      </div>
+    </div>
   );
 }

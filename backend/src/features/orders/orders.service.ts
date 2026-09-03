@@ -32,6 +32,28 @@ export interface CreateOrderInput {
   shippingAddress: ShippingAddressInput;
   paymentMethod: "JAZZCASH" | "EASYPAISA" | "COD" | "CARD";
   email?: string;
+  promoCode?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Promo codes — server-validated, percent discount off subtotal
+// ---------------------------------------------------------------------------
+
+export const PROMO_CODES: Record<string, number> = {
+  TRIONDA10: 10,
+  TRIONDA20: 20,
+};
+
+export function validatePromoCode(code?: string) {
+  if (!code || !code.trim()) {
+    return { valid: false, message: "Enter a promo code." };
+  }
+  const normalized = code.trim().toUpperCase();
+  const percent = PROMO_CODES[normalized];
+  if (!percent) {
+    return { valid: false, message: "Invalid or expired promo code." };
+  }
+  return { valid: true, code: normalized, discountPercent: percent, message: `Promo applied — ${percent}% off your subtotal.` };
 }
 
 // ---------------------------------------------------------------------------
@@ -101,9 +123,8 @@ async function findOrCreateGuestUser(email?: string): Promise<string> {
   const user = await prisma.user.create({
     data: {
       email: guestEmail,
-      passwordHash,
-      firstName: "Guest",
-      lastName: "Customer",
+      password: passwordHash,
+      name: "Guest Customer",
       role: "CUSTOMER",
     },
   });
@@ -164,7 +185,7 @@ export async function getOrderByNumber(orderNumber: string, email?: string) {
         },
       },
       shippingAddress: true,
-      user: { select: { id: true, email: true, firstName: true, lastName: true } },
+      user: { select: { id: true, email: true, name: true } },
     },
   });
 
@@ -202,7 +223,7 @@ export async function getMyOrderByNumber(orderNumber: string, userId: string) {
         },
       },
       shippingAddress: true,
-      user: { select: { id: true, email: true, firstName: true, lastName: true } },
+      user: { select: { id: true, email: true, name: true } },
     },
   });
 
@@ -289,8 +310,20 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
     };
   });
 
+  // Promo code — server validated, percent discount off subtotal
+  let discount = 0;
+  let promoCode: string | null = null;
+  if (input.promoCode && input.promoCode.trim()) {
+    const promo = validatePromoCode(input.promoCode);
+    if (!promo.valid || !promo.code) {
+      throw new OrderError("Invalid or expired promo code.", 400);
+    }
+    discount = (subtotal * promo.discountPercent!) / 100;
+    promoCode = promo.code;
+  }
+
   const shippingCost = SHIPPING_COST;
-  const total = subtotal + shippingCost;
+  const total = Math.max(0, subtotal + shippingCost - discount);
 
   const userId = authUserId || (await findOrCreateGuestUser(input.email));
   const orderNumber = await generateOrderNumber();
@@ -321,6 +354,8 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
         total,
         paymentMethod: input.paymentMethod,
         paymentStatus: "PENDING",
+        discount,
+        promoCode,
         userId,
         shippingAddressId: address.id,
       },
@@ -354,7 +389,7 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
           },
         },
         shippingAddress: true,
-        user: { select: { id: true, email: true, firstName: true, lastName: true } },
+        user: { select: { id: true, email: true, name: true } },
       },
     });
   });

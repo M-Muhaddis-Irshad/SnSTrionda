@@ -44,6 +44,15 @@ enum PaymentStatus {
   REFUNDED
 }
 
+// Category of a site-level media asset (hero banners, collection headers, etc.)
+enum SiteMediaCategory {
+  HERO
+  BANNER
+  COLLECTION
+  CAROUSEL
+  CAMPAIGN
+}
+
 // =============================================================================
 // PRODUCT CATALOG
 // =============================================================================
@@ -264,6 +273,8 @@ model Order {
   status            OrderStatus     @default(PENDING)
   subtotal          Decimal         @db.Decimal(10, 2)
   shippingCost      Decimal         @db.Decimal(10, 2) @default(0)
+  discount          Decimal         @default(0) @db.Decimal(10, 2)
+  promoCode         String?
   total             Decimal         @db.Decimal(10, 2)
   paymentMethod     PaymentMethod
   paymentStatus     PaymentStatus   @default(PENDING)
@@ -322,4 +333,44 @@ model Activity {
 
   @@index([userId])
   @@index([createdAt])
+}
+
+// =============================================================================
+// SITE MEDIA & CAMPAIGNS (admin-managed website assets)
+// =============================================================================
+
+model Image {
+  id        String            @id @default(cuid())
+  name      String
+  url       String            // Cloudinary URL in production
+  alt       String?
+  category  SiteMediaCategory @default(BANNER)
+  active    Boolean           @default(true)
+
+  campaigns Campaign[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([active])
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  imageId     String
+  image       Image    @relation(fields: [imageId], references: [id], onDelete: Restrict)
+  startDate   DateTime
+  endDate     DateTime
+  discount    Int      @default(0) // percent 0-100
+  active      Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([imageId])
+  @@index([active])
+  @@index([startDate, endDate])
 }

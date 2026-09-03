@@ -2,49 +2,50 @@
 
 import { useState } from "react";
 import { useCartStore, selectSubtotal } from "@/stores/cartStore";
+import { useCheckoutStore } from "@/stores/checkoutStore";
 import Badge from "@/components/ui/Badge";
 import QuantitySelector from "@/components/products/QuantitySelector";
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const SHIPPING_COST = 200;
-
-// ---------------------------------------------------------------------------
-// Format price
-// ---------------------------------------------------------------------------
-
-function formatPrice(price: number): string {
-  return `Rs. ${price.toLocaleString("en-PK")}`;
-}
-
-// ---------------------------------------------------------------------------
-// OrderSummaryPanel Component
-// ---------------------------------------------------------------------------
+import { formatPrice, computeTotals } from "@/lib/checkout";
 
 export default function OrderSummaryPanel() {
   const items = useCartStore((state) => state.items);
   const subtotal = useCartStore(selectSubtotal);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const promoCode = useCheckoutStore((state) => state.promoCode);
+  const discountPercent = useCheckoutStore((state) => state.discountPercent);
   const [isOpen, setIsOpen] = useState(false);
 
-  const total = subtotal + SHIPPING_COST;
+  const { shipping, discount, total } = computeTotals(subtotal, discountPercent);
 
   return (
     <>
-      {/* ── Mobile: Accordion toggle ── */}
+      {/* ── Mobile: Accordion toggle (below the form) ── */}
       <div className="lg:hidden border border-chrome-500 mb-6">
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
           className="w-full flex items-center justify-between px-4 py-3 font-body text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <span className="flex items-center gap-2">
             Order summary
             <Badge variant="default">{items.length}</Badge>
           </span>
-          <span className="font-body text-sm font-medium">{formatPrice(total)}</span>
+          <span className="flex items-center gap-2">
+            <span className="font-body text-sm font-medium">{formatPrice(total)}</span>
+            <svg
+              className={`checkout-chevron ${isOpen ? "rotate-180" : ""}`}
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              aria-hidden="true"
+            >
+              <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
         </button>
 
         {isOpen && (
@@ -86,6 +87,15 @@ export default function OrderSummaryPanel() {
                 </span>
               </div>
             ))}
+
+            {/* Totals */}
+            <SummaryTotals
+              subtotal={subtotal}
+              shipping={shipping}
+              discount={discount}
+              total={total}
+              promoCode={promoCode}
+            />
           </div>
         )}
       </div>
@@ -135,29 +145,66 @@ export default function OrderSummaryPanel() {
             ))}
           </div>
 
-          {/* Totals */}
-          <div className="border-t border-chrome-500 pt-4 space-y-2">
-            <div className="flex justify-between">
-              <span className="font-body text-sm text-muted">Subtotal</span>
-              <span className="font-body text-sm text-foreground">
-                {formatPrice(subtotal)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-body text-sm text-muted">Shipping</span>
-              <span className="font-body text-sm text-foreground">
-                {formatPrice(SHIPPING_COST)}
-              </span>
-            </div>
-            <div className="flex justify-between pt-3 mt-1 border-t border-chrome-500">
-              <span className="font-body text-sm text-foreground font-medium">Total</span>
-              <span className="font-display text-xl tracking-wide text-foreground">
-                {formatPrice(total)}
-              </span>
-            </div>
-          </div>
+          <SummaryTotals
+            subtotal={subtotal}
+            shipping={shipping}
+            discount={discount}
+            total={total}
+            promoCode={promoCode}
+          />
         </div>
       </div>
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Totals block — shared by mobile + desktop
+// ---------------------------------------------------------------------------
+
+function SummaryTotals({
+  subtotal,
+  shipping,
+  discount,
+  total,
+  promoCode,
+}: {
+  subtotal: number;
+  shipping: number;
+  discount: number;
+  total: number;
+  promoCode: string | null;
+}) {
+  return (
+    <div className="border-t border-chrome-500 pt-4 space-y-2">
+      <div className="flex justify-between">
+        <span className="font-body text-sm text-muted">Subtotal</span>
+        <span className="font-body text-sm text-foreground">
+          {formatPrice(subtotal)}
+        </span>
+      </div>
+      {discount > 0 && (
+        <div className="flex justify-between">
+          <span className="font-body text-sm text-muted">
+            Discount{promoCode ? ` (${promoCode})` : ""}
+          </span>
+          <span className="font-body text-sm text-chrome-200">
+            −{formatPrice(discount)}
+          </span>
+        </div>
+      )}
+      <div className="flex justify-between">
+        <span className="font-body text-sm text-muted">Shipping</span>
+        <span className="font-body text-sm text-foreground">
+          {formatPrice(shipping)}
+        </span>
+      </div>
+      <div className="flex justify-between pt-3 mt-1 border-t border-chrome-500">
+        <span className="font-body text-sm text-foreground font-medium">Total</span>
+        <span className="font-display text-xl tracking-wide text-foreground">
+          {formatPrice(total)}
+        </span>
+      </div>
+    </div>
   );
 }

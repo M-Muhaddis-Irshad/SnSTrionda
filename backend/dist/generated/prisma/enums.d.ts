@@ -26,4 +26,12 @@ export declare const PaymentStatus: {
     readonly REFUNDED: 'REFUNDED';
 };
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
+export declare const SiteMediaCategory: {
+    readonly HERO: 'HERO';
+    readonly BANNER: 'BANNER';
+    readonly COLLECTION: 'COLLECTION';
+    readonly CAROUSEL: 'CAROUSEL';
+    readonly CAMPAIGN: 'CAMPAIGN';
+};
+export type SiteMediaCategory = (typeof SiteMediaCategory)[keyof typeof SiteMediaCategory];
 //# sourceMappingURL=enums.d.ts.map
