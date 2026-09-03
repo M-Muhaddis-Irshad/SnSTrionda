@@ -199,7 +199,7 @@ export default function SignupPage() {
         />
         <div className="auth-image-overlay" />
         <div className="auth-branding">
-          <Image src={LOGO_URL} alt="Trionda Logo" width={40} height={40} className="rounded" unoptimized />
+          <Image src={LOGO_URL} alt="Trionda Logo" width={48} height={32} className="rounded h-8 w-12" unoptimized />
           <span className="auth-branding-text">TRIONDA WEARS</span>
         </div>
       </div>
@@ -209,12 +209,12 @@ export default function SignupPage() {
         <div className="auth-form-container">
           {/* Logo (mobile only) */}
           <div className="auth-logo-mobile">
-            <Image src={LOGO_URL} alt="Trionda Logo" width={56} height={56} className="rounded" unoptimized />
+            <Image src={LOGO_URL} alt="Trionda Logo" width={54} height={36} className="rounded h-[36px] w-[54px]" unoptimized />
           </div>
 
           {/* Desktop logo */}
           <div className="auth-logo-desktop">
-            <Image src={LOGO_URL} alt="Trionda Logo" width={70} height={70} className="rounded" unoptimized />
+            <Image src={LOGO_URL} alt="Trionda Logo" width={72} height={48} className="rounded h-12 w-[72px]" unoptimized />
           </div>
 
           <div className="auth-heading-group">

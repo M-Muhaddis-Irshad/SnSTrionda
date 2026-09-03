@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
+import { useAuthHydrated } from "@/lib/useAuthHydrated";
 
 const NAV_ITEMS = [
   { href: "/account", label: "Overview", exact: true },
@@ -18,14 +19,18 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const { user, isAuthenticated, clearAuth } = useAuthStore();
   const [checking, setChecking] = useState(true);
+  const authHydrated = useAuthHydrated();
 
+  // Wait for persisted auth to rehydrate on hard refreshes before deciding
+  // whether the user is actually signed in.
   useEffect(() => {
+    if (!authHydrated) return;
     if (!isAuthenticated()) {
       router.replace("/login");
       return;
     }
     setChecking(false);
-  }, [isAuthenticated, router]);
+  }, [authHydrated, isAuthenticated, router]);
 
   function handleLogout() {
     clearAuth();

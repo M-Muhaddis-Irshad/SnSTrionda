@@ -7,18 +7,69 @@ exports.listProducts = listProducts;
 exports.listCategories = listCategories;
 exports.getProductBySlug = getProductBySlug;
 const db_1 = require("../../db");
-// ---------------------------------------------------------------------------
-// List Products (with pagination)
-// ---------------------------------------------------------------------------
 async function listProducts(params) {
-    const { page, limit } = params;
+    const { page, limit, search } = params;
     const skip = (page - 1) * limit;
+    const searchQuery = search?.trim()
+        ? {
+            OR: [
+                { name: { contains: search.trim(), mode: "insensitive" } },
+                { description: { contains: search.trim(), mode: "insensitive" } },
+            ],
+        }
+        : {};
+    // Category (comma-separated slugs), price window, variant faceting — all REAL filters
+    const categoryQuery = params.category
+        ? { category: { slug: { in: params.category.split(",").map((c) => c.trim()).filter(Boolean) } } }
+        : {};
+    const priceQuery = params.minPrice !== undefined || params.maxPrice !== undefined
+        ? {
+            OR: [
+                {
+                    basePrice: {
+                        ...(params.minPrice !== undefined ? { gte: params.minPrice } : {}),
+                        ...(params.maxPrice !== undefined ? { lte: params.maxPrice } : {}),
+                    },
+                },
+                {
+                    variants: {
+                        some: {
+                            price: {
+                                ...(params.minPrice !== undefined ? { gte: params.minPrice } : {}),
+                                ...(params.maxPrice !== undefined ? { lte: params.maxPrice } : {}),
+                            },
+                        },
+                    },
+                },
+            ],
+        }
+        : {};
+    const variantQuery = {};
+    if (params.sizes?.length) {
+        variantQuery.size = { in: params.sizes };
+    }
+    if (params.colors?.length) {
+        variantQuery.color = { in: params.colors };
+    }
+    if (params.materials?.length) {
+        variantQuery.fabricType = { in: params.materials };
+    }
+    const facetQuery = Object.keys(variantQuery).length
+        ? { variants: { some: variantQuery } }
+        : {};
+    const sortOrder = params.sort === "price_asc"
+        ? { basePrice: "asc" }
+        : params.sort === "price_desc"
+            ? { basePrice: "desc" }
+            : params.sort === "name_asc"
+                ? { name: "asc" }
+                : { createdAt: "desc" };
     const [products, total] = await Promise.all([
         db_1.prisma.product.findMany({
-            where: { isActive: true },
+            where: { isActive: true, ...searchQuery, ...categoryQuery, ...priceQuery, ...facetQuery },
             skip,
             take: limit,
-            orderBy: { createdAt: "desc" },
+            orderBy: sortOrder,
             include: {
                 category: {
                     select: { id: true, name: true, slug: true },
@@ -33,7 +84,9 @@ async function listProducts(params) {
                 },
             },
         }),
-        db_1.prisma.product.count({ where: { isActive: true } }),
+        db_1.prisma.product.count({
+            where: { isActive: true, ...searchQuery, ...categoryQuery, ...priceQuery, ...facetQuery },
+        }),
     ]);
     const totalPages = Math.ceil(total / limit);
     return {

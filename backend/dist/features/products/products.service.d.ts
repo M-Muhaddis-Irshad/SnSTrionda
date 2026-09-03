@@ -13,7 +13,17 @@ export interface PaginatedResult<T> {
         hasPrev: boolean;
     };
 }
-export declare function listProducts(params: PaginationParams): Promise<PaginatedResult<any>>;
+export interface ListProductsParams extends PaginationParams {
+    search?: string;
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sizes?: string[];
+    colors?: string[];
+    materials?: string[];
+    sort?: "newest" | "price_asc" | "price_desc" | "name_asc";
+}
+export declare function listProducts(params: ListProductsParams): Promise<PaginatedResult<any>>;
 export declare function listCategories(): Promise<{
     id: string;
     name: string;

@@ -23,8 +23,6 @@ import { adminFetch } from '@/lib/admin-api';
 import type { AdminLiveStats, AdminActivityEntry } from '@/types/realtime';
 import { ACTIVITY_ACTION_LABELS } from '@/types/realtime';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
 interface DashboardData {
   stats: {
     totalRevenue: number;
@@ -69,14 +67,16 @@ interface DashboardData {
   };
 }
 
-const COLORS = ['#ffffff', '#888888', '#555555', '#333333'];
+const COLORS = ['#ffffff', '#a3a3a3', '#666666', '#333333'];
+// Grayscale ramp — statuses stay distinguishable while matching the
+// black/white/minimal admin theme. Also drives the recent-order badges.
 const STATUS_COLORS: Record<string, string> = {
-  PENDING: '#fbbf24',
-  CONFIRMED: '#60a5fa',
-  PROCESSING: '#60a5fa',
-  SHIPPED: '#34d399',
-  DELIVERED: '#10b981',
-  CANCELLED: '#ef4444',
+  PENDING: '#d4d4d4',
+  CONFIRMED: '#a3a3a3',
+  PROCESSING: '#7a7a7a',
+  SHIPPED: '#4d4d4d',
+  DELIVERED: '#ffffff',
+  CANCELLED: '#2e2e2e',
 };
 
 export default function AdminDashboard() {
@@ -150,18 +150,9 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/admin/dashboard/stats`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Failed to fetch');
-      }
-
-      const json = await res.json();
+      // adminFetch refreshes the access token on 401 and retries, so a stale
+      // token after a hard refresh doesn't leave the dashboard broken.
+      const json = await adminFetch<{ data: any }>('/dashboard/stats');
       const stats = json.data;
 
       // Transform backend response to frontend shape

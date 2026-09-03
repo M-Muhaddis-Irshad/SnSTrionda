@@ -3,7 +3,7 @@
 // =============================================================================
 
 import { Request, Response } from "express";
-import { listProducts, getProductBySlug, listCategories } from "./products.service";
+import { listProducts, getProductBySlug, listCategories, type ListProductsParams } from "./products.service";
 import { AppError } from "../auth/auth.service";
 
 // ---------------------------------------------------------------------------
@@ -15,8 +15,27 @@ export async function handleListProducts(req: Request, res: Response) {
     // Parse pagination query params
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 12));
+    const search = (req.query.search as string) || undefined;
+    const category = (req.query.category as string) || undefined;
+    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
+    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
+    const sizes = (req.query.sizes as string)?.split(",").map((s) => s.trim()).filter(Boolean) || undefined;
+    const colors = (req.query.colors as string)?.split(",").map((s) => s.trim()).filter(Boolean) || undefined;
+    const materials = (req.query.materials as string)?.split(",").map((s) => s.trim()).filter(Boolean) || undefined;
+    const sort = (req.query.sort as string) as ListProductsParams["sort"] | undefined;
 
-    const result = await listProducts({ page, limit });
+    const result = await listProducts({
+      page,
+      limit,
+      search,
+      category,
+      minPrice,
+      maxPrice,
+      sizes,
+      colors,
+      materials,
+      sort,
+    });
 
     res.json({
       message: "Products retrieved successfully",

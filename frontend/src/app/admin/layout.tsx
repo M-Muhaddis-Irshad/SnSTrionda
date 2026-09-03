@@ -23,6 +23,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { useAuthHydrated } from '@/lib/useAuthHydrated';
 
 const NAV_ITEMS = [
   { section: 'Main', items: [
@@ -62,24 +63,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const { user, accessToken, clearAuth } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const authHydrated = useAuthHydrated();
 
   const isAuthenticated = !!accessToken && !!user;
   const isAdmin = user?.role === 'ADMIN';
 
+  // Guard against redirecting on a stale render. Zustand rehydrates the
+  // persisted session asynchronously, and an effect queued by an early render
+  // can fire with isAuthenticated=false even though the store already holds a
+  // valid session by the time the effect runs. Decide from a fresh store read.
   useEffect(() => {
     if (pathname === '/admin/login') return;
-    if (!isAuthenticated) {
+    if (!authHydrated) return; // wait for persisted auth before deciding
+    const st = useAuthStore.getState();
+    const authed = !!st.accessToken && !!st.user;
+    const admin = st.user?.role === 'ADMIN';
+    if (!authed || !admin) {
       router.replace('/login');
     }
-  }, [pathname, isAuthenticated, router]);
+  }, [pathname, isAuthenticated, isAdmin, authHydrated, router]);
 
   // Login page renders without the admin shell
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  // Not authenticated
-  if (!isAuthenticated) {
+  // Wait for persisted auth to rehydrate on hard refreshes before deciding
+  // anything — otherwise a fresh /admin load briefly looks logged-out and
+  // wrongly bounces the user to /login.
+  if (!authHydrated) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -87,10 +99,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // Not admin — redirect
-  if (!isAdmin) {
-    router.replace('/login');
-    return null;
+  // Not authenticated or not an admin — hold content until the effect above
+  // redirects (never redirect during render).
+  if (!isAuthenticated || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -108,7 +124,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         className={`
           fixed inset-y-0 left-0 z-50 w-64 bg-black border-r border-gray-800
           transform transition-transform duration-200 ease-in-out
-          lg:translate-x-0 lg:static lg:z-auto
+          lg:translate-x-0 lg:static lg:z-auto lg:sticky lg:top-0 lg:h-screen
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >

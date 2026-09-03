@@ -3,16 +3,29 @@
 // =============================================================================
 
 import { useAuthStore } from "@/stores/authStore";
+import { refreshAccessToken } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
+function sessionExpired(): never {
+  const { clearAuth } = useAuthStore.getState();
+  clearAuth();
+  window.location.href = "/admin/login";
+  throw new Error("Session expired. Please sign in again.");
+}
+
 export async function adminFetch<T = any>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  isRetry = false
 ): Promise<T> {
   const { accessToken } = useAuthStore.getState();
 
   if (!accessToken) {
+    // Try one silent refresh before giving up
+    if (!isRetry && (await refreshAccessToken())) {
+      return adminFetch<T>(path, options, true);
+    }
     throw new Error("Not authenticated");
   }
 
@@ -25,20 +38,17 @@ export async function adminFetch<T = any>(
     },
   });
 
-  // Handle 401 — token expired or invalid
+  // Handle 401 — token expired or invalid: refresh once, then retry
   if (res.status === 401) {
-    const { clearAuth } = useAuthStore.getState();
-    clearAuth();
-    window.location.href = "/admin/login";
-    throw new Error("Session expired. Please sign in again.");
+    if (!isRetry && (await refreshAccessToken())) {
+      return adminFetch<T>(path, options, true);
+    }
+    sessionExpired();
   }
 
   // Handle 403 — not admin
   if (res.status === 403) {
-    const { clearAuth } = useAuthStore.getState();
-    clearAuth();
-    window.location.href = "/admin/login";
-    throw new Error("Admin access required.");
+    sessionExpired();
   }
 
   if (!res.ok) {

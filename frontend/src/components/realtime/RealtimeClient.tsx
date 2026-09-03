@@ -11,6 +11,7 @@ import { useEffect, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import { getSocket, disconnectSocket, authedFetch } from "@/lib/socket";
+import { ensureValidAccessToken } from "@/lib/auth";
 import { useToastStore } from "@/stores/toastStore";
 
 export default function RealtimeClient() {
@@ -19,50 +20,66 @@ export default function RealtimeClient() {
   const seededRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const token = accessToken;
-    const uid = user?.id;
+    let cancelled = false;
+    let sock: ReturnType<typeof getSocket> = null;
+    let seedNotifications: (() => void) | null = null;
 
-    if (!token || !uid) {
-      disconnectSocket();
-      useNotificationStore.getState().reset();
-      seededRef.current = null;
-      return;
-    }
+    (async () => {
+      // Never connect with an expired/stale access token. If the persisted
+      // token is about to expire, refresh it (silently) BEFORE connecting —
+      // otherwise the server rejects the handshake on a hard page refresh.
+      const valid = await ensureValidAccessToken();
+      if (cancelled) return;
 
-    const sock = getSocket();
-    if (!sock) return;
+      const { accessToken: token, user: currentUser } = useAuthStore.getState();
+      const uid = currentUser?.id;
 
-    const seedNotifications = async () => {
-      if (seededRef.current === uid) return; // once per login session
-      try {
-        const res = await authedFetch<{ data: any[]; unreadCount: number }>(
-          "/api/notifications?page=1&limit=20"
-        );
-        useNotificationStore.getState().hydrate(
-          res.data.map((n: any) => ({
-            id: n.id,
-            userId: n.userId,
-            type: n.type,
-            title: n.title,
-            message: n.message,
-            data: n.data ?? null,
-            read: n.read,
-            createdAt: n.createdAt,
-          })),
-          res.unreadCount || 0
-        );
-        seededRef.current = uid;
-      } catch {
-        // Backend unreachable — retry on the next socket event
+      if (!valid || !token || !uid) {
+        disconnectSocket();
+        useNotificationStore.getState().reset();
+        seededRef.current = null;
+        return;
       }
-    };
 
-    if (sock.connected) {
-      seedNotifications();
-    }
-    sock.on("connect", seedNotifications);
+      sock = getSocket();
+      if (!sock) return;
+
+      seedNotifications = async () => {
+        if (seededRef.current === uid) return; // once per login session
+        try {
+          const res = await authedFetch<{ data: any[]; unreadCount: number }>(
+            "/api/notifications?page=1&limit=20"
+          );
+          useNotificationStore.getState().hydrate(
+            res.data.map((n: any) => ({
+              id: n.id,
+              userId: n.userId,
+              type: n.type,
+              title: n.title,
+              message: n.message,
+              data: n.data ?? null,
+              read: n.read,
+              createdAt: n.createdAt,
+            })),
+            res.unreadCount || 0
+          );
+          seededRef.current = uid;
+        } catch {
+          // Backend unreachable — retry on the next socket event
+        }
+      };
+
+      if (sock.connected) {
+        seedNotifications();
+      }
+      sock.on("connect", seedNotifications);
+    })();
+
     return () => {
-      sock.off("connect", seedNotifications);
+      cancelled = true;
+      if (sock && seedNotifications) {
+        sock.off("connect", seedNotifications);
+      }
     };
   }, [accessToken, user?.id]);
 

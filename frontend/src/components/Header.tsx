@@ -4,6 +4,7 @@ import MobileMenu from "./MobileMenu";
 import CartButton from "./cart/CartButton";
 import AccountButton from "./AccountButton";
 import NotificationBell from "./NotificationBell";
+import SearchButton from "./search/SearchButton";
 
 const navLinks = [
   { label: "Shop", href: "/shop" },
@@ -23,7 +24,7 @@ export default function Header() {
           <Image
             src="/logo/trionda-icon-mark.png"
             alt="Trionda Wears icon"
-            width={40}
+            width={60}
             height={40}
             className="h-10 w-auto"
             priority
@@ -52,25 +53,7 @@ export default function Header() {
 
           <AccountButton />
 
-          <button
-            type="button"
-            className="header-icon-btn"
-            aria-label="Search"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-              />
-            </svg>
-          </button>
+          <SearchButton />
 
           <CartButton />
 

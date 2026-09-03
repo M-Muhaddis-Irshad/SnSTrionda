@@ -10,6 +10,7 @@ import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import { useToastStore } from "@/stores/toastStore";
+import { refreshAccessToken } from "@/lib/auth";
 import type { AppNotification } from "@/types/realtime";
 
 export const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -63,8 +64,29 @@ export function getSocket(): Socket | null {
     console.log("Socket disconnected:", reason);
   });
 
+  // Auth failures are recoverable: the persisted access token may be expired.
+  // Refresh it (rotation) and reconnect with the fresh token instead of giving up.
+  let lastAuthRefreshAt = 0;
   socket.on("connect_error", (err) => {
-    console.error("Socket connection error:", err.message);
+    const isAuthError =
+      /invalid or expired token|authentication required/i.test(err.message || "");
+    if (!isAuthError) {
+      console.error("Socket connection error:", err.message);
+      return;
+    }
+    // Avoid hammering the refresh endpoint on every auto-retry of one failure
+    if (Date.now() - lastAuthRefreshAt < 5000) return;
+    lastAuthRefreshAt = Date.now();
+    console.warn("Socket rejected (token), refreshing…");
+    refreshAccessToken().then((ok) => {
+      if (!ok) return; // clearAuth ran — RealtimeClient will disconnect us
+      const { accessToken } = useAuthStore.getState();
+      if (!accessToken) return;
+      if (socket) {
+        socket.auth = { token: accessToken };
+        socket.connect();
+      }
+    });
   });
 
   return socket;
@@ -186,23 +208,45 @@ export function leaveChatRoom(sessionId: string): void {
 // Small authenticated fetch helpers shared by the account pages
 // ---------------------------------------------------------------------------
 
-export async function authedFetch<T = any>(path: string, options: RequestInit = {}): Promise<T> {
-  const { accessToken } = useAuthStore.getState();
+async function doAuthedFetch<T>(path: string, options: RequestInit, token: string): Promise<T> {
   const res = await fetch(`${BACKEND_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      Authorization: `Bearer ${token}`,
       ...options.headers,
     },
   });
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    if (res.status === 401) {
-      useAuthStore.getState().clearAuth();
-    }
-    throw new Error(data.error || `Request failed with status ${res.status}`);
+    const err: any = new Error(data.error || `Request failed with status ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
   return res.json();
+}
+
+export async function authedFetch<T = any>(path: string, options: RequestInit = {}): Promise<T> {
+  let { accessToken } = useAuthStore.getState();
+  if (!accessToken) {
+    // Try one silent refresh before giving up
+    const ok = await refreshAccessToken();
+    if (!ok) throw new Error("Not authenticated");
+    accessToken = useAuthStore.getState().accessToken!;
+  }
+
+  try {
+    return await doAuthedFetch<T>(path, options, accessToken);
+  } catch (err: any) {
+    // Expired access token — refresh once (rotation) and retry the request
+    if (err.status === 401) {
+      const ok = await refreshAccessToken();
+      if (!ok) throw new Error("Session expired. Please sign in again.");
+      const fresh = useAuthStore.getState().accessToken;
+      if (!fresh) throw new Error("Session expired. Please sign in again.");
+      return doAuthedFetch<T>(path, options, fresh);
+    }
+    throw err;
+  }
 }

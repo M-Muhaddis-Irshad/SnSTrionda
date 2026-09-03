@@ -1,6 +1,7 @@
-import { Suspense } from "react";
-import CategoryFilter from "@/components/shop/CategoryFilter";
-import ProductCard from "@/components/ui/ProductCard";
+import Link from "next/link";
+import ShopFilters, { type ShopFacets, type ShopQuery } from "@/components/shop/ShopFilters";
+import ShopResults from "@/components/shop/ShopResults";
+import BenefitsBar from "@/components/BenefitsBar";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -17,14 +18,9 @@ interface ProductVariant {
   id: string;
   size: string | null;
   color: string | null;
+  fabricType: string | null;
   price: number | null;
   stockQuantity: number;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
 }
 
 interface Product {
@@ -32,7 +28,7 @@ interface Product {
   name: string;
   slug: string;
   basePrice: number;
-  category: Category;
+  category: { id: string; name: string; slug: string };
   images: ProductImage[];
   variants: ProductVariant[];
 }
@@ -50,125 +46,150 @@ interface ProductsResponse {
   };
 }
 
+const PAGE_SIZE = 12;
+
 // ---------------------------------------------------------------------------
-// Fetch all products
+// Fetch products with real backend filters/sort/pagination
 // ---------------------------------------------------------------------------
 
-async function fetchAllProducts(): Promise<Product[]> {
+async function fetchProducts(params: URLSearchParams): Promise<ProductsResponse | null> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
   try {
-    const res = await fetch(`${apiUrl}/api/products?limit=50`, {
+    const res = await fetch(`${apiUrl}/api/products?${params.toString()}`, {
       cache: "no-store",
     });
-
-    if (!res.ok) {
-      console.error("Failed to fetch products:", res.status);
-      return [];
-    }
-
-    const data: ProductsResponse = await res.json();
-    return data.data;
+    if (!res.ok) return null;
+    return res.json();
   } catch (err) {
     console.error("Error fetching products:", err);
-    return [];
+    return null;
   }
 }
 
 // ---------------------------------------------------------------------------
-// Group products by category
+// Compute filter facets from the full catalog (real values from the DB)
 // ---------------------------------------------------------------------------
 
-interface CategoryGroup {
-  category: Category;
-  products: Product[];
-}
+function computeFacets(products: Product[]): ShopFacets {
+  const categoryMap = new Map<string, { id: string; name: string; slug: string }>();
+  const sizes = new Set<string>();
+  const colors = new Set<string>();
+  const materials = new Set<string>();
 
-function groupByCategory(products: Product[]): CategoryGroup[] {
-  const map = new Map<string, CategoryGroup>();
-
-  for (const product of products) {
-    const key = product.category.id;
-    if (!map.has(key)) {
-      map.set(key, { category: product.category, products: [] });
+  for (const p of products) {
+    if (!categoryMap.has(p.category.id)) {
+      categoryMap.set(p.category.id, p.category);
     }
-    map.get(key)!.products.push(product);
+    for (const v of p.variants) {
+      if (v.size) sizes.add(v.size);
+      if (v.color) colors.add(v.color);
+      if (v.fabricType) materials.add(v.fabricType);
+    }
   }
 
-  return Array.from(map.values()).sort((a, b) =>
-    a.category.name.localeCompare(b.category.name)
-  );
+  const prices = products.map((p) => Number(p.basePrice));
+  const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+  const maxPrice = prices.length > 0 ? Math.max(...prices) : 100000;
+
+  return {
+    categories: Array.from(categoryMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
+    sizes: Array.from(sizes).sort(),
+    colors: Array.from(colors).sort(),
+    materials: Array.from(materials).sort(),
+    minPrice: Math.floor(minPrice / 100) * 100,
+    maxPrice: Math.ceil(maxPrice / 100) * 100,
+  };
 }
 
 // ---------------------------------------------------------------------------
-// ShopPage (Server Component)
+// Parse URL params into the query shape the filters need
+// ---------------------------------------------------------------------------
+
+function parseQuery(searchParams: URLSearchParams): ShopQuery {
+  return {
+    category: searchParams.get("category")?.split(",").filter(Boolean) || undefined,
+    sizes: searchParams.get("sizes")?.split(",").filter(Boolean) || undefined,
+    colors: searchParams.get("colors")?.split(",").filter(Boolean) || undefined,
+    materials: searchParams.get("materials")?.split(",").filter(Boolean) || undefined,
+    minPrice: searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined,
+    maxPrice: searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// ShopPage (Server Component) — ALL PRODUCTS
 // ---------------------------------------------------------------------------
 
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = await searchParams;
-  const activeCategory = params.category || "all";
+  const raw = await searchParams;
+  const searchParamsObj = new URLSearchParams();
+  for (const [key, value] of Object.entries(raw)) {
+    if (Array.isArray(value)) value.forEach((v) => searchParamsObj.append(key, v));
+    else if (value !== undefined) searchParamsObj.set(key, value);
+  }
 
-  const products = await fetchAllProducts();
-  const groups = groupByCategory(products);
+  const page = Math.max(1, parseInt(searchParamsObj.get("page") || "1", 10));
+  searchParamsObj.set("page", String(page));
+  searchParamsObj.set("limit", String(PAGE_SIZE));
 
-  const categories = groups.map((g) => g.category);
+  const sort = searchParamsObj.get("sort") || "newest";
 
-  const visibleGroups =
-    activeCategory === "all"
-      ? groups
-      : groups.filter((g) => g.category.slug === activeCategory);
+  const [gridResult, facetResult] = await Promise.all([
+    fetchProducts(searchParamsObj),
+    fetchProducts(new URLSearchParams({ limit: "200" })),
+  ]);
+
+  const products = gridResult?.data ?? [];
+  const pagination = gridResult?.pagination ?? {
+    page: 1,
+    limit: PAGE_SIZE,
+    total: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrev: false,
+  };
+
+  const facets = computeFacets(facetResult?.data ?? []);
+  const query = parseQuery(searchParamsObj);
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        {/* Page heading */}
-        <h1 className="font-display text-4xl tracking-[0.1em] text-foreground sm:text-5xl">
-          Shop
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-body text-xs uppercase tracking-[0.2em] text-muted">
+          <Link href="/" className="transition-colors hover:text-foreground">Home</Link>
+          <span className="text-chrome-400">/</span>
+          <span className="text-foreground">Shop</span>
+        </nav>
+
+        {/* Page title */}
+        <h1 className="mt-6 font-display text-4xl uppercase tracking-[0.12em] text-foreground sm:text-5xl">
+          All Products
         </h1>
-        <div className="mt-3 h-px w-16 bg-chrome-400" />
 
-        {/* Category filter pills */}
-        <div className="mt-8">
-          <Suspense fallback={null}>
-            <CategoryFilter categories={categories} />
-          </Suspense>
-        </div>
+        <div className="mt-4 h-px w-16 bg-chrome-400" />
 
-        {/* Category rails */}
-        <div className="mt-12 space-y-16">
-          {visibleGroups.length > 0 ? (
-            visibleGroups.map((group) => (
-              <section key={group.category.id} id={group.category.slug}>
-                <h2 className="font-display text-2xl tracking-[0.08em] text-foreground sm:text-3xl">
-                  {group.category.name}
-                </h2>
-                <div className="mt-2 h-px w-12 bg-chrome-400" />
+        {/* Layout: sidebar + results */}
+        <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:gap-12">
+          <div className="lg:w-64 shrink-0 border-t border-chrome-500/70 lg:border-t-0">
+            <ShopFilters facets={facets} current={query} />
+          </div>
 
-                {/* Horizontal scroll rail */}
-                <div className="mt-8 overflow-x-auto scrollbar-hide">
-                  <div className="flex gap-5 pb-4">
-                    {group.products.map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        layout="rail"
-                      />
-                    ))}
-                  </div>
-                </div>
-              </section>
-            ))
-          ) : (
-            <p className="text-muted text-sm py-8">
-              No products found.
-            </p>
-          )}
+          <ShopResults
+            products={products}
+            sort={sort}
+            page={page}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+          />
         </div>
       </div>
+
+      <BenefitsBar />
     </main>
   );
 }

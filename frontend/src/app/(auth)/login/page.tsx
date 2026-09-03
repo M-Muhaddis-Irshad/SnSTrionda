@@ -155,8 +155,8 @@ function LoginForm() {
             src={LOGO_URL}
             alt="Trionda Logo"
             width={90}
-            height={90}
-            className="rounded"
+            height={60}
+            className="rounded h-[60px] w-[90px]"
             unoptimized
           />
           <span className="auth-branding-text">TRIONDA WEARS</span>
@@ -168,12 +168,12 @@ function LoginForm() {
         <div className="auth-form-container">
           {/* Logo (mobile only) */}
           <div className="auth-logo-mobile">
-            <Image src={LOGO_URL} alt="Trionda Logo" width={56} height={56} className="rounded" unoptimized />
+            <Image src={LOGO_URL} alt="Trionda Logo" width={54} height={36} className="rounded h-[36px] w-[54px]" unoptimized />
           </div>
 
           {/* Desktop logo */}
           <div className="auth-logo-desktop">
-            <Image src={LOGO_URL} alt="Trionda Logo" width={70} height={70} className="rounded" unoptimized />
+            <Image src={LOGO_URL} alt="Trionda Logo" width={72} height={48} className="rounded h-12 w-[72px]" unoptimized />
           </div>
 
           <div className="auth-heading-group">

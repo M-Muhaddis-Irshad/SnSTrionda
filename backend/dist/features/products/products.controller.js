@@ -15,7 +15,26 @@ async function handleListProducts(req, res) {
         // Parse pagination query params
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 12));
-        const result = await (0, products_service_1.listProducts)({ page, limit });
+        const search = req.query.search || undefined;
+        const category = req.query.category || undefined;
+        const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
+        const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
+        const sizes = req.query.sizes?.split(",").map((s) => s.trim()).filter(Boolean) || undefined;
+        const colors = req.query.colors?.split(",").map((s) => s.trim()).filter(Boolean) || undefined;
+        const materials = req.query.materials?.split(",").map((s) => s.trim()).filter(Boolean) || undefined;
+        const sort = req.query.sort;
+        const result = await (0, products_service_1.listProducts)({
+            page,
+            limit,
+            search,
+            category,
+            minPrice,
+            maxPrice,
+            sizes,
+            colors,
+            materials,
+            sort,
+        });
         res.json({
             message: "Products retrieved successfully",
             ...result,

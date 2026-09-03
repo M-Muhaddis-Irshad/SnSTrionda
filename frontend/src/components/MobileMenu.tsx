@@ -53,6 +53,31 @@ export default function MobileMenu() {
 
   return (
     <div className="mobile-menu-wrapper">
+      {/* Hamburger toggle (mobile only — wrapper is md:hidden) */}
+      <button
+        type="button"
+        className="mobile-menu-toggle"
+        aria-label="Open menu"
+        aria-expanded={isOpen}
+        aria-controls="mobile-menu-panel"
+        onClick={() => setIsOpen(true)}
+      >
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+          />
+        </svg>
+      </button>
+
       {/* Overlay */}
       {isOpen && (
         <div
@@ -64,6 +89,7 @@ export default function MobileMenu() {
 
       {/* Slide-in panel */}
       <div
+        id="mobile-menu-panel"
         className={`mobile-menu-panel ${
           isOpen ? "mobile-menu-panel--open" : "mobile-menu-panel--closed"
         }`}
