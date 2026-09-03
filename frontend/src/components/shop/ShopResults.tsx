@@ -4,11 +4,12 @@
 // ShopResults — the interactive results column (toolbar + grid/list + pagination)
 // =============================================================================
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ProductCard from "@/components/ui/ProductCard";
 import ShopToolbar from "./ShopToolbar";
 import ShopPagination from "./ShopPagination";
+import { gsap } from "@/lib/motion";
 
 export interface ShopProduct {
   id: string;
@@ -36,12 +37,67 @@ export default function ShopResults({
   totalPages,
 }: ShopResultsProps) {
   const [view, setView] = useState<"grid" | "list">("grid");
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const prevSignature = useRef("");
+  const prevCtx = useRef<gsap.Context | null>(null);
 
   const from = total === 0 ? 0 : (page - 1) * 12 + 1;
   const to = Math.min(page * 12, total);
 
+  // Stagger-reveal ONLY the cards that are new to this result set (filter /
+  // pagination / view changes). Cards that persist across renders (e.g. a sort
+  // change) are left untouched so animations never stack or re-hide content.
+  // Every ScrollTrigger/tween is scoped in a gsap.context that is reverted
+  // before the next set builds — nothing accumulates across filter changes.
+  useLayoutEffect(() => {
+    const root = resultsRef.current;
+    if (!root) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    const ids = products.map((p) => p.id).join(",");
+    const signature = `${view}|${page}|${ids}`;
+    if (signature === prevSignature.current) return;
+
+    const prevIds = new Set(
+      (prevSignature.current.split("|")[2] || "").split(",").filter(Boolean)
+    );
+    prevSignature.current = signature;
+
+    prevCtx.current?.revert();
+    const ctx = gsap.context(() => {
+      const bySlug = new Map(products.map((p) => [p.slug, p.id]));
+      const selector = view === "grid" ? ".product-card" : "li";
+      const targets = gsap.utils.toArray<HTMLElement>(selector, root).filter((el) => {
+        const anchor = el.matches("a") ? el : el.querySelector<HTMLElement>("a");
+        const href = anchor?.getAttribute("href") || "";
+        const slug = (href.match(/\/products\/([^/?]+)/) || [])[1];
+        const id = slug ? bySlug.get(slug) : undefined;
+        return id ? !prevIds.has(id) : true;
+      });
+
+      targets.forEach((el, index) => {
+        gsap.from(el, {
+          y: 18,
+          autoAlpha: 0,
+          duration: 0.55,
+          ease: "power2.out",
+          delay: Math.min(index, 12) * 0.06,
+          scrollTrigger: {
+            trigger: el,
+            start: "top 94%",
+            once: true,
+          },
+        });
+      });
+    }, root);
+    prevCtx.current = ctx;
+  }, [products, view, page]);
+
+  // Revert remaining tweens/triggers on unmount
+  useLayoutEffect(() => () => prevCtx.current?.revert(), []);
+
   return (
-    <div className="min-w-0 flex-1">
+    <div ref={resultsRef} className="min-w-0 flex-1">
       {/* Count */}
       <p className="mb-4 font-body text-xs uppercase tracking-[0.2em] text-muted">
         Showing {from}–{to} of {total} products

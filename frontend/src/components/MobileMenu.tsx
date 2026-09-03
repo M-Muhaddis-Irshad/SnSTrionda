@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
+import { gsap } from "@/lib/motion";
 
 export const OPEN_MENU_EVENT = "trionda:open-menu";
 
@@ -24,6 +25,9 @@ export default function MobileMenu() {
   const accountLabel = !authenticated ? "Sign In" : "My Account";
 
   const [isOpen, setIsOpen] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const openCtx = useRef<gsap.Context | null>(null);
 
   // Opened by the bottom mobile nav's "Menu" tab (no hamburger in the header)
   useEffect(() => {
@@ -50,6 +54,40 @@ export default function MobileMenu() {
       document.body.style.overflow = prev;
     };
   }, [isOpen]);
+
+  // GSAP polish on top of the CSS slide (panel position stays CSS-driven —
+  // GSAP only fades the overlay and staggers the links in, so the open/close
+  // state logic and the earlier hamburger fix are untouched).
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    const ctx = gsap.context(() => {
+      if (overlayRef.current) {
+        gsap.fromTo(
+          overlayRef.current,
+          { autoAlpha: 0 },
+          { autoAlpha: 1, duration: 0.3, ease: "power1.out" }
+        );
+      }
+      if (navRef.current) {
+        const links = gsap.utils.toArray<HTMLElement>(
+          ".mobile-menu-link, .mobile-menu-account-link",
+          navRef.current
+        );
+        gsap.fromTo(
+          links,
+          { y: 16, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.45, ease: "power2.out", stagger: 0.055, delay: 0.15 }
+        );
+      }
+    });
+    openCtx.current?.revert();
+    openCtx.current = ctx;
+  }, [isOpen]);
+
+  // Kill lingering tweens when the menu unmounts entirely
+  useLayoutEffect(() => () => openCtx.current?.revert(), []);
 
   return (
     <div className="mobile-menu-wrapper">
@@ -81,6 +119,7 @@ export default function MobileMenu() {
       {/* Overlay */}
       {isOpen && (
         <div
+          ref={overlayRef}
           className="mobile-menu-overlay"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
@@ -121,7 +160,7 @@ export default function MobileMenu() {
           </button>
 
           {/* Nav links */}
-          <nav className="mobile-menu-nav" aria-label="Mobile navigation links">
+          <nav ref={navRef} className="mobile-menu-nav" aria-label="Mobile navigation links">
             {navLinks.map((link) => (
               <Link
                 key={link.label}

@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Link from "next/link";
 import Autoplay from "embla-carousel-autoplay";
+import { gsap } from "@/lib/motion";
+import { onAppReady } from "@/lib/motion";
 
 // ---------------------------------------------------------------------------
 // Slide content
@@ -66,6 +68,9 @@ const SLIDES: Slide[] = [
 // ---------------------------------------------------------------------------
 
 export default function HeroCarousel() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const entranceDone = useRef(false);
+
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
     Autoplay({
       delay: 5500,
@@ -130,8 +135,73 @@ export default function HeroCarousel() {
     return () => cancelAnimationFrame(animFrame);
   }, [emblaApi, selectedIndex]);
 
+  // One-shot entrance for the currently visible slide's content — plays once
+  // the preloader starts revealing the page (never re-runs on autoplay slide
+  // changes, and never double-animates what the CSS reveal already did).
+  useEffect(() => {
+    if (entranceDone.current) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    let timeline: gsap.core.Timeline | null = null;
+
+    const unsubscribe = onAppReady(() => {
+      if (entranceDone.current) return;
+      entranceDone.current = true;
+      const section = sectionRef.current;
+      if (!section) return;
+      const activeSlide = section.querySelector<HTMLElement>('.hero-slide[aria-hidden="false"]');
+      if (!activeSlide) return;
+      const content = activeSlide.querySelector(".hero-slide-content");
+      if (!content) return;
+
+      timeline = gsap.timeline({ defaults: { ease: "power2.out" } });
+      timeline
+        .fromTo(
+          content.querySelector(".hero-diamond"),
+          { autoAlpha: 0, scale: 0.5 },
+          { autoAlpha: 1, scale: 1, duration: 0.5 }
+        )
+        .fromTo(
+          content.querySelectorAll(".hero-heading > span"),
+          { y: 28, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.12 },
+          "-=0.15"
+        )
+        .fromTo(
+          content.querySelector(".hero-divider"),
+          { scaleX: 0, autoAlpha: 0, transformOrigin: "center" },
+          { scaleX: 1, autoAlpha: 1, duration: 0.5 },
+          "-=0.25"
+        )
+        .fromTo(
+          content.querySelector(".hero-subheading"),
+          { y: 18, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.6 },
+          "-=0.3"
+        )
+        .fromTo(
+          content.querySelector(".hero-cta"),
+          { y: 16, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.55 },
+          "-=0.35"
+        )
+        .fromTo(
+          content.querySelector(".hero-diamond--bottom"),
+          { autoAlpha: 0 },
+          { autoAlpha: 1, duration: 0.5 },
+          "-=0.35"
+        );
+    });
+
+    return () => {
+      unsubscribe();
+      timeline?.kill();
+    };
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       className="hero-section"
       role="region"
       aria-roledescription="carousel"
@@ -194,7 +264,7 @@ export default function HeroCarousel() {
 
                   {/* CTA button */}
                   <div className="mt-10">
-                    <Link href={slide.ctaHref} className="hero-cta">
+                    <Link href={slide.ctaHref} className="hero-cta" data-gsap-lift>
                       {slide.ctaLabel}
                       <svg
                         className="hero-cta-arrow"

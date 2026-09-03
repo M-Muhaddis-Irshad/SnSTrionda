@@ -6,6 +6,7 @@ import ProductDetailTabs from "@/components/products/ProductDetailTabs";
 import ProductReviews from "@/components/products/ProductReviews";
 import ProductCard from "@/components/ui/ProductCard";
 import BenefitsBar from "@/components/BenefitsBar";
+import FadeIn from "@/components/motion/FadeIn";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -154,22 +155,26 @@ export default async function ProductDetailPage({
         {/* Product grid */}
         <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Gallery */}
-          <ProductGallery images={product.images} productName={product.name} />
+          <FadeIn>
+            <ProductGallery images={product.images} productName={product.name} />
+          </FadeIn>
 
           {/* Purchase panel */}
-          <ProductPurchasePanel
-            productId={product.id}
-            productName={product.name}
-            productSlug={product.slug}
-            categoryName={product.category.name}
-            basePrice={Number(product.basePrice)}
-            isCustomizable={product.isCustomizable}
-            variants={product.variants}
-            images={product.images}
-            apiUrl={API_URL}
-            rating={rating}
-            reviewCount={reviews.length}
-          />
+          <FadeIn delay={0.12}>
+            <ProductPurchasePanel
+              productId={product.id}
+              productName={product.name}
+              productSlug={product.slug}
+              categoryName={product.category.name}
+              basePrice={Number(product.basePrice)}
+              isCustomizable={product.isCustomizable}
+              variants={product.variants}
+              images={product.images}
+              apiUrl={API_URL}
+              rating={rating}
+              reviewCount={reviews.length}
+            />
+          </FadeIn>
         </div>
 
         {/* Tabs + accordion */}

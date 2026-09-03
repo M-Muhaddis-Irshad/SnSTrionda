@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ScrollReveal from "@/components/motion/ScrollReveal";
 
 interface Category {
   id: string;
@@ -58,7 +59,8 @@ export default async function CategoryCards() {
       </div>
 
       <div className="category-grid">
-        <div
+        <ScrollReveal
+          selector=".category-card"
           className="grid gap-4"
           style={{
             gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, 240px), 1fr))`,
@@ -103,7 +105,7 @@ export default async function CategoryCards() {
               </div>
             </Link>
           ))}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

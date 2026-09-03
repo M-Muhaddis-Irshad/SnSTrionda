@@ -3,6 +3,7 @@ import { Bodoni_Moda, Inter } from "next/font/google";
 import ClientShell from "@/components/ClientShell";
 import ConditionalShell from "@/components/ConditionalShell";
 import RealtimeClient from "@/components/realtime/RealtimeClient";
+import InitialPreloader from "@/components/InitialPreloader";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="min-h-screen overflow-x-hidden bg-background text-foreground font-body antialiased pb-14 md:pb-0">
+        <InitialPreloader />
         <ConditionalShell>
           {children}
         </ConditionalShell>

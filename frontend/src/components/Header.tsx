@@ -5,6 +5,7 @@ import CartButton from "./cart/CartButton";
 import AccountButton from "./AccountButton";
 import NotificationBell from "./NotificationBell";
 import SearchButton from "./search/SearchButton";
+import HoverLift from "./motion/HoverLift";
 
 const navLinks = [
   { label: "Shop", href: "/shop" },
@@ -41,6 +42,7 @@ export default function Header() {
               key={link.label}
               href={link.href}
               className="header-nav-link"
+              data-gsap-lift
             >
               {link.label}
             </Link>
@@ -60,6 +62,7 @@ export default function Header() {
           <MobileMenu />
         </div>
       </div>
+      <HoverLift />
     </header>
   );
 }

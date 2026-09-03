@@ -43,7 +43,11 @@ function GoogleSignInButton({ onSuccess }: { onSuccess: (credential: string) => 
           callback: (response: { credential: string }) => onSuccess(response.credential),
         });
         window.google.accounts.id.renderButton(btnRef.current, {
-          theme: 'outline',
+          // Google's official dark variant — matches the site's black theme
+          // (the avatar+email pill in the reference is Google's native One Tap
+          // UI, which only renders via google.accounts.id.prompt() — it is NOT
+          // something a rendered button or custom button can replicate).
+          theme: 'filled_black',
           size: 'large',
           width: btnRef.current.offsetWidth,
           text: 'continue_with',

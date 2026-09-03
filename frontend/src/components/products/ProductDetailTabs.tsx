@@ -6,7 +6,8 @@
 // data; only Shipping & Returns uses the site-wide static policy.
 // =============================================================================
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { gsap } from "@/lib/motion";
 
 export interface DetailVariant {
   size: string | null;
@@ -38,6 +39,20 @@ export default function ProductDetailTabs({
 }: ProductDetailTabsProps) {
   const [tab, setTab] = useState<"description" | "details" | "fit" | "shipping">("description");
   const [openRow, setOpenRow] = useState<string | null>("material");
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Subtle crossfade whenever the active tab changes (pre-paint so the new
+  // panel never flashes at full opacity first).
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    gsap.fromTo(
+      panel,
+      { autoAlpha: 0.25, y: 8 },
+      { autoAlpha: 1, y: 0, duration: 0.35, ease: "power1.out" }
+    );
+  }, [tab]);
 
   const fabrics = [...new Set(variants.map((v) => v.fabricType).filter(Boolean))] as string[];
   const sizes = [...new Set(variants.map((v) => v.size).filter(Boolean))] as string[];
@@ -108,7 +123,7 @@ export default function ProductDetailTabs({
       </div>
 
       {/* Tab panels */}
-      <div className="py-6">
+      <div ref={panelRef} className="py-6">
         {tab === "description" && (
           <p className="font-body text-sm leading-relaxed text-muted">
             {description || "No description available for this piece yet."}
