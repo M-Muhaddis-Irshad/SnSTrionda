@@ -17,6 +17,13 @@ exports.handleCreateVariant = handleCreateVariant;
 exports.handleUpdateVariant = handleUpdateVariant;
 exports.handleDeleteVariant = handleDeleteVariant;
 const admin_service_1 = require("./admin.service");
+const socketService_1 = require("../../services/socketService");
+// Fire-and-forget audit trail entry (never blocks or fails the request)
+function track(adminId, action, entityType, entityId, details) {
+    if (!adminId)
+        return;
+    (0, socketService_1.logAdminActivity)(adminId, action, entityType, entityId, details ?? null).catch(() => { });
+}
 // ---------------------------------------------------------------------------
 // Helper
 // ---------------------------------------------------------------------------
@@ -72,7 +79,7 @@ async function handleUpdateOrderStatus(req, res) {
         if (!status && !paymentStatus) {
             return res.status(400).json({ error: "Provide at least one of: status, paymentStatus" });
         }
-        const order = await (0, admin_service_1.updateOrderStatus)(orderId, { status, paymentStatus });
+        const order = await (0, admin_service_1.updateOrderStatus)(orderId, { status, paymentStatus }, req.user?.userId);
         res.json({ data: order, message: "Order updated successfully" });
     }
     catch (err) {
@@ -123,6 +130,7 @@ async function handleCreateProduct(req, res) {
             variants,
         });
         res.status(201).json({ data: product, message: "Product created successfully" });
+        track(req.user?.userId, "CREATE_PRODUCT", "Product", product.id, { name: product.name });
     }
     catch (err) {
         handleAdminError(err, res);
@@ -141,6 +149,7 @@ async function handleUpdateProduct(req, res) {
             categoryId,
         });
         res.json({ data: product, message: "Product updated successfully" });
+        track(req.user?.userId, "UPDATE_PRODUCT", "Product", productId, { name: product?.name });
     }
     catch (err) {
         handleAdminError(err, res);
@@ -151,6 +160,7 @@ async function handleDeleteProduct(req, res) {
         const productId = req.params.productId;
         const result = await (0, admin_service_1.deleteProduct)(productId);
         res.json({ ...result, message: "Product deactivated successfully" });
+        track(req.user?.userId, "DELETE_PRODUCT", "Product", productId);
     }
     catch (err) {
         handleAdminError(err, res);
@@ -184,6 +194,7 @@ async function handleCreateVariant(req, res) {
             stockQuantity: stockQuantity !== undefined ? Number(stockQuantity) : undefined,
         });
         res.status(201).json({ data: variant, message: "Variant created successfully" });
+        track(req.user?.userId, "CREATE_VARIANT", "Variant", variant.id, { sku: variant.sku });
     }
     catch (err) {
         handleAdminError(err, res);
@@ -202,6 +213,7 @@ async function handleUpdateVariant(req, res) {
             stockQuantity: stockQuantity !== undefined ? Number(stockQuantity) : undefined,
         });
         res.json({ data: variant, message: "Variant updated successfully" });
+        track(req.user?.userId, "UPDATE_VARIANT", "Variant", variantId);
     }
     catch (err) {
         handleAdminError(err, res);
@@ -212,6 +224,7 @@ async function handleDeleteVariant(req, res) {
         const variantId = req.params.variantId;
         const result = await (0, admin_service_1.deleteVariant)(variantId);
         res.json({ ...result, message: "Variant deleted successfully" });
+        track(req.user?.userId, "DELETE_VARIANT", "Variant", variantId);
     }
     catch (err) {
         handleAdminError(err, res);

@@ -184,6 +184,12 @@ export type UserWhereInput = {
     addresses?: Prisma.AddressListRelationFilter;
     orders?: Prisma.OrderListRelationFilter;
     activities?: Prisma.ActivityListRelationFilter;
+    reviews?: Prisma.ReviewListRelationFilter;
+    notifications?: Prisma.NotificationListRelationFilter;
+    customerChats?: Prisma.ChatSessionListRelationFilter;
+    adminChats?: Prisma.ChatSessionListRelationFilter;
+    chatMessages?: Prisma.ChatMessageListRelationFilter;
+    adminActivities?: Prisma.AdminActivityListRelationFilter;
 };
 export type UserOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
@@ -201,6 +207,12 @@ export type UserOrderByWithRelationInput = {
     addresses?: Prisma.AddressOrderByRelationAggregateInput;
     orders?: Prisma.OrderOrderByRelationAggregateInput;
     activities?: Prisma.ActivityOrderByRelationAggregateInput;
+    reviews?: Prisma.ReviewOrderByRelationAggregateInput;
+    notifications?: Prisma.NotificationOrderByRelationAggregateInput;
+    customerChats?: Prisma.ChatSessionOrderByRelationAggregateInput;
+    adminChats?: Prisma.ChatSessionOrderByRelationAggregateInput;
+    chatMessages?: Prisma.ChatMessageOrderByRelationAggregateInput;
+    adminActivities?: Prisma.AdminActivityOrderByRelationAggregateInput;
 };
 export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
@@ -221,6 +233,12 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
     addresses?: Prisma.AddressListRelationFilter;
     orders?: Prisma.OrderListRelationFilter;
     activities?: Prisma.ActivityListRelationFilter;
+    reviews?: Prisma.ReviewListRelationFilter;
+    notifications?: Prisma.NotificationListRelationFilter;
+    customerChats?: Prisma.ChatSessionListRelationFilter;
+    adminChats?: Prisma.ChatSessionListRelationFilter;
+    chatMessages?: Prisma.ChatMessageListRelationFilter;
+    adminActivities?: Prisma.AdminActivityListRelationFilter;
 }, "id" | "email">;
 export type UserOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
@@ -268,6 +286,12 @@ export type UserCreateInput = {
     addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
 };
 export type UserUncheckedCreateInput = {
     id?: string;
@@ -285,6 +309,12 @@ export type UserUncheckedCreateInput = {
     addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
 };
 export type UserUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -302,6 +332,12 @@ export type UserUpdateInput = {
     addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
 };
 export type UserUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -319,6 +355,12 @@ export type UserUncheckedUpdateInput = {
     addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
 };
 export type UserCreateManyInput = {
     id?: string;
@@ -396,6 +438,10 @@ export type UserScalarRelationFilter = {
     is?: Prisma.UserWhereInput;
     isNot?: Prisma.UserWhereInput;
 };
+export type UserNullableScalarRelationFilter = {
+    is?: Prisma.UserWhereInput | null;
+    isNot?: Prisma.UserWhereInput | null;
+};
 export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null;
 };
@@ -462,6 +508,80 @@ export type UserUpdateOneRequiredWithoutActivitiesNestedInput = {
     connect?: Prisma.UserWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutActivitiesInput, Prisma.UserUpdateWithoutActivitiesInput>, Prisma.UserUncheckedUpdateWithoutActivitiesInput>;
 };
+export type UserCreateNestedOneWithoutReviewsInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutReviewsInput, Prisma.UserUncheckedCreateWithoutReviewsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneRequiredWithoutReviewsNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutReviewsInput, Prisma.UserUncheckedCreateWithoutReviewsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewsInput;
+    upsert?: Prisma.UserUpsertWithoutReviewsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewsInput, Prisma.UserUpdateWithoutReviewsInput>, Prisma.UserUncheckedUpdateWithoutReviewsInput>;
+};
+export type UserCreateNestedOneWithoutNotificationsInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput;
+    upsert?: Prisma.UserUpsertWithoutNotificationsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>;
+};
+export type UserCreateNestedOneWithoutCustomerChatsInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutCustomerChatsInput, Prisma.UserUncheckedCreateWithoutCustomerChatsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutCustomerChatsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserCreateNestedOneWithoutAdminChatsInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutAdminChatsInput, Prisma.UserUncheckedCreateWithoutAdminChatsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutAdminChatsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneRequiredWithoutCustomerChatsNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutCustomerChatsInput, Prisma.UserUncheckedCreateWithoutCustomerChatsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutCustomerChatsInput;
+    upsert?: Prisma.UserUpsertWithoutCustomerChatsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCustomerChatsInput, Prisma.UserUpdateWithoutCustomerChatsInput>, Prisma.UserUncheckedUpdateWithoutCustomerChatsInput>;
+};
+export type UserUpdateOneWithoutAdminChatsNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutAdminChatsInput, Prisma.UserUncheckedCreateWithoutAdminChatsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutAdminChatsInput;
+    upsert?: Prisma.UserUpsertWithoutAdminChatsInput;
+    disconnect?: Prisma.UserWhereInput | boolean;
+    delete?: Prisma.UserWhereInput | boolean;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAdminChatsInput, Prisma.UserUpdateWithoutAdminChatsInput>, Prisma.UserUncheckedUpdateWithoutAdminChatsInput>;
+};
+export type UserCreateNestedOneWithoutChatMessagesInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutChatMessagesInput, Prisma.UserUncheckedCreateWithoutChatMessagesInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutChatMessagesInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneRequiredWithoutChatMessagesNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutChatMessagesInput, Prisma.UserUncheckedCreateWithoutChatMessagesInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutChatMessagesInput;
+    upsert?: Prisma.UserUpsertWithoutChatMessagesInput;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChatMessagesInput, Prisma.UserUpdateWithoutChatMessagesInput>, Prisma.UserUncheckedUpdateWithoutChatMessagesInput>;
+};
+export type UserCreateNestedOneWithoutAdminActivitiesInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutAdminActivitiesInput, Prisma.UserUncheckedCreateWithoutAdminActivitiesInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutAdminActivitiesInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneRequiredWithoutAdminActivitiesNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutAdminActivitiesInput, Prisma.UserUncheckedCreateWithoutAdminActivitiesInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutAdminActivitiesInput;
+    upsert?: Prisma.UserUpsertWithoutAdminActivitiesInput;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAdminActivitiesInput, Prisma.UserUpdateWithoutAdminActivitiesInput>, Prisma.UserUncheckedUpdateWithoutAdminActivitiesInput>;
+};
 export type UserCreateWithoutAccountsInput = {
     id?: string;
     name?: string | null;
@@ -477,6 +597,12 @@ export type UserCreateWithoutAccountsInput = {
     addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
 };
 export type UserUncheckedCreateWithoutAccountsInput = {
     id?: string;
@@ -493,6 +619,12 @@ export type UserUncheckedCreateWithoutAccountsInput = {
     addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
 };
 export type UserCreateOrConnectWithoutAccountsInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -522,6 +654,12 @@ export type UserUpdateWithoutAccountsInput = {
     addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
 };
 export type UserUncheckedUpdateWithoutAccountsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -538,6 +676,12 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
     addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
 };
 export type UserCreateWithoutSessionsInput = {
     id?: string;
@@ -554,6 +698,12 @@ export type UserCreateWithoutSessionsInput = {
     addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
 };
 export type UserUncheckedCreateWithoutSessionsInput = {
     id?: string;
@@ -570,6 +720,12 @@ export type UserUncheckedCreateWithoutSessionsInput = {
     addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
 };
 export type UserCreateOrConnectWithoutSessionsInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -599,6 +755,12 @@ export type UserUpdateWithoutSessionsInput = {
     addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
 };
 export type UserUncheckedUpdateWithoutSessionsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -615,6 +777,12 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
     addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
 };
 export type UserCreateWithoutAddressesInput = {
     id?: string;
@@ -631,6 +799,12 @@ export type UserCreateWithoutAddressesInput = {
     sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
 };
 export type UserUncheckedCreateWithoutAddressesInput = {
     id?: string;
@@ -647,6 +821,12 @@ export type UserUncheckedCreateWithoutAddressesInput = {
     sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
 };
 export type UserCreateOrConnectWithoutAddressesInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -676,6 +856,12 @@ export type UserUpdateWithoutAddressesInput = {
     sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
 };
 export type UserUncheckedUpdateWithoutAddressesInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -692,6 +878,12 @@ export type UserUncheckedUpdateWithoutAddressesInput = {
     sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
 };
 export type UserCreateWithoutOrdersInput = {
     id?: string;
@@ -708,6 +900,12 @@ export type UserCreateWithoutOrdersInput = {
     sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
     addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
 };
 export type UserUncheckedCreateWithoutOrdersInput = {
     id?: string;
@@ -724,6 +922,12 @@ export type UserUncheckedCreateWithoutOrdersInput = {
     sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
     addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
     activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
 };
 export type UserCreateOrConnectWithoutOrdersInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -753,6 +957,12 @@ export type UserUpdateWithoutOrdersInput = {
     sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
     addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
 };
 export type UserUncheckedUpdateWithoutOrdersInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -769,6 +979,12 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
     sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
     addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
     activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
 };
 export type UserCreateWithoutActivitiesInput = {
     id?: string;
@@ -785,6 +1001,12 @@ export type UserCreateWithoutActivitiesInput = {
     sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
     addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
 };
 export type UserUncheckedCreateWithoutActivitiesInput = {
     id?: string;
@@ -801,6 +1023,12 @@ export type UserUncheckedCreateWithoutActivitiesInput = {
     sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
     addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
     orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
 };
 export type UserCreateOrConnectWithoutActivitiesInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -830,6 +1058,12 @@ export type UserUpdateWithoutActivitiesInput = {
     sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
     addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
 };
 export type UserUncheckedUpdateWithoutActivitiesInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -846,6 +1080,618 @@ export type UserUncheckedUpdateWithoutActivitiesInput = {
     sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
     addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
     orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
+};
+export type UserCreateWithoutReviewsInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
+};
+export type UserUncheckedCreateWithoutReviewsInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
+};
+export type UserCreateOrConnectWithoutReviewsInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutReviewsInput, Prisma.UserUncheckedCreateWithoutReviewsInput>;
+};
+export type UserUpsertWithoutReviewsInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutReviewsInput, Prisma.UserUncheckedUpdateWithoutReviewsInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutReviewsInput, Prisma.UserUncheckedCreateWithoutReviewsInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutReviewsInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutReviewsInput, Prisma.UserUncheckedUpdateWithoutReviewsInput>;
+};
+export type UserUpdateWithoutReviewsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
+};
+export type UserUncheckedUpdateWithoutReviewsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
+};
+export type UserCreateWithoutNotificationsInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
+};
+export type UserUncheckedCreateWithoutNotificationsInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
+};
+export type UserCreateOrConnectWithoutNotificationsInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>;
+};
+export type UserUpsertWithoutNotificationsInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>;
+};
+export type UserUpdateWithoutNotificationsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
+};
+export type UserUncheckedUpdateWithoutNotificationsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
+};
+export type UserCreateWithoutCustomerChatsInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
+};
+export type UserUncheckedCreateWithoutCustomerChatsInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
+};
+export type UserCreateOrConnectWithoutCustomerChatsInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutCustomerChatsInput, Prisma.UserUncheckedCreateWithoutCustomerChatsInput>;
+};
+export type UserCreateWithoutAdminChatsInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
+};
+export type UserUncheckedCreateWithoutAdminChatsInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
+};
+export type UserCreateOrConnectWithoutAdminChatsInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutAdminChatsInput, Prisma.UserUncheckedCreateWithoutAdminChatsInput>;
+};
+export type UserUpsertWithoutCustomerChatsInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutCustomerChatsInput, Prisma.UserUncheckedUpdateWithoutCustomerChatsInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutCustomerChatsInput, Prisma.UserUncheckedCreateWithoutCustomerChatsInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutCustomerChatsInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutCustomerChatsInput, Prisma.UserUncheckedUpdateWithoutCustomerChatsInput>;
+};
+export type UserUpdateWithoutCustomerChatsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
+};
+export type UserUncheckedUpdateWithoutCustomerChatsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
+};
+export type UserUpsertWithoutAdminChatsInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutAdminChatsInput, Prisma.UserUncheckedUpdateWithoutAdminChatsInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutAdminChatsInput, Prisma.UserUncheckedCreateWithoutAdminChatsInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutAdminChatsInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutAdminChatsInput, Prisma.UserUncheckedUpdateWithoutAdminChatsInput>;
+};
+export type UserUpdateWithoutAdminChatsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
+};
+export type UserUncheckedUpdateWithoutAdminChatsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
+};
+export type UserCreateWithoutChatMessagesInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    adminActivities?: Prisma.AdminActivityCreateNestedManyWithoutAdminInput;
+};
+export type UserUncheckedCreateWithoutChatMessagesInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    adminActivities?: Prisma.AdminActivityUncheckedCreateNestedManyWithoutAdminInput;
+};
+export type UserCreateOrConnectWithoutChatMessagesInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutChatMessagesInput, Prisma.UserUncheckedCreateWithoutChatMessagesInput>;
+};
+export type UserUpsertWithoutChatMessagesInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutChatMessagesInput, Prisma.UserUncheckedUpdateWithoutChatMessagesInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutChatMessagesInput, Prisma.UserUncheckedCreateWithoutChatMessagesInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutChatMessagesInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutChatMessagesInput, Prisma.UserUncheckedUpdateWithoutChatMessagesInput>;
+};
+export type UserUpdateWithoutChatMessagesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    adminActivities?: Prisma.AdminActivityUpdateManyWithoutAdminNestedInput;
+};
+export type UserUncheckedUpdateWithoutChatMessagesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    adminActivities?: Prisma.AdminActivityUncheckedUpdateManyWithoutAdminNestedInput;
+};
+export type UserCreateWithoutAdminActivitiesInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutSenderInput;
+};
+export type UserUncheckedCreateWithoutAdminActivitiesInput = {
+    id?: string;
+    name?: string | null;
+    email: string;
+    emailVerified?: Date | string | null;
+    image?: string | null;
+    password?: string | null;
+    phone?: string | null;
+    role?: $Enums.UserRole;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput;
+    sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
+    addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutUserInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    customerChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutCustomerInput;
+    adminChats?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutAdminInput;
+    chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutSenderInput;
+};
+export type UserCreateOrConnectWithoutAdminActivitiesInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutAdminActivitiesInput, Prisma.UserUncheckedCreateWithoutAdminActivitiesInput>;
+};
+export type UserUpsertWithoutAdminActivitiesInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutAdminActivitiesInput, Prisma.UserUncheckedUpdateWithoutAdminActivitiesInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutAdminActivitiesInput, Prisma.UserUncheckedCreateWithoutAdminActivitiesInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutAdminActivitiesInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutAdminActivitiesInput, Prisma.UserUncheckedUpdateWithoutAdminActivitiesInput>;
+};
+export type UserUpdateWithoutAdminActivitiesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUpdateManyWithoutSenderNestedInput;
+};
+export type UserUncheckedUpdateWithoutAdminActivitiesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput;
+    sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
+    addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    activities?: Prisma.ActivityUncheckedUpdateManyWithoutUserNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    customerChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutCustomerNestedInput;
+    adminChats?: Prisma.ChatSessionUncheckedUpdateManyWithoutAdminNestedInput;
+    chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutSenderNestedInput;
 };
 /**
  * Count Type UserCountOutputType
@@ -856,6 +1702,12 @@ export type UserCountOutputType = {
     addresses: number;
     orders: number;
     activities: number;
+    reviews: number;
+    notifications: number;
+    customerChats: number;
+    adminChats: number;
+    chatMessages: number;
+    adminActivities: number;
 };
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     accounts?: boolean | UserCountOutputTypeCountAccountsArgs;
@@ -863,6 +1715,12 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
     addresses?: boolean | UserCountOutputTypeCountAddressesArgs;
     orders?: boolean | UserCountOutputTypeCountOrdersArgs;
     activities?: boolean | UserCountOutputTypeCountActivitiesArgs;
+    reviews?: boolean | UserCountOutputTypeCountReviewsArgs;
+    notifications?: boolean | UserCountOutputTypeCountNotificationsArgs;
+    customerChats?: boolean | UserCountOutputTypeCountCustomerChatsArgs;
+    adminChats?: boolean | UserCountOutputTypeCountAdminChatsArgs;
+    chatMessages?: boolean | UserCountOutputTypeCountChatMessagesArgs;
+    adminActivities?: boolean | UserCountOutputTypeCountAdminActivitiesArgs;
 };
 /**
  * UserCountOutputType without action
@@ -903,6 +1761,42 @@ export type UserCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Ext
 export type UserCountOutputTypeCountActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.ActivityWhereInput;
 };
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ReviewWhereInput;
+};
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.NotificationWhereInput;
+};
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCustomerChatsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ChatSessionWhereInput;
+};
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAdminChatsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ChatSessionWhereInput;
+};
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountChatMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ChatMessageWhereInput;
+};
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAdminActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.AdminActivityWhereInput;
+};
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     name?: boolean;
@@ -919,6 +1813,12 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     addresses?: boolean | Prisma.User$addressesArgs<ExtArgs>;
     orders?: boolean | Prisma.User$ordersArgs<ExtArgs>;
     activities?: boolean | Prisma.User$activitiesArgs<ExtArgs>;
+    reviews?: boolean | Prisma.User$reviewsArgs<ExtArgs>;
+    notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>;
+    customerChats?: boolean | Prisma.User$customerChatsArgs<ExtArgs>;
+    adminChats?: boolean | Prisma.User$adminChatsArgs<ExtArgs>;
+    chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>;
+    adminActivities?: boolean | Prisma.User$adminActivitiesArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["user"]>;
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -964,6 +1864,12 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     addresses?: boolean | Prisma.User$addressesArgs<ExtArgs>;
     orders?: boolean | Prisma.User$ordersArgs<ExtArgs>;
     activities?: boolean | Prisma.User$activitiesArgs<ExtArgs>;
+    reviews?: boolean | Prisma.User$reviewsArgs<ExtArgs>;
+    notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>;
+    customerChats?: boolean | Prisma.User$customerChatsArgs<ExtArgs>;
+    adminChats?: boolean | Prisma.User$adminChatsArgs<ExtArgs>;
+    chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>;
+    adminActivities?: boolean | Prisma.User$adminActivitiesArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {};
@@ -976,6 +1882,12 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
         addresses: Prisma.$AddressPayload<ExtArgs>[];
         orders: Prisma.$OrderPayload<ExtArgs>[];
         activities: Prisma.$ActivityPayload<ExtArgs>[];
+        reviews: Prisma.$ReviewPayload<ExtArgs>[];
+        notifications: Prisma.$NotificationPayload<ExtArgs>[];
+        customerChats: Prisma.$ChatSessionPayload<ExtArgs>[];
+        adminChats: Prisma.$ChatSessionPayload<ExtArgs>[];
+        chatMessages: Prisma.$ChatMessagePayload<ExtArgs>[];
+        adminActivities: Prisma.$AdminActivityPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
@@ -1322,6 +2234,12 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
     addresses<T extends Prisma.User$addressesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$addressesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     orders<T extends Prisma.User$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     activities<T extends Prisma.User$activitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    reviews<T extends Prisma.User$reviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    customerChats<T extends Prisma.User$customerChatsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$customerChatsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    adminChats<T extends Prisma.User$adminChatsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminChatsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    chatMessages<T extends Prisma.User$chatMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    adminActivities<T extends Prisma.User$adminActivitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminActivitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1846,6 +2764,144 @@ export type User$activitiesArgs<ExtArgs extends runtime.Types.Extensions.Interna
     take?: number;
     skip?: number;
     distinct?: Prisma.ActivityScalarFieldEnum | Prisma.ActivityScalarFieldEnum[];
+};
+/**
+ * User.reviews
+ */
+export type User$reviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Review
+     */
+    select?: Prisma.ReviewSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Review
+     */
+    omit?: Prisma.ReviewOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ReviewInclude<ExtArgs> | null;
+    where?: Prisma.ReviewWhereInput;
+    orderBy?: Prisma.ReviewOrderByWithRelationInput | Prisma.ReviewOrderByWithRelationInput[];
+    cursor?: Prisma.ReviewWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ReviewScalarFieldEnum | Prisma.ReviewScalarFieldEnum[];
+};
+/**
+ * User.notifications
+ */
+export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: Prisma.NotificationSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: Prisma.NotificationOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.NotificationInclude<ExtArgs> | null;
+    where?: Prisma.NotificationWhereInput;
+    orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[];
+    cursor?: Prisma.NotificationWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[];
+};
+/**
+ * User.customerChats
+ */
+export type User$customerChatsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: Prisma.ChatSessionSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: Prisma.ChatSessionOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ChatSessionInclude<ExtArgs> | null;
+    where?: Prisma.ChatSessionWhereInput;
+    orderBy?: Prisma.ChatSessionOrderByWithRelationInput | Prisma.ChatSessionOrderByWithRelationInput[];
+    cursor?: Prisma.ChatSessionWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ChatSessionScalarFieldEnum | Prisma.ChatSessionScalarFieldEnum[];
+};
+/**
+ * User.adminChats
+ */
+export type User$adminChatsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: Prisma.ChatSessionSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: Prisma.ChatSessionOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ChatSessionInclude<ExtArgs> | null;
+    where?: Prisma.ChatSessionWhereInput;
+    orderBy?: Prisma.ChatSessionOrderByWithRelationInput | Prisma.ChatSessionOrderByWithRelationInput[];
+    cursor?: Prisma.ChatSessionWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ChatSessionScalarFieldEnum | Prisma.ChatSessionScalarFieldEnum[];
+};
+/**
+ * User.chatMessages
+ */
+export type User$chatMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatMessage
+     */
+    select?: Prisma.ChatMessageSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the ChatMessage
+     */
+    omit?: Prisma.ChatMessageOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ChatMessageInclude<ExtArgs> | null;
+    where?: Prisma.ChatMessageWhereInput;
+    orderBy?: Prisma.ChatMessageOrderByWithRelationInput | Prisma.ChatMessageOrderByWithRelationInput[];
+    cursor?: Prisma.ChatMessageWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ChatMessageScalarFieldEnum | Prisma.ChatMessageScalarFieldEnum[];
+};
+/**
+ * User.adminActivities
+ */
+export type User$adminActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminActivity
+     */
+    select?: Prisma.AdminActivitySelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the AdminActivity
+     */
+    omit?: Prisma.AdminActivityOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.AdminActivityInclude<ExtArgs> | null;
+    where?: Prisma.AdminActivityWhereInput;
+    orderBy?: Prisma.AdminActivityOrderByWithRelationInput | Prisma.AdminActivityOrderByWithRelationInput[];
+    cursor?: Prisma.AdminActivityWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.AdminActivityScalarFieldEnum | Prisma.AdminActivityScalarFieldEnum[];
 };
 /**
  * User without action

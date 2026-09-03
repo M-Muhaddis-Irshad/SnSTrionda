@@ -80,7 +80,10 @@ export async function listProducts(params: PaginationParams): Promise<PaginatedR
 // ---------------------------------------------------------------------------
 
 export async function listCategories() {
+  // Storefront only sees active categories — inactive ones (e.g. retired
+  // Footwear / Accessories) are hidden from nav, cards and filters.
   return prisma.category.findMany({
+    where: { active: true },
     orderBy: { name: "asc" },
     select: { id: true, name: true, slug: true },
   });

@@ -778,6 +778,25 @@ body {
   @apply text-sm;
 }
 
+/* Google Identity Services button — span full available width like form fields */
+.google-button-container {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.google-button-container > div {
+  width: 100%;
+  max-width: 100%;
+}
+
+.google-button-container iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 .auth-switch-text {
   @apply text-center text-gray-400 text-sm mt-8;
 }
@@ -1027,21 +1046,84 @@ body {
   @apply bg-background py-16 sm:py-20;
 }
 
-.featured-scroll {
-  @apply mt-10 overflow-x-auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.featured-scroll::-webkit-scrollbar {
-  display: none;
+/* Featured product grid — responsive columns, staggered entrance, hover lift */
+
+.featured-grid-wrap {
+  @apply mx-auto mt-10 max-w-7xl px-4 sm:px-6 lg:px-8;
 }
 
-.featured-track {
-  @apply flex gap-5 px-4 pb-4 sm:px-6 lg:px-8 xl:px-[max(2rem,calc((100%-80rem)/2+2rem))];
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.featured-grid-item {
+  min-width: 0;
+  animation: featuredCardIn 0.5s ease-out both;
+}
+
+@keyframes featuredCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .featured-empty {
   @apply text-muted text-sm py-8;
+}
+
+/* Card hover — scale + deep shadow + slightly brighter image (pointer devices only) */
+@media (hover: hover) {
+  .featured-grid .product-card:hover .product-card-inner {
+    transform: scale(1.02);
+    box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.9);
+  }
+  .featured-grid .product-card:hover .product-card-img {
+    filter: brightness(1.05);
+  }
+}
+
+/* Single column on very small screens */
+@media (max-width: 639px) {
+  .featured-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* No stagger on mobile — instant render for a fast first paint */
+@media (max-width: 767px) {
+  .featured-grid-item {
+    animation: none;
+  }
+}
+
+/* Category chip + View CTA shown on the homepage featured grid */
+.product-card-category-badge {
+  @apply mb-2 inline-block border border-chrome-500 px-2 py-0.5 font-body text-[9px]
+         uppercase tracking-[0.18em] text-chrome-300;
+}
+
+.product-card-view {
+  @apply mt-3 inline-flex items-center gap-2 font-body text-[11px] uppercase
+         tracking-[0.18em] text-chrome-300 transition-colors duration-200;
+}
+
+.product-card-view-arrow {
+  @apply h-3 w-3 transition-transform duration-200;
+}
+
+.product-card:hover .product-card-view {
+  color: var(--color-foreground);
+}
+
+.product-card:hover .product-card-view-arrow {
+  transform: translateX(3px);
 }
 
 /* =============================================================================

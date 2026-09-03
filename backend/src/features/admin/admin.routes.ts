@@ -21,6 +21,22 @@ import {
 } from "./admin.controller";
 import imageRouter from "./image.routes";
 import campaignRouter from "./campaign.routes";
+import {
+  handleAdminListDeliveryZones,
+  handleAdminGetDeliveryZone,
+  handleAdminCreateDeliveryZone,
+  handleAdminUpdateDeliveryZone,
+  handleAdminDeleteDeliveryZone,
+} from "../delivery/delivery.controller";
+import {
+  handleAdminListReviews,
+  handleAdminGetReview,
+  handleAdminApproveReview,
+  handleAdminRejectReview,
+  handleAdminUnapproveReview,
+  handleAdminDeleteReview,
+} from "../reviews/reviews.controller";
+import { handleListActivity } from "../activity/activity.controller";
 
 const router = Router();
 
@@ -66,6 +82,33 @@ router.use("/campaigns", campaignRouter);
 // ---------------------------------------------------------------------------
 
 router.get("/categories", handleListCategories);
+
+// ---------------------------------------------------------------------------
+// Delivery zones — full CRUD
+// ---------------------------------------------------------------------------
+
+router.get("/delivery-zones", handleAdminListDeliveryZones);
+router.get("/delivery-zones/:id", handleAdminGetDeliveryZone);
+router.post("/delivery-zones", handleAdminCreateDeliveryZone);
+router.patch("/delivery-zones/:id", handleAdminUpdateDeliveryZone);
+router.delete("/delivery-zones/:id", handleAdminDeleteDeliveryZone);
+
+// ---------------------------------------------------------------------------
+// Reviews — moderation workflow (approve / reject / unapprove / delete)
+// ---------------------------------------------------------------------------
+
+router.get("/reviews", handleAdminListReviews);
+router.get("/reviews/:id", handleAdminGetReview);
+router.patch("/reviews/:id/approve", handleAdminApproveReview);
+router.patch("/reviews/:id/reject", handleAdminRejectReview);
+router.patch("/reviews/:id/unapprove", handleAdminUnapproveReview);
+router.delete("/reviews/:id", handleAdminDeleteReview);
+
+// ---------------------------------------------------------------------------
+// Activity feed (audit trail)
+// ---------------------------------------------------------------------------
+
+router.get("/activity", handleListActivity);
 
 // ---------------------------------------------------------------------------
 // Variants (nested under product)

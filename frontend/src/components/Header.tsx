@@ -3,14 +3,13 @@ import Link from "next/link";
 import MobileMenu from "./MobileMenu";
 import CartButton from "./cart/CartButton";
 import AccountButton from "./AccountButton";
+import NotificationBell from "./NotificationBell";
 
 const navLinks = [
   { label: "Shop", href: "/shop" },
   { label: "Men", href: "/shop/men" },
   { label: "Women", href: "/shop/women" },
   { label: "Clothing", href: "/shop/clothing" },
-  { label: "Footwear", href: "/shop/footwear" },
-  { label: "Accessories", href: "/shop/accessories" },
   { label: "New Arrivals", href: "/shop/new-arrivals" },
   { label: "Collections", href: "/shop/collections" },
 ];
@@ -49,6 +48,8 @@ export default function Header() {
 
         {/* Right — Icons + Mobile menu */}
         <div className="header-actions">
+          <NotificationBell />
+
           <AccountButton />
 
           <button

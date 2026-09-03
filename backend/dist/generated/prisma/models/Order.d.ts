@@ -256,6 +256,9 @@ export type OrderWhereInput = {
     user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
     shippingAddress?: Prisma.XOR<Prisma.AddressScalarRelationFilter, Prisma.AddressWhereInput>;
     items?: Prisma.OrderItemListRelationFilter;
+    reviews?: Prisma.ReviewListRelationFilter;
+    statusHistory?: Prisma.OrderStatusHistoryListRelationFilter;
+    chatSessions?: Prisma.ChatSessionListRelationFilter;
 };
 export type OrderOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
@@ -275,6 +278,9 @@ export type OrderOrderByWithRelationInput = {
     user?: Prisma.UserOrderByWithRelationInput;
     shippingAddress?: Prisma.AddressOrderByWithRelationInput;
     items?: Prisma.OrderItemOrderByRelationAggregateInput;
+    reviews?: Prisma.ReviewOrderByRelationAggregateInput;
+    statusHistory?: Prisma.OrderStatusHistoryOrderByRelationAggregateInput;
+    chatSessions?: Prisma.ChatSessionOrderByRelationAggregateInput;
 };
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
@@ -297,6 +303,9 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
     user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
     shippingAddress?: Prisma.XOR<Prisma.AddressScalarRelationFilter, Prisma.AddressWhereInput>;
     items?: Prisma.OrderItemListRelationFilter;
+    reviews?: Prisma.ReviewListRelationFilter;
+    statusHistory?: Prisma.OrderStatusHistoryListRelationFilter;
+    chatSessions?: Prisma.ChatSessionListRelationFilter;
 }, "id" | "orderNumber">;
 export type OrderOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
@@ -354,6 +363,9 @@ export type OrderCreateInput = {
     user: Prisma.UserCreateNestedOneWithoutOrdersInput;
     shippingAddress: Prisma.AddressCreateNestedOneWithoutShippingOrdersInput;
     items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutOrderInput;
 };
 export type OrderUncheckedCreateInput = {
     id?: string;
@@ -371,6 +383,9 @@ export type OrderUncheckedCreateInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutOrderInput;
 };
 export type OrderUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -388,6 +403,9 @@ export type OrderUpdateInput = {
     user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput;
     shippingAddress?: Prisma.AddressUpdateOneRequiredWithoutShippingOrdersNestedInput;
     items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUpdateManyWithoutOrderNestedInput;
 };
 export type OrderUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -405,6 +423,9 @@ export type OrderUncheckedUpdateInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutOrderNestedInput;
 };
 export type OrderCreateManyInput = {
     id?: string;
@@ -524,6 +545,10 @@ export type OrderScalarRelationFilter = {
     is?: Prisma.OrderWhereInput;
     isNot?: Prisma.OrderWhereInput;
 };
+export type OrderNullableScalarRelationFilter = {
+    is?: Prisma.OrderWhereInput | null;
+    isNot?: Prisma.OrderWhereInput | null;
+};
 export type OrderCreateNestedManyWithoutUserInput = {
     create?: Prisma.XOR<Prisma.OrderCreateWithoutUserInput, Prisma.OrderUncheckedCreateWithoutUserInput> | Prisma.OrderCreateWithoutUserInput[] | Prisma.OrderUncheckedCreateWithoutUserInput[];
     connectOrCreate?: Prisma.OrderCreateOrConnectWithoutUserInput | Prisma.OrderCreateOrConnectWithoutUserInput[];
@@ -621,6 +646,44 @@ export type OrderUpdateOneRequiredWithoutItemsNestedInput = {
     connect?: Prisma.OrderWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutItemsInput, Prisma.OrderUpdateWithoutItemsInput>, Prisma.OrderUncheckedUpdateWithoutItemsInput>;
 };
+export type OrderCreateNestedOneWithoutReviewsInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutReviewsInput, Prisma.OrderUncheckedCreateWithoutReviewsInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReviewsInput;
+    connect?: Prisma.OrderWhereUniqueInput;
+};
+export type OrderUpdateOneRequiredWithoutReviewsNestedInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutReviewsInput, Prisma.OrderUncheckedCreateWithoutReviewsInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReviewsInput;
+    upsert?: Prisma.OrderUpsertWithoutReviewsInput;
+    connect?: Prisma.OrderWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutReviewsInput, Prisma.OrderUpdateWithoutReviewsInput>, Prisma.OrderUncheckedUpdateWithoutReviewsInput>;
+};
+export type OrderCreateNestedOneWithoutChatSessionsInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutChatSessionsInput, Prisma.OrderUncheckedCreateWithoutChatSessionsInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutChatSessionsInput;
+    connect?: Prisma.OrderWhereUniqueInput;
+};
+export type OrderUpdateOneWithoutChatSessionsNestedInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutChatSessionsInput, Prisma.OrderUncheckedCreateWithoutChatSessionsInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutChatSessionsInput;
+    upsert?: Prisma.OrderUpsertWithoutChatSessionsInput;
+    disconnect?: Prisma.OrderWhereInput | boolean;
+    delete?: Prisma.OrderWhereInput | boolean;
+    connect?: Prisma.OrderWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutChatSessionsInput, Prisma.OrderUpdateWithoutChatSessionsInput>, Prisma.OrderUncheckedUpdateWithoutChatSessionsInput>;
+};
+export type OrderCreateNestedOneWithoutStatusHistoryInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutStatusHistoryInput, Prisma.OrderUncheckedCreateWithoutStatusHistoryInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutStatusHistoryInput;
+    connect?: Prisma.OrderWhereUniqueInput;
+};
+export type OrderUpdateOneRequiredWithoutStatusHistoryNestedInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutStatusHistoryInput, Prisma.OrderUncheckedCreateWithoutStatusHistoryInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutStatusHistoryInput;
+    upsert?: Prisma.OrderUpsertWithoutStatusHistoryInput;
+    connect?: Prisma.OrderWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutStatusHistoryInput, Prisma.OrderUpdateWithoutStatusHistoryInput>, Prisma.OrderUncheckedUpdateWithoutStatusHistoryInput>;
+};
 export type OrderCreateWithoutUserInput = {
     id?: string;
     orderNumber: string;
@@ -636,6 +699,9 @@ export type OrderCreateWithoutUserInput = {
     updatedAt?: Date | string;
     shippingAddress: Prisma.AddressCreateNestedOneWithoutShippingOrdersInput;
     items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutOrderInput;
 };
 export type OrderUncheckedCreateWithoutUserInput = {
     id?: string;
@@ -652,6 +718,9 @@ export type OrderUncheckedCreateWithoutUserInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutOrderInput;
 };
 export type OrderCreateOrConnectWithoutUserInput = {
     where: Prisma.OrderWhereUniqueInput;
@@ -708,6 +777,9 @@ export type OrderCreateWithoutShippingAddressInput = {
     updatedAt?: Date | string;
     user: Prisma.UserCreateNestedOneWithoutOrdersInput;
     items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutOrderInput;
 };
 export type OrderUncheckedCreateWithoutShippingAddressInput = {
     id?: string;
@@ -724,6 +796,9 @@ export type OrderUncheckedCreateWithoutShippingAddressInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutOrderInput;
 };
 export type OrderCreateOrConnectWithoutShippingAddressInput = {
     where: Prisma.OrderWhereUniqueInput;
@@ -761,6 +836,9 @@ export type OrderCreateWithoutItemsInput = {
     updatedAt?: Date | string;
     user: Prisma.UserCreateNestedOneWithoutOrdersInput;
     shippingAddress: Prisma.AddressCreateNestedOneWithoutShippingOrdersInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutOrderInput;
 };
 export type OrderUncheckedCreateWithoutItemsInput = {
     id?: string;
@@ -777,6 +855,9 @@ export type OrderUncheckedCreateWithoutItemsInput = {
     shippingAddressId: string;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutOrderInput;
 };
 export type OrderCreateOrConnectWithoutItemsInput = {
     where: Prisma.OrderWhereUniqueInput;
@@ -806,6 +887,9 @@ export type OrderUpdateWithoutItemsInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput;
     shippingAddress?: Prisma.AddressUpdateOneRequiredWithoutShippingOrdersNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUpdateManyWithoutOrderNestedInput;
 };
 export type OrderUncheckedUpdateWithoutItemsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -822,6 +906,276 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
     shippingAddressId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutOrderNestedInput;
+};
+export type OrderCreateWithoutReviewsInput = {
+    id?: string;
+    orderNumber: string;
+    status?: $Enums.OrderStatus;
+    subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: string | null;
+    total: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod: $Enums.PaymentMethod;
+    paymentStatus?: $Enums.PaymentStatus;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    user: Prisma.UserCreateNestedOneWithoutOrdersInput;
+    shippingAddress: Prisma.AddressCreateNestedOneWithoutShippingOrdersInput;
+    items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutOrderInput;
+};
+export type OrderUncheckedCreateWithoutReviewsInput = {
+    id?: string;
+    orderNumber: string;
+    status?: $Enums.OrderStatus;
+    subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: string | null;
+    total: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod: $Enums.PaymentMethod;
+    paymentStatus?: $Enums.PaymentStatus;
+    userId: string;
+    shippingAddressId: string;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutOrderInput;
+};
+export type OrderCreateOrConnectWithoutReviewsInput = {
+    where: Prisma.OrderWhereUniqueInput;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutReviewsInput, Prisma.OrderUncheckedCreateWithoutReviewsInput>;
+};
+export type OrderUpsertWithoutReviewsInput = {
+    update: Prisma.XOR<Prisma.OrderUpdateWithoutReviewsInput, Prisma.OrderUncheckedUpdateWithoutReviewsInput>;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutReviewsInput, Prisma.OrderUncheckedCreateWithoutReviewsInput>;
+    where?: Prisma.OrderWhereInput;
+};
+export type OrderUpdateToOneWithWhereWithoutReviewsInput = {
+    where?: Prisma.OrderWhereInput;
+    data: Prisma.XOR<Prisma.OrderUpdateWithoutReviewsInput, Prisma.OrderUncheckedUpdateWithoutReviewsInput>;
+};
+export type OrderUpdateWithoutReviewsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    orderNumber?: Prisma.StringFieldUpdateOperationsInput | string;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod;
+    paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput;
+    shippingAddress?: Prisma.AddressUpdateOneRequiredWithoutShippingOrdersNestedInput;
+    items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUpdateManyWithoutOrderNestedInput;
+};
+export type OrderUncheckedUpdateWithoutReviewsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    orderNumber?: Prisma.StringFieldUpdateOperationsInput | string;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod;
+    paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus;
+    userId?: Prisma.StringFieldUpdateOperationsInput | string;
+    shippingAddressId?: Prisma.StringFieldUpdateOperationsInput | string;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutOrderNestedInput;
+};
+export type OrderCreateWithoutChatSessionsInput = {
+    id?: string;
+    orderNumber: string;
+    status?: $Enums.OrderStatus;
+    subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: string | null;
+    total: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod: $Enums.PaymentMethod;
+    paymentStatus?: $Enums.PaymentStatus;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    user: Prisma.UserCreateNestedOneWithoutOrdersInput;
+    shippingAddress: Prisma.AddressCreateNestedOneWithoutShippingOrdersInput;
+    items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryCreateNestedManyWithoutOrderInput;
+};
+export type OrderUncheckedCreateWithoutChatSessionsInput = {
+    id?: string;
+    orderNumber: string;
+    status?: $Enums.OrderStatus;
+    subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: string | null;
+    total: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod: $Enums.PaymentMethod;
+    paymentStatus?: $Enums.PaymentStatus;
+    userId: string;
+    shippingAddressId: string;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutOrderInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedCreateNestedManyWithoutOrderInput;
+};
+export type OrderCreateOrConnectWithoutChatSessionsInput = {
+    where: Prisma.OrderWhereUniqueInput;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutChatSessionsInput, Prisma.OrderUncheckedCreateWithoutChatSessionsInput>;
+};
+export type OrderUpsertWithoutChatSessionsInput = {
+    update: Prisma.XOR<Prisma.OrderUpdateWithoutChatSessionsInput, Prisma.OrderUncheckedUpdateWithoutChatSessionsInput>;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutChatSessionsInput, Prisma.OrderUncheckedCreateWithoutChatSessionsInput>;
+    where?: Prisma.OrderWhereInput;
+};
+export type OrderUpdateToOneWithWhereWithoutChatSessionsInput = {
+    where?: Prisma.OrderWhereInput;
+    data: Prisma.XOR<Prisma.OrderUpdateWithoutChatSessionsInput, Prisma.OrderUncheckedUpdateWithoutChatSessionsInput>;
+};
+export type OrderUpdateWithoutChatSessionsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    orderNumber?: Prisma.StringFieldUpdateOperationsInput | string;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod;
+    paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput;
+    shippingAddress?: Prisma.AddressUpdateOneRequiredWithoutShippingOrdersNestedInput;
+    items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUpdateManyWithoutOrderNestedInput;
+};
+export type OrderUncheckedUpdateWithoutChatSessionsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    orderNumber?: Prisma.StringFieldUpdateOperationsInput | string;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod;
+    paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus;
+    userId?: Prisma.StringFieldUpdateOperationsInput | string;
+    shippingAddressId?: Prisma.StringFieldUpdateOperationsInput | string;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedUpdateManyWithoutOrderNestedInput;
+};
+export type OrderCreateWithoutStatusHistoryInput = {
+    id?: string;
+    orderNumber: string;
+    status?: $Enums.OrderStatus;
+    subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: string | null;
+    total: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod: $Enums.PaymentMethod;
+    paymentStatus?: $Enums.PaymentStatus;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    user: Prisma.UserCreateNestedOneWithoutOrdersInput;
+    shippingAddress: Prisma.AddressCreateNestedOneWithoutShippingOrdersInput;
+    items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutOrderInput;
+};
+export type OrderUncheckedCreateWithoutStatusHistoryInput = {
+    id?: string;
+    orderNumber: string;
+    status?: $Enums.OrderStatus;
+    subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: string | null;
+    total: runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod: $Enums.PaymentMethod;
+    paymentStatus?: $Enums.PaymentStatus;
+    userId: string;
+    shippingAddressId: string;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput;
+    reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutOrderInput;
+    chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutOrderInput;
+};
+export type OrderCreateOrConnectWithoutStatusHistoryInput = {
+    where: Prisma.OrderWhereUniqueInput;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutStatusHistoryInput, Prisma.OrderUncheckedCreateWithoutStatusHistoryInput>;
+};
+export type OrderUpsertWithoutStatusHistoryInput = {
+    update: Prisma.XOR<Prisma.OrderUpdateWithoutStatusHistoryInput, Prisma.OrderUncheckedUpdateWithoutStatusHistoryInput>;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutStatusHistoryInput, Prisma.OrderUncheckedCreateWithoutStatusHistoryInput>;
+    where?: Prisma.OrderWhereInput;
+};
+export type OrderUpdateToOneWithWhereWithoutStatusHistoryInput = {
+    where?: Prisma.OrderWhereInput;
+    data: Prisma.XOR<Prisma.OrderUpdateWithoutStatusHistoryInput, Prisma.OrderUncheckedUpdateWithoutStatusHistoryInput>;
+};
+export type OrderUpdateWithoutStatusHistoryInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    orderNumber?: Prisma.StringFieldUpdateOperationsInput | string;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod;
+    paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput;
+    shippingAddress?: Prisma.AddressUpdateOneRequiredWithoutShippingOrdersNestedInput;
+    items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUpdateManyWithoutOrderNestedInput;
+};
+export type OrderUncheckedUpdateWithoutStatusHistoryInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    orderNumber?: Prisma.StringFieldUpdateOperationsInput | string;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    discount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    promoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
+    paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod;
+    paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus;
+    userId?: Prisma.StringFieldUpdateOperationsInput | string;
+    shippingAddressId?: Prisma.StringFieldUpdateOperationsInput | string;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutOrderNestedInput;
 };
 export type OrderCreateManyUserInput = {
     id?: string;
@@ -853,6 +1207,9 @@ export type OrderUpdateWithoutUserInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     shippingAddress?: Prisma.AddressUpdateOneRequiredWithoutShippingOrdersNestedInput;
     items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUpdateManyWithoutOrderNestedInput;
 };
 export type OrderUncheckedUpdateWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -869,6 +1226,9 @@ export type OrderUncheckedUpdateWithoutUserInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutOrderNestedInput;
 };
 export type OrderUncheckedUpdateManyWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -915,6 +1275,9 @@ export type OrderUpdateWithoutShippingAddressInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput;
     items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUpdateManyWithoutOrderNestedInput;
 };
 export type OrderUncheckedUpdateWithoutShippingAddressInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -931,6 +1294,9 @@ export type OrderUncheckedUpdateWithoutShippingAddressInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput;
+    reviews?: Prisma.ReviewUncheckedUpdateManyWithoutOrderNestedInput;
+    statusHistory?: Prisma.OrderStatusHistoryUncheckedUpdateManyWithoutOrderNestedInput;
+    chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutOrderNestedInput;
 };
 export type OrderUncheckedUpdateManyWithoutShippingAddressInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -952,9 +1318,15 @@ export type OrderUncheckedUpdateManyWithoutShippingAddressInput = {
  */
 export type OrderCountOutputType = {
     items: number;
+    reviews: number;
+    statusHistory: number;
+    chatSessions: number;
 };
 export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     items?: boolean | OrderCountOutputTypeCountItemsArgs;
+    reviews?: boolean | OrderCountOutputTypeCountReviewsArgs;
+    statusHistory?: boolean | OrderCountOutputTypeCountStatusHistoryArgs;
+    chatSessions?: boolean | OrderCountOutputTypeCountChatSessionsArgs;
 };
 /**
  * OrderCountOutputType without action
@@ -970,6 +1342,24 @@ export type OrderCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extens
  */
 export type OrderCountOutputTypeCountItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.OrderItemWhereInput;
+};
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ReviewWhereInput;
+};
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountStatusHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.OrderStatusHistoryWhereInput;
+};
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountChatSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ChatSessionWhereInput;
 };
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
@@ -989,6 +1379,9 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     shippingAddress?: boolean | Prisma.AddressDefaultArgs<ExtArgs>;
     items?: boolean | Prisma.Order$itemsArgs<ExtArgs>;
+    reviews?: boolean | Prisma.Order$reviewsArgs<ExtArgs>;
+    statusHistory?: boolean | Prisma.Order$statusHistoryArgs<ExtArgs>;
+    chatSessions?: boolean | Prisma.Order$chatSessionsArgs<ExtArgs>;
     _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["order"]>;
 export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1048,6 +1441,9 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     shippingAddress?: boolean | Prisma.AddressDefaultArgs<ExtArgs>;
     items?: boolean | Prisma.Order$itemsArgs<ExtArgs>;
+    reviews?: boolean | Prisma.Order$reviewsArgs<ExtArgs>;
+    statusHistory?: boolean | Prisma.Order$statusHistoryArgs<ExtArgs>;
+    chatSessions?: boolean | Prisma.Order$chatSessionsArgs<ExtArgs>;
     _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1064,6 +1460,9 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
         user: Prisma.$UserPayload<ExtArgs>;
         shippingAddress: Prisma.$AddressPayload<ExtArgs>;
         items: Prisma.$OrderItemPayload<ExtArgs>[];
+        reviews: Prisma.$ReviewPayload<ExtArgs>[];
+        statusHistory: Prisma.$OrderStatusHistoryPayload<ExtArgs>[];
+        chatSessions: Prisma.$ChatSessionPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
@@ -1412,6 +1811,9 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
     user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
     shippingAddress<T extends Prisma.AddressDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AddressDefaultArgs<ExtArgs>>): Prisma.Prisma__AddressClient<runtime.Types.Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
     items<T extends Prisma.Order$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    reviews<T extends Prisma.Order$reviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    statusHistory<T extends Prisma.Order$statusHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$statusHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    chatSessions<T extends Prisma.Order$chatSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$chatSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1856,6 +2258,75 @@ export type Order$itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
     take?: number;
     skip?: number;
     distinct?: Prisma.OrderItemScalarFieldEnum | Prisma.OrderItemScalarFieldEnum[];
+};
+/**
+ * Order.reviews
+ */
+export type Order$reviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Review
+     */
+    select?: Prisma.ReviewSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Review
+     */
+    omit?: Prisma.ReviewOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ReviewInclude<ExtArgs> | null;
+    where?: Prisma.ReviewWhereInput;
+    orderBy?: Prisma.ReviewOrderByWithRelationInput | Prisma.ReviewOrderByWithRelationInput[];
+    cursor?: Prisma.ReviewWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ReviewScalarFieldEnum | Prisma.ReviewScalarFieldEnum[];
+};
+/**
+ * Order.statusHistory
+ */
+export type Order$statusHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OrderStatusHistory
+     */
+    select?: Prisma.OrderStatusHistorySelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the OrderStatusHistory
+     */
+    omit?: Prisma.OrderStatusHistoryOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.OrderStatusHistoryInclude<ExtArgs> | null;
+    where?: Prisma.OrderStatusHistoryWhereInput;
+    orderBy?: Prisma.OrderStatusHistoryOrderByWithRelationInput | Prisma.OrderStatusHistoryOrderByWithRelationInput[];
+    cursor?: Prisma.OrderStatusHistoryWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.OrderStatusHistoryScalarFieldEnum | Prisma.OrderStatusHistoryScalarFieldEnum[];
+};
+/**
+ * Order.chatSessions
+ */
+export type Order$chatSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: Prisma.ChatSessionSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: Prisma.ChatSessionOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ChatSessionInclude<ExtArgs> | null;
+    where?: Prisma.ChatSessionWhereInput;
+    orderBy?: Prisma.ChatSessionOrderByWithRelationInput | Prisma.ChatSessionOrderByWithRelationInput[];
+    cursor?: Prisma.ChatSessionWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ChatSessionScalarFieldEnum | Prisma.ChatSessionScalarFieldEnum[];
 };
 /**
  * Order without action

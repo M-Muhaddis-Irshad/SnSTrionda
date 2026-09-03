@@ -8,6 +8,9 @@ import { useAuthStore } from "@/stores/authStore";
 const NAV_ITEMS = [
   { href: "/account", label: "Overview", exact: true },
   { href: "/account/orders", label: "Order History", exact: false },
+  { href: "/account/reviews", label: "My Reviews", exact: false },
+  { href: "/account/notifications", label: "Notifications", exact: false },
+  { href: "/account/chat", label: "Support Chat", exact: false },
 ];
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {

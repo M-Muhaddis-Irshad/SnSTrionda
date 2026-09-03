@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import Modal, { btnPrimaryCls, btnSecondaryCls, btnDangerCls } from "./Modal";
 import ImageModal from "./ImageModal";
 import {
@@ -327,8 +328,9 @@ export default function ImagesTab() {
               <p className="text-xs text-red-400">{deleteError}</p>
             ) : deleteUsage && deleteUsage.usage.usedByCampaigns > 0 ? (
               <div className="bg-red-500/10 border border-red-500/40 rounded p-3 text-xs text-red-300 space-y-1">
-                <p className="font-semibold">
-                  ⚠️ Cannot delete — this image is used by{" "}
+                <p className="font-semibold flex items-center gap-1.5">
+                  <AlertTriangle size={14} strokeWidth={2} className="shrink-0" />
+                  Cannot delete — this image is used by{" "}
                   {deleteUsage.usage.usedByCampaigns} campaign
                   {deleteUsage.usage.usedByCampaigns === 1 ? "" : "s"}:
                 </p>

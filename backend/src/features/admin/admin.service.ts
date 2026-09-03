@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { prisma } from "../../db";
+import { broadcastOrderStatusUpdate } from "../../services/socketService";
 
 // ---------------------------------------------------------------------------
 // Custom Error
@@ -208,6 +209,7 @@ export async function getOrderById(orderId: string) {
         },
       },
       shippingAddress: true,
+      statusHistory: { orderBy: { statusChangedAt: "asc" } },
     },
   });
 
@@ -223,7 +225,8 @@ const VALID_PAYMENT_STATUSES = ["PENDING", "PAID", "FAILED", "REFUNDED"];
 
 export async function updateOrderStatus(
   orderId: string,
-  body: { status?: string; paymentStatus?: string }
+  body: { status?: string; paymentStatus?: string },
+  adminId?: string
 ) {
   const { status, paymentStatus } = body;
 
@@ -258,6 +261,21 @@ export async function updateOrderStatus(
       shippingAddress: true,
     },
   });
+
+  // Real-time fan-out AFTER the DB commit: record the transition, notify the
+  // customer, broadcast to the admin room, and log it in the activity feed.
+  // Only fires when the order status actually changed (not for payment-only edits).
+  if (status && status !== order.status) {
+    try {
+      await broadcastOrderStatusUpdate(updated, {
+        fromStatus: order.status,
+        adminId: adminId || undefined,
+        notes: null,
+      });
+    } catch (broadcastErr: any) {
+      console.error("Order status broadcast failed (order still updated):", broadcastErr?.message || broadcastErr);
+    }
+  }
 
   return updated;
 }

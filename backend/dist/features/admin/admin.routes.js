@@ -11,6 +11,9 @@ const auth_middleware_1 = require("../auth/auth.middleware");
 const admin_controller_1 = require("./admin.controller");
 const image_routes_1 = __importDefault(require("./image.routes"));
 const campaign_routes_1 = __importDefault(require("./campaign.routes"));
+const delivery_controller_1 = require("../delivery/delivery.controller");
+const reviews_controller_1 = require("../reviews/reviews.controller");
+const activity_controller_1 = require("../activity/activity.controller");
 const router = (0, express_1.Router)();
 // ---------------------------------------------------------------------------
 // All admin routes require authentication + ADMIN role
@@ -43,6 +46,27 @@ router.use("/campaigns", campaign_routes_1.default);
 // Categories (read-only for admin forms)
 // ---------------------------------------------------------------------------
 router.get("/categories", admin_controller_1.handleListCategories);
+// ---------------------------------------------------------------------------
+// Delivery zones — full CRUD
+// ---------------------------------------------------------------------------
+router.get("/delivery-zones", delivery_controller_1.handleAdminListDeliveryZones);
+router.get("/delivery-zones/:id", delivery_controller_1.handleAdminGetDeliveryZone);
+router.post("/delivery-zones", delivery_controller_1.handleAdminCreateDeliveryZone);
+router.patch("/delivery-zones/:id", delivery_controller_1.handleAdminUpdateDeliveryZone);
+router.delete("/delivery-zones/:id", delivery_controller_1.handleAdminDeleteDeliveryZone);
+// ---------------------------------------------------------------------------
+// Reviews — moderation workflow (approve / reject / unapprove / delete)
+// ---------------------------------------------------------------------------
+router.get("/reviews", reviews_controller_1.handleAdminListReviews);
+router.get("/reviews/:id", reviews_controller_1.handleAdminGetReview);
+router.patch("/reviews/:id/approve", reviews_controller_1.handleAdminApproveReview);
+router.patch("/reviews/:id/reject", reviews_controller_1.handleAdminRejectReview);
+router.patch("/reviews/:id/unapprove", reviews_controller_1.handleAdminUnapproveReview);
+router.delete("/reviews/:id", reviews_controller_1.handleAdminDeleteReview);
+// ---------------------------------------------------------------------------
+// Activity feed (audit trail)
+// ---------------------------------------------------------------------------
+router.get("/activity", activity_controller_1.handleListActivity);
 // ---------------------------------------------------------------------------
 // Variants (nested under product)
 // ---------------------------------------------------------------------------

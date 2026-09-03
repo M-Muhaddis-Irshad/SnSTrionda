@@ -1,0 +1,60 @@
+# =============================================================================
+# Render Blueprint — trionda-backend (Web Service)
+# =============================================================================
+# Usage: connect the repo in Render, choose "Blueprint" (render.yaml in repo
+# root of the backend), then set the `sync: false` env vars in the dashboard.
+#
+# Build order:
+#   1. npm install            — installs deps (includes prisma CLI via devDeps)
+#   2. npx prisma generate    — regenerates the Prisma client (gitignored, so
+#                               it MUST be generated during the build)
+#   3. npm run build          — also runs prisma generate, then tsc -> dist/
+#
+# Start command: tsconfig has rootDir=src and outDir=dist, so the compiled
+# entry point is dist/server.js (NOT dist/src/server.js).
+# =============================================================================
+
+services:
+  - type: web
+    name: trionda-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: node dist/server.js
+    healthCheckPath: /api/health
+    envVars:
+      # Secrets — leave sync: false and enter the real values in the Render
+      # dashboard (Services > trionda-backend > Environment).
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: SAFEPAY_API_KEY
+        sync: false
+      - key: SAFEPAY_SECRET_KEY
+        sync: false
+      - key: SAFEPAY_WEBHOOK_SECRET
+        sync: false
+      - key: SAFEPAY_ENV
+        sync: false
+      # Frontend origin — MUST match the deployed Vercel domain exactly.
+      # Without this, Express CORS + Socket.IO reject every browser request.
+      - key: CORS_ORIGIN
+        sync: false
+      - key: NODE_ENV
+        value: production

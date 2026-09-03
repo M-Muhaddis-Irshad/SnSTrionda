@@ -19,6 +19,13 @@ import {
   createVariant,
   AdminError,
 } from "./admin.service";
+import { logAdminActivity } from "../../services/socketService";
+
+// Fire-and-forget audit trail entry (never blocks or fails the request)
+function track(adminId: string | undefined, action: string, entityType: string, entityId: string, details?: Record<string, unknown>) {
+  if (!adminId) return;
+  logAdminActivity(adminId, action, entityType, entityId, details ?? null).catch(() => {});
+}
 
 // ---------------------------------------------------------------------------
 // Helper
@@ -82,7 +89,7 @@ export async function handleUpdateOrderStatus(req: Request, res: Response) {
       return res.status(400).json({ error: "Provide at least one of: status, paymentStatus" });
     }
 
-    const order = await updateOrderStatus(orderId, { status, paymentStatus });
+    const order = await updateOrderStatus(orderId, { status, paymentStatus }, req.user?.userId);
     res.json({ data: order, message: "Order updated successfully" });
   } catch (err: any) {
     handleAdminError(err, res);
@@ -138,6 +145,7 @@ export async function handleCreateProduct(req: Request, res: Response) {
     });
 
     res.status(201).json({ data: product, message: "Product created successfully" });
+    track(req.user?.userId, "CREATE_PRODUCT", "Product", product.id, { name: product.name });
   } catch (err: any) {
     handleAdminError(err, res);
   }
@@ -158,6 +166,7 @@ export async function handleUpdateProduct(req: Request, res: Response) {
     });
 
     res.json({ data: product, message: "Product updated successfully" });
+    track(req.user?.userId, "UPDATE_PRODUCT", "Product", productId, { name: product?.name });
   } catch (err: any) {
     handleAdminError(err, res);
   }
@@ -168,6 +177,7 @@ export async function handleDeleteProduct(req: Request, res: Response) {
     const productId = req.params.productId as string;
     const result = await deleteProduct(productId);
     res.json({ ...result, message: "Product deactivated successfully" });
+    track(req.user?.userId, "DELETE_PRODUCT", "Product", productId);
   } catch (err: any) {
     handleAdminError(err, res);
   }
@@ -205,6 +215,7 @@ export async function handleCreateVariant(req: Request, res: Response) {
     });
 
     res.status(201).json({ data: variant, message: "Variant created successfully" });
+    track(req.user?.userId, "CREATE_VARIANT", "Variant", variant.id, { sku: variant.sku });
   } catch (err: any) {
     handleAdminError(err, res);
   }
@@ -225,6 +236,7 @@ export async function handleUpdateVariant(req: Request, res: Response) {
     });
 
     res.json({ data: variant, message: "Variant updated successfully" });
+    track(req.user?.userId, "UPDATE_VARIANT", "Variant", variantId);
   } catch (err: any) {
     handleAdminError(err, res);
   }
@@ -235,6 +247,7 @@ export async function handleDeleteVariant(req: Request, res: Response) {
     const variantId = req.params.variantId as string;
     const result = await deleteVariant(variantId);
     res.json({ ...result, message: "Variant deleted successfully" });
+    track(req.user?.userId, "DELETE_VARIANT", "Variant", variantId);
   } catch (err: any) {
     handleAdminError(err, res);
   }

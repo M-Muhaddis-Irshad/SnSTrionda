@@ -6,8 +6,18 @@ import { useCheckoutStore } from "@/stores/checkoutStore";
 import Badge from "@/components/ui/Badge";
 import QuantitySelector from "@/components/products/QuantitySelector";
 import { formatPrice, computeTotals } from "@/lib/checkout";
+import { deliveryDaysLabel, type DeliveryZone } from "@/types/delivery";
 
-export default function OrderSummaryPanel() {
+interface OrderSummaryPanelProps {
+  /** Delivery charges — from the selected delivery zone, otherwise flat rate. */
+  shipping?: number;
+  deliveryZone?: DeliveryZone | null;
+}
+
+export default function OrderSummaryPanel({
+  shipping,
+  deliveryZone,
+}: OrderSummaryPanelProps = {}) {
   const items = useCartStore((state) => state.items);
   const subtotal = useCartStore(selectSubtotal);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
@@ -15,7 +25,11 @@ export default function OrderSummaryPanel() {
   const discountPercent = useCheckoutStore((state) => state.discountPercent);
   const [isOpen, setIsOpen] = useState(false);
 
-  const { shipping, discount, total } = computeTotals(subtotal, discountPercent);
+  const { shipping: shippingCost, discount, total } = computeTotals(
+    subtotal,
+    discountPercent,
+    shipping
+  );
 
   return (
     <>
@@ -91,10 +105,11 @@ export default function OrderSummaryPanel() {
             {/* Totals */}
             <SummaryTotals
               subtotal={subtotal}
-              shipping={shipping}
+              shipping={shippingCost}
               discount={discount}
               total={total}
               promoCode={promoCode}
+              deliveryZone={deliveryZone}
             />
           </div>
         )}
@@ -147,10 +162,11 @@ export default function OrderSummaryPanel() {
 
           <SummaryTotals
             subtotal={subtotal}
-            shipping={shipping}
+            shipping={shippingCost}
             discount={discount}
             total={total}
             promoCode={promoCode}
+            deliveryZone={deliveryZone}
           />
         </div>
       </div>
@@ -168,12 +184,14 @@ function SummaryTotals({
   discount,
   total,
   promoCode,
+  deliveryZone,
 }: {
   subtotal: number;
   shipping: number;
   discount: number;
   total: number;
   promoCode: string | null;
+  deliveryZone?: DeliveryZone | null;
 }) {
   return (
     <div className="border-t border-chrome-500 pt-4 space-y-2">
@@ -194,11 +212,19 @@ function SummaryTotals({
         </div>
       )}
       <div className="flex justify-between">
-        <span className="font-body text-sm text-muted">Shipping</span>
+        <span className="font-body text-sm text-muted">Delivery charges</span>
         <span className="font-body text-sm text-foreground">
           {formatPrice(shipping)}
         </span>
       </div>
+      {deliveryZone && (
+        <div className="flex justify-between">
+          <span className="font-body text-sm text-muted">Estimated delivery</span>
+          <span className="font-body text-sm text-foreground">
+            {deliveryDaysLabel(deliveryZone.estimatedDays)} to {deliveryZone.name}
+          </span>
+        </div>
+      )}
       <div className="flex justify-between pt-3 mt-1 border-t border-chrome-500">
         <span className="font-body text-sm text-foreground font-medium">Total</span>
         <span className="font-display text-xl tracking-wide text-foreground">

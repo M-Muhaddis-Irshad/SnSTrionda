@@ -6,6 +6,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import multer from "multer";
 import { handleListProducts, handleGetProductBySlug, handleListCategories } from "./products.controller";
 import { handleUploadImage, handleDeleteImage } from "./products.image.controller";
+import { handleListProductReviews } from "../reviews/reviews.controller";
 import { authenticate, requireRole } from "../auth/auth.middleware";
 
 const router = Router();
@@ -60,6 +61,12 @@ router.delete(
 // ---------------------------------------------------------------------------
 
 router.get("/categories", handleListCategories);
+
+// ---------------------------------------------------------------------------
+// Public product reviews — APPROVED reviews only (must precede /:slug)
+// ---------------------------------------------------------------------------
+
+router.get("/:productId/reviews", handleListProductReviews);
 
 // ---------------------------------------------------------------------------
 // Product routes (/:slug must come after image routes)

@@ -82,4 +82,39 @@ export type Image = Prisma.ImageModel;
  *
  */
 export type Campaign = Prisma.CampaignModel;
+/**
+ * Model DeliveryZone
+ *
+ */
+export type DeliveryZone = Prisma.DeliveryZoneModel;
+/**
+ * Model Review
+ *
+ */
+export type Review = Prisma.ReviewModel;
+/**
+ * Model Notification
+ *
+ */
+export type Notification = Prisma.NotificationModel;
+/**
+ * Model ChatSession
+ *
+ */
+export type ChatSession = Prisma.ChatSessionModel;
+/**
+ * Model ChatMessage
+ *
+ */
+export type ChatMessage = Prisma.ChatMessageModel;
+/**
+ * Model AdminActivity
+ *
+ */
+export type AdminActivity = Prisma.AdminActivityModel;
+/**
+ * Model OrderStatusHistory
+ *
+ */
+export type OrderStatusHistory = Prisma.OrderStatusHistoryModel;
 //# sourceMappingURL=browser.d.ts.map

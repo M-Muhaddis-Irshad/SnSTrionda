@@ -166,6 +166,13 @@ export declare function getOrderById(orderId: string): Promise<{
         createdAt: Date;
         updatedAt: Date;
     };
+    statusHistory: {
+        id: string;
+        orderId: string;
+        status: string;
+        statusChangedAt: Date;
+        notes: string | null;
+    }[];
     user: {
         email: string;
         id: string;
@@ -190,7 +197,7 @@ export declare function getOrderById(orderId: string): Promise<{
 export declare function updateOrderStatus(orderId: string, body: {
     status?: string;
     paymentStatus?: string;
-}): Promise<{
+}, adminId?: string): Promise<{
     items: ({
         productVariant: {
             product: {

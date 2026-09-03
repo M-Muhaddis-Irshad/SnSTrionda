@@ -137,6 +137,7 @@ async function getOrderByNumber(orderNumber, email) {
             },
             shippingAddress: true,
             user: { select: { id: true, email: true, name: true } },
+            statusHistory: { orderBy: { statusChangedAt: "asc" } },
         },
     });
     if (!order)
@@ -170,6 +171,7 @@ async function getMyOrderByNumber(orderNumber, userId) {
             },
             shippingAddress: true,
             user: { select: { id: true, email: true, name: true } },
+            statusHistory: { orderBy: { statusChangedAt: "asc" } },
         },
     });
     if (!order)
@@ -248,7 +250,21 @@ async function createOrder(input, authUserId) {
         discount = (subtotal * promo.discountPercent) / 100;
         promoCode = promo.code;
     }
-    const shippingCost = SHIPPING_COST;
+    // Delivery charge — from the selected delivery zone when provided, otherwise
+    // fall back to the flat standard rate.
+    let shippingCost = SHIPPING_COST;
+    if (input.deliveryZoneId) {
+        const zone = await db_1.prisma.deliveryZone.findUnique({
+            where: { id: input.deliveryZoneId },
+        });
+        if (!zone) {
+            throw new OrderError("Selected delivery zone not found.", 400);
+        }
+        if (!zone.active) {
+            throw new OrderError("Selected delivery zone is currently unavailable.", 400);
+        }
+        shippingCost = zone.deliveryCharges;
+    }
     const total = Math.max(0, subtotal + shippingCost - discount);
     const userId = authUserId || (await findOrCreateGuestUser(input.email));
     const orderNumber = await generateOrderNumber();
@@ -281,6 +297,14 @@ async function createOrder(input, authUserId) {
                 promoCode,
                 userId,
                 shippingAddressId: address.id,
+            },
+        });
+        // Seed the status timeline with the initial transition.
+        await tx.orderStatusHistory.create({
+            data: {
+                orderId: order.id,
+                status: "PENDING",
+                notes: "Order placed",
             },
         });
         for (const itemData of orderItemsData) {

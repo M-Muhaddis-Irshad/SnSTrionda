@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import MobileBottomNav from "./MobileBottomNav";
+import { OPEN_MENU_EVENT } from "./MobileMenu";
 
 // ---------------------------------------------------------------------------
 // ClientShell — renders the mobile bottom nav, hidden on checkout/admin pages.
@@ -17,5 +18,10 @@ export default function ClientShell() {
 
   if (shouldHide) return null;
 
-  return <MobileBottomNav />;
+  // The bottom nav's "Menu" tab opens the full slide-in menu (no hamburger).
+  function openMenu() {
+    window.dispatchEvent(new Event(OPEN_MENU_EVENT));
+  }
+
+  return <MobileBottomNav onMenuToggle={openMenu} />;
 }

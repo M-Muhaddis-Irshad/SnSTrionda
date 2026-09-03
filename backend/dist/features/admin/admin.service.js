@@ -18,6 +18,7 @@ exports.updateVariant = updateVariant;
 exports.deleteVariant = deleteVariant;
 exports.createVariant = createVariant;
 const db_1 = require("../../db");
+const socketService_1 = require("../../services/socketService");
 // ---------------------------------------------------------------------------
 // Custom Error
 // ---------------------------------------------------------------------------
@@ -183,6 +184,7 @@ async function getOrderById(orderId) {
                 },
             },
             shippingAddress: true,
+            statusHistory: { orderBy: { statusChangedAt: "asc" } },
         },
     });
     if (!order) {
@@ -192,7 +194,7 @@ async function getOrderById(orderId) {
 }
 const VALID_ORDER_STATUSES = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
 const VALID_PAYMENT_STATUSES = ["PENDING", "PAID", "FAILED", "REFUNDED"];
-async function updateOrderStatus(orderId, body) {
+async function updateOrderStatus(orderId, body, adminId) {
     const { status, paymentStatus } = body;
     if (status && !VALID_ORDER_STATUSES.includes(status)) {
         throw new AdminError(`Invalid order status. Must be one of: ${VALID_ORDER_STATUSES.join(", ")}`, 400);
@@ -224,6 +226,21 @@ async function updateOrderStatus(orderId, body) {
             shippingAddress: true,
         },
     });
+    // Real-time fan-out AFTER the DB commit: record the transition, notify the
+    // customer, broadcast to the admin room, and log it in the activity feed.
+    // Only fires when the order status actually changed (not for payment-only edits).
+    if (status && status !== order.status) {
+        try {
+            await (0, socketService_1.broadcastOrderStatusUpdate)(updated, {
+                fromStatus: order.status,
+                adminId: adminId || undefined,
+                notes: null,
+            });
+        }
+        catch (broadcastErr) {
+            console.error("Order status broadcast failed (order still updated):", broadcastErr?.message || broadcastErr);
+        }
+    }
     return updated;
 }
 async function adminListProducts(params) {

@@ -10,15 +10,20 @@ export function formatPrice(price: number): string {
   return `Rs. ${price.toLocaleString("en-PK")}`;
 }
 
-// Discount is a whole-rupee amount (matches the backend calculation exactly)
-export function computeTotals(subtotal: number, discountPercent: number | null) {
+// Discount is a whole-rupee amount (matches the backend calculation exactly).
+// `shipping` can be overridden with the selected delivery zone's charges.
+export function computeTotals(
+  subtotal: number,
+  discountPercent: number | null,
+  shipping: number = SHIPPING_COST
+) {
   const discount =
     discountPercent && discountPercent > 0
       ? Math.round((subtotal * discountPercent) / 100)
       : 0;
-  const shipping = SHIPPING_COST;
-  const total = Math.max(0, subtotal + shipping - discount);
-  return { subtotal, shipping, discount, total };
+  const shippingCost = shipping;
+  const total = Math.max(0, subtotal + shippingCost - discount);
+  return { subtotal, shipping: shippingCost, discount, total };
 }
 
 // Pakistan phone numbers: 03XXXXXXXXX, 3XXXXXXXXX or +92 3XXXXXXXXX

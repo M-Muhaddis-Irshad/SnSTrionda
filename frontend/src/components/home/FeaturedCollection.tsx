@@ -1,4 +1,5 @@
 import ProductCard from "@/components/ui/ProductCard";
+import GridCards from "@/components/GridCards";
 
 interface ProductImage {
   id: string;
@@ -71,23 +72,27 @@ export default async function FeaturedCollection() {
         <div className="section-divider" />
       </div>
 
-      <div className="featured-scroll">
-        <div className="featured-track">
-          {products.length > 0 ? (
-            products.map((product) => (
+      {products.length > 0 ? (
+        <div className="featured-grid-wrap">
+          <GridCards stagger>
+            {products.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
-                layout="rail"
+                layout="grid"
+                showCategoryBadge
+                showViewCta
               />
-            ))
-          ) : (
-            <p className="featured-empty">
-              No featured products available at the moment.
-            </p>
-          )}
+            ))}
+          </GridCards>
         </div>
-      </div>
+      ) : (
+        <div className="featured-grid-wrap">
+          <p className="featured-empty">
+            No featured products available at the moment.
+          </p>
+        </div>
+      )}
     </section>
   );
 }

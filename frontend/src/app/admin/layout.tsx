@@ -3,31 +3,57 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  Users,
+  Folder,
+  Palette,
+  Star,
+  Image,
+  Tag,
+  Mail,
+  Ticket,
+  Settings,
+  User,
+  Truck,
+  LogOut,
+  MessageSquare,
+  Activity,
+} from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 
 const NAV_ITEMS = [
   { section: 'Main', items: [
-    { href: '/admin', label: 'Dashboard', icon: '📊' },
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   ]},
   { section: 'Management', items: [
-    { href: '/admin/orders', label: 'Orders', icon: '📦' },
-    { href: '/admin/products', label: 'Products', icon: '🛍️' },
-    { href: '/admin/customers', label: 'Customers', icon: '👥' },
-    { href: '/admin/categories', label: 'Categories', icon: '📂' },
-    { href: '/admin/collections', label: 'Collections', icon: '🎨' },
-    { href: '/admin/reviews', label: 'Reviews', icon: '⭐' },
+    { href: '/admin/orders', label: 'Orders', icon: Package },
+    { href: '/admin/products', label: 'Products', icon: ShoppingBag },
+    { href: '/admin/customers', label: 'Customers', icon: Users },
+    { href: '/admin/categories', label: 'Categories', icon: Folder },
+    { href: '/admin/collections', label: 'Collections', icon: Palette },
+    { href: '/admin/reviews', label: 'Reviews', icon: Star },
   ]},
   { section: 'Content', items: [
-    { href: '/admin/media', label: 'Media & Campaigns', icon: '🖼️' },
+    { href: '/admin/media', label: 'Media & Campaigns', icon: Image },
+  ]},
+  { section: 'Realtime', items: [
+    { href: '/admin/chat', label: 'Live Chat', icon: MessageSquare },
+    { href: '/admin/activity', label: 'Activity Log', icon: Activity },
   ]},
   { section: 'Marketing', items: [
-    { href: '/admin/discounts', label: 'Discounts', icon: '🏷️' },
-    { href: '/admin/campaigns', label: 'Email Campaigns', icon: '📧' },
-    { href: '/admin/coupons', label: 'Coupons', icon: '🎟️' },
+    { href: '/admin/discounts', label: 'Discounts', icon: Tag },
+    { href: '/admin/campaigns', label: 'Email Campaigns', icon: Mail },
+    { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
+  ]},
+  { section: 'Delivery', items: [
+    { href: '/admin/delivery', label: 'Delivery Zones', icon: Truck },
   ]},
   { section: 'Settings', items: [
-    { href: '/admin/settings', label: 'Store Settings', icon: '⚙️' },
-    { href: '/admin/users', label: 'Users', icon: '👤' },
+    { href: '/admin/settings', label: 'Store Settings', icon: Settings },
+    { href: '/admin/users', label: 'Users', icon: User },
   ]},
 ];
 
@@ -119,7 +145,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           }
                         `}
                       >
-                        <span className="text-lg">{item.icon}</span>
+                        <span className="flex items-center justify-center w-5">
+                          <item.icon size={18} strokeWidth={1.75} />
+                        </span>
                         {item.label}
                       </Link>
                     );
@@ -142,8 +170,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             <button
               onClick={() => { clearAuth(); router.push('/login'); }}
-              className="w-full mt-3 py-2 text-gray-400 hover:text-white text-sm text-left px-3 transition"
+              className="w-full mt-3 py-2 text-gray-400 hover:text-white text-sm text-left px-3 transition flex items-center gap-3"
             >
+              <LogOut size={18} strokeWidth={1.75} />
               Logout
             </button>
           </div>

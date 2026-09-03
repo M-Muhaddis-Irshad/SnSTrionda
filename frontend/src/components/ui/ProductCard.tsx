@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useWishlistStore } from "@/stores/wishlistStore";
+import CategoryBadge from "@/components/CategoryBadge";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -112,9 +113,15 @@ function PriceDisplay({
 export default function ProductCard({
   product,
   layout = "grid",
+  showCategoryBadge = false,
+  showViewCta = false,
 }: {
   product: Product;
   layout?: "grid" | "rail";
+  /** Show the category chip above the product name (homepage grid). */
+  showCategoryBadge?: boolean;
+  /** Show a "View" affordance under the price (homepage grid). */
+  showViewCta?: boolean;
 }) {
   const [imgError, setImgError] = useState(false);
   const toggle = useWishlistStore((s) => s.toggle);
@@ -208,10 +215,11 @@ export default function ProductCard({
 
         {/* Content */}
         <div className="product-card-content">
+          {showCategoryBadge && <CategoryBadge label={categoryText} />}
           <h3 className="product-card-name">
             {product.name}
           </h3>
-          {subText && (
+          {subText && !showCategoryBadge && (
             <p className="product-card-subtext">
               {subText}
             </p>
@@ -219,6 +227,25 @@ export default function ProductCard({
           <div>
             <PriceDisplay basePrice={product.basePrice} variants={product.variants} />
           </div>
+          {showViewCta && (
+            <span className="product-card-view">
+              View
+              <svg
+                className="product-card-view-arrow"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                />
+              </svg>
+            </span>
+          )}
         </div>
       </div>
     </Link>

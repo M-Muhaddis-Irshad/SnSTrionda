@@ -49,7 +49,11 @@ function GoogleSignInButton({ onSuccess }: { onSuccess: (credential: string) => 
     return () => clearInterval(checkGoogle);
   }, [onSuccess]);
 
-  return <div ref={btnRef} className="w-full" />;
+  return (
+    <div className="google-button-container">
+      <div ref={btnRef} className="w-full" />
+    </div>
+  );
 }
 
 /* ---------- Login Form ---------- */

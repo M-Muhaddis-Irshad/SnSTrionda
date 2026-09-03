@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bodoni_Moda, Inter } from "next/font/google";
 import ClientShell from "@/components/ClientShell";
 import ConditionalShell from "@/components/ConditionalShell";
+import RealtimeClient from "@/components/realtime/RealtimeClient";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </ConditionalShell>
         <ClientShell />
+        <RealtimeClient />
       </body>
     </html>
   );

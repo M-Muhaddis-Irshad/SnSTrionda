@@ -55,7 +55,10 @@ async function listProducts(params) {
 // List Categories (public, for homepage/shop)
 // ---------------------------------------------------------------------------
 async function listCategories() {
+    // Storefront only sees active categories — inactive ones (e.g. retired
+    // Footwear / Accessories) are hidden from nav, cards and filters.
     return db_1.prisma.category.findMany({
+        where: { active: true },
         orderBy: { name: "asc" },
         select: { id: true, name: true, slug: true },
     });

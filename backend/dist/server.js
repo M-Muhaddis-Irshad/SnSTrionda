@@ -18,5 +18,6 @@ httpServer.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
     console.log(`🔌 Socket.IO ready on port ${PORT}`);
+    console.log("🛡️  Rate limiting active on /api/* (100 req / 15 min)");
 });
 //# sourceMappingURL=server.js.map

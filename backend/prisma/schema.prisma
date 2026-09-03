@@ -62,6 +62,7 @@ model Category {
   name        String
   slug        String     @unique
   description String?
+  active      Boolean    @default(true) // inactive categories are hidden from storefront
   parentId    String?
   parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
   children    Category[] @relation("CategoryTree")
@@ -71,6 +72,7 @@ model Category {
   updatedAt DateTime @updatedAt
 
   @@index([parentId])
+  @@index([active])
 }
 
 model Product {
@@ -87,6 +89,7 @@ model Product {
 
   variants        ProductVariant[]
   images          ProductImage[]
+  reviews         Review[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -178,11 +181,17 @@ model User {
   phone         String?
   role          UserRole  @default(CUSTOMER)
 
-  accounts      Account[]
-  sessions      Session[]
-  addresses     Address[]
-  orders        Order[]
-  activities    Activity[]
+  accounts        Account[]
+  sessions        Session[]
+  addresses       Address[]
+  orders          Order[]
+  activities      Activity[]
+  reviews         Review[]
+  notifications   Notification[]
+  customerChats   ChatSession[]   @relation("chatCustomer")
+  adminChats      ChatSession[]   @relation("chatAdmin")
+  chatMessages    ChatMessage[]
+  adminActivities AdminActivity[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -286,6 +295,9 @@ model Order {
   shippingAddress   Address         @relation(fields: [shippingAddressId], references: [id], onDelete: Restrict)
 
   items             OrderItem[]
+  reviews           Review[]
+  statusHistory     OrderStatusHistory[]
+  chatSessions      ChatSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -373,4 +385,152 @@ model Campaign {
   @@index([imageId])
   @@index([active])
   @@index([startDate, endDate])
+}
+
+// =============================================================================
+// DELIVERY ZONES (Pakistan cities — charges & estimated delivery time)
+// =============================================================================
+
+model DeliveryZone {
+  id              String   @id @default(cuid())
+  name            String   @unique // e.g. "Karachi"
+  latitude        Float
+  longitude       Float
+  deliveryCharges Int      // in PKR, e.g. 300
+  estimatedDays   Int      @default(2) // 1-7
+  active          Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+}
+
+// =============================================================================
+// REVIEWS (user reviews with admin moderation workflow)
+// =============================================================================
+// Status flow: PENDING → APPROVED (published) | REJECTED (hidden)
+// Only reviews tied to a DELIVERED order belonging to the user can be created.
+// =============================================================================
+
+model Review {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  rating     Int      // 1-5
+  title      String?
+  comment    String   @db.Text
+  status     String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  approvedAt DateTime?
+  approvedBy String?  // admin user id
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+  @@index([productId, status])
+  @@index([status])
+  @@index([userId])
+}
+
+// =============================================================================
+// REAL-TIME LAYER — notifications, chat, admin activity, order status history
+// =============================================================================
+
+// Push notifications delivered to a user via Socket.IO (and persisted for the
+// notifications inbox at /account/notifications).
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // ORDER_STATUS | REVIEW_STATUS | CHAT_MESSAGE | ADMIN_UPDATE
+  title     String
+  message   String
+  data      Json?    // stores { orderId, reviewId, chatSessionId, ... } as needed
+  read      Boolean  @default(false)
+  readAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+// A support conversation between one customer and the admin team.
+// status: OPEN | RESOLVED | CLOSED
+model ChatSession {
+  id         String        @id @default(cuid())
+  subject    String        // e.g. "Order Issue", "Product Question"
+  orderId    String?
+  order      Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  customerId String
+  customer   User          @relation("chatCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  adminId    String?       // assigned admin (locks in when an admin first replies)
+  admin      User?         @relation("chatAdmin", fields: [adminId], references: [id], onDelete: SetNull)
+  status     String        @default("OPEN") // OPEN | RESOLVED | CLOSED
+  messages   ChatMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([adminId])
+  @@index([status])
+  @@index([orderId])
+}
+
+// Individual messages inside a ChatSession.
+model ChatMessage {
+  id            String      @id @default(cuid())
+  chatSessionId String
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  senderId      String
+  sender        User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  message       String
+  read          Boolean     @default(false)
+  readAt        DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([chatSessionId, createdAt])
+  @@index([senderId])
+}
+
+// Audit trail of admin actions, streamed live to the admin activity feed.
+// action: CREATE_PRODUCT | UPDATE_PRODUCT | DELETE_PRODUCT | UPDATE_ORDER_STATUS |
+//         APPROVE_REVIEW | REJECT_REVIEW | UNAPPROVE_REVIEW | DELETE_REVIEW |
+//         CREATE_DELIVERY_ZONE | UPDATE_DELIVERY_ZONE | DELETE_DELIVERY_ZONE | ...
+model AdminActivity {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action     String
+  entityType String   // Product | Order | Review | DeliveryZone | Chat | ...
+  entityId   String
+  details    Json?    // optional { fromStatus, toStatus, ... }
+
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([entityType])
+  @@index([createdAt])
+}
+
+// Every order status transition, shown as a timeline to the customer and used
+// by the admin activity feed.
+model OrderStatusHistory {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status          String   // PENDING | CONFIRMED | PROCESSING | SHIPPED | DELIVERED | CANCELLED
+  statusChangedAt DateTime @default(now())
+  notes           String?
+
+  @@index([orderId])
+  @@index([statusChangedAt])
 }

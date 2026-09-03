@@ -16,7 +16,12 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
+import { Banknote, Package, Users, ShoppingBag, TrendingUp, Activity as ActivityIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { getSocket } from '@/lib/socket';
+import { adminFetch } from '@/lib/admin-api';
+import type { AdminLiveStats, AdminActivityEntry } from '@/types/realtime';
+import { ACTIVITY_ACTION_LABELS } from '@/types/realtime';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -82,6 +87,65 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+  }, []);
+
+  // -------------------------------------------------------------------------
+  // LIVE layer — stats every 30s + activity feed (Socket.IO)
+  // -------------------------------------------------------------------------
+  const [liveStats, setLiveStats] = useState<AdminLiveStats | null>(null);
+  const [activities, setActivities] = useState<AdminActivityEntry[]>([]);
+
+  useEffect(() => {
+    // Seed the activity feed
+    adminFetch<{ data: any[] }>('/activity?page=1&limit=8')
+      .then((res) => {
+        setActivities(
+          (res.data || []).map((a: any) => ({
+            activityId: a.id,
+            adminId: a.adminId,
+            adminName: a.admin?.name || a.admin?.email || 'Admin',
+            action: a.action,
+            entityType: a.entityType,
+            entityId: a.entityId,
+            details: a.details ?? null,
+            timestamp: a.createdAt,
+          }))
+        );
+      })
+      .catch(() => {});
+
+    const sock = getSocket();
+    if (!sock) return;
+
+    const onStats = (stats: AdminLiveStats) => {
+      setLiveStats(stats);
+      // Keep the headline cards live too
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              stats: {
+                ...prev.stats,
+                totalRevenue: stats.totalRevenue,
+                totalOrders: stats.totalOrders,
+              },
+            }
+          : prev
+      );
+    };
+
+    const onActivity = (entry: AdminActivityEntry) => {
+      setActivities((prev) =>
+        [entry, ...prev].filter((e, i, arr) => arr.findIndex((x) => x.activityId === e.activityId) === i).slice(0, 8)
+      );
+    };
+
+    sock.on('admin:stats-updated', onStats);
+    sock.on('admin:activity-logged', onActivity);
+    return () => {
+      sock.off('admin:stats-updated', onStats);
+      sock.off('admin:activity-logged', onActivity);
+    };
   }, []);
 
   const fetchDashboardData = async () => {
@@ -213,37 +277,48 @@ export default function AdminDashboard() {
           value={`Rs. ${data.stats.totalRevenue.toLocaleString()}`}
           change={data.stats.revenueChange}
           period="vs last 30 days"
-          icon="💰"
+          icon={<Banknote size={18} strokeWidth={1.75} />}
         />
         <StatCard
           label="TOTAL ORDERS"
           value={data.stats.totalOrders.toString()}
           change={data.stats.ordersChange}
           period="vs last 30 days"
-          icon="📦"
+          icon={<Package size={18} strokeWidth={1.75} />}
         />
         <StatCard
           label="TOTAL CUSTOMERS"
           value={data.stats.totalCustomers.toString()}
           change={data.stats.customersChange}
           period="vs last 30 days"
-          icon="👥"
+          icon={<Users size={18} strokeWidth={1.75} />}
         />
         <StatCard
           label="TOTAL PRODUCTS"
           value={data.stats.totalProducts.toString()}
           change="+0%"
           period="vs last 30 days"
-          icon="🛍️"
+          icon={<ShoppingBag size={18} strokeWidth={1.75} />}
         />
         <StatCard
           label="CONVERSION RATE"
           value={data.stats.conversionRate}
           change="+0%"
           period="vs last 30 days"
-          icon="📈"
+          icon={<TrendingUp size={18} strokeWidth={1.75} />}
         />
       </div>
+
+      {/* LIVE STRIP — pushed by the backend every 30s + after events */}
+      {liveStats && (
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+          <LiveStat label="ORDERS TODAY" value={String(liveStats.ordersToday)} />
+          <LiveStat label="REVENUE TODAY" value={`Rs. ${liveStats.revenueToday.toLocaleString()}`} />
+          <LiveStat label="PENDING REVIEWS" value={String(liveStats.pendingReviews)} accent={liveStats.pendingReviews > 0 ? 'text-amber-400' : ''} />
+          <LiveStat label="ACTIVE CHATS" value={String(liveStats.activeChats)} accent={liveStats.activeChats > 0 ? 'text-emerald-400' : ''} />
+          <LiveStat label="ADMINS ONLINE" value={String(liveStats.connectedAdmins)} />
+        </div>
+      )}
 
       {/* CHARTS SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -358,7 +433,9 @@ export default function AdminDashboard() {
               data.recentOrders.map((order) => (
                 <div key={order.id} className="flex items-center justify-between py-3 border-b border-gray-800">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-800 rounded flex items-center justify-center">📦</div>
+                    <div className="w-10 h-10 bg-gray-800 rounded flex items-center justify-center">
+                      <Package size={18} strokeWidth={1.75} className="text-gray-400" />
+                    </div>
                     <div>
                       <p className="text-white font-semibold text-sm">#{order.orderNumber}</p>
                       <p className="text-gray-500 text-xs">{order.customer}</p>
@@ -411,6 +488,41 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* LIVE ACTIVITY FEED */}
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-white font-semibold">LIVE ACTIVITY</h3>
+          <a href="/admin/activity" className="text-gray-400 hover:text-white text-sm">
+            View All
+          </a>
+        </div>
+        {activities.length === 0 ? (
+          <p className="text-gray-500 text-sm text-center py-8">No admin activity yet</p>
+        ) : (
+          <div className="space-y-3">
+            {activities.slice(0, 6).map((entry) => (
+              <div key={entry.activityId} className="flex items-center gap-3 py-2 border-b border-gray-800 last:border-b-0">
+                <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center shrink-0">
+                  <ActivityIcon size={14} className="text-gray-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-200 truncate">
+                    <span className="font-semibold text-white">{entry.adminName}</span>
+                    <span className="text-gray-400"> {ACTION_LABEL(entry.action)}</span>
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {entry.entityType} · {entry.entityId}
+                  </p>
+                </div>
+                <span className="text-xs text-gray-500 shrink-0">
+                  {new Date(entry.timestamp).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* CUSTOMER OVERVIEW */}
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
         <h3 className="text-white font-semibold mb-6">CUSTOMER OVERVIEW</h3>
@@ -427,7 +539,7 @@ export default function AdminDashboard() {
 }
 
 function StatCard({ label, value, change, period, icon }: {
-  label: string; value: string; change: string; period: string; icon: string;
+  label: string; value: string; change: string; period: string; icon: React.ReactNode;
 }) {
   const isPositive = !change.startsWith('-');
   return (
@@ -440,10 +552,23 @@ function StatCard({ label, value, change, period, icon }: {
             {change} <span className="text-gray-500">{period}</span>
           </p>
         </div>
-        <div className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center text-lg">{icon}</div>
+        <div className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center text-gray-400">{icon}</div>
       </div>
     </div>
   );
+}
+
+function LiveStat({ label, value, accent = '' }: { label: string; value: string; accent?: string }) {
+  return (
+    <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+      <p className="text-[11px] uppercase text-gray-500 font-bold mb-1.5">{label}</p>
+      <p className={`text-2xl font-semibold text-white ${accent}`}>{value}</p>
+    </div>
+  );
+}
+
+function ACTION_LABEL(action: string): string {
+  return ACTIVITY_ACTION_LABELS[action] || action.replace(/_/g, ' ').toLowerCase();
 }
 
 function OverviewStat({ label, value }: { label: string; value: string }) {

@@ -14,5 +14,12 @@ export type * from './models/OrderItem';
 export type * from './models/Activity';
 export type * from './models/Image';
 export type * from './models/Campaign';
+export type * from './models/DeliveryZone';
+export type * from './models/Review';
+export type * from './models/Notification';
+export type * from './models/ChatSession';
+export type * from './models/ChatMessage';
+export type * from './models/AdminActivity';
+export type * from './models/OrderStatusHistory';
 export type * from './commonInputTypes';
 //# sourceMappingURL=models.d.ts.map

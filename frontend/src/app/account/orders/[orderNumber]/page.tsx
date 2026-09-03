@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
+import { getSocket } from "@/lib/socket";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -44,6 +45,12 @@ interface OrderDetail {
     email: string;
     name: string;
   };
+  statusHistory?: {
+    id: string;
+    status: string;
+    statusChangedAt: string;
+    notes?: string | null;
+  }[];
 }
 
 function formatPrice(price: number): string {
@@ -70,30 +77,49 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    async function fetchOrder() {
-      try {
-        const res = await fetch(`${API_URL}/api/orders/mine/${orderNumber}`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+  const fetchOrder = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/orders/mine/${orderNumber}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-        if (!res.ok) {
-          setError("Order not found.");
-          setLoading(false);
-          return;
-        }
-
-        const data = await res.json();
-        setOrder(data.data);
-      } catch {
-        setError("Failed to load order details.");
-      } finally {
+      if (!res.ok) {
+        setError("Order not found.");
         setLoading(false);
+        return;
       }
-    }
 
+      const data = await res.json();
+      setOrder(data.data);
+      setError("");
+    } catch {
+      setError("Failed to load order details.");
+    } finally {
+      setLoading(false);
+    }
+  }, [orderNumber, accessToken]);
+
+  useEffect(() => {
     fetchOrder();
-  }, [orderNumber, accessToken, user?.id]);
+  }, [fetchOrder, user?.id]);
+
+  // Live updates: the admin changes the status → refetch the freshest state
+  // (history rows + totals) and re-render the timeline in place.
+  useEffect(() => {
+    const sock = getSocket();
+    if (!sock) return;
+
+    const onStatusUpdate = (data: any) => {
+      if (data.orderNumber === orderNumber || data.orderId === order?.id) {
+        fetchOrder();
+      }
+    };
+
+    sock.on("order:status-updated", onStatusUpdate);
+    return () => {
+      sock.off("order:status-updated", onStatusUpdate);
+    };
+  }, [orderNumber, order?.id, fetchOrder]);
 
   if (loading) {
     return (
@@ -152,6 +178,12 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* Status timeline — live: updates instantly when the admin changes status */}
+      <StatusTimeline
+        status={order.status}
+        history={order.statusHistory || []}
+      />
 
       {/* Items */}
       <section className="border border-chrome-500 bg-surface p-6">
@@ -237,5 +269,93 @@ export default function OrderDetailPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// StatusTimeline — order progress from statusHistory (falls back to the
+// canonical PENDING → CONFIRMED → PROCESSING → SHIPPED → DELIVERED flow).
+// ---------------------------------------------------------------------------
+
+const ORDER_FLOW = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"];
+
+function humanizeStatus(status: string): string {
+  return status.charAt(0) + status.slice(1).toLowerCase();
+}
+
+function StatusTimeline({ status, history }: { status: string; history: OrderDetail["statusHistory"] }) {
+  if (status === "CANCELLED") {
+    return (
+      <section className="border border-red-300/40 bg-red-50 p-6">
+        <h3 className="font-display text-lg text-red-700 mb-2">Order Cancelled</h3>
+        <p className="font-body text-sm text-red-600">
+          This order was cancelled. Contact support if you believe this is a mistake.
+        </p>
+      </section>
+    );
+  }
+
+  // Prefer the recorded history when available
+  if (history && history.length > 0) {
+    return (
+      <section className="border border-chrome-500 bg-surface p-6">
+        <h3 className="font-display text-lg text-foreground mb-5">Order Status</h3>
+        <ol className="space-y-6 border-l border-chrome-300 ml-1.5">
+          {history.map((entry) => {
+            const isLast = entry.status === status;
+            return (
+              <li key={entry.id} className="relative pl-5">
+                <span
+                  className={`absolute left-0 top-1 -translate-x-1/2 w-2.5 h-2.5 rounded-full ${
+                    isLast ? "bg-emerald-500" : "bg-chrome-300"
+                  }`}
+                />
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+                  <p className={`font-body text-sm font-medium ${isLast ? "text-emerald-700" : "text-foreground"}`}>
+                    {humanizeStatus(entry.status)}
+                    {isLast && <span className="ml-2 text-[10px] uppercase tracking-wider text-emerald-600">Current</span>}
+                  </p>
+                  <p className="font-body text-xs text-muted">
+                    {new Date(entry.statusChangedAt).toLocaleString("en-PK", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+                {entry.notes && <p className="font-body text-xs text-muted mt-0.5">{entry.notes}</p>}
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+    );
+  }
+
+  // Fallback for legacy orders created before history tracking
+  const currentIdx = ORDER_FLOW.indexOf(status);
+  return (
+    <section className="border border-chrome-500 bg-surface p-6">
+      <h3 className="font-display text-lg text-foreground mb-5">Order Status</h3>
+      <ol className="flex items-center flex-wrap gap-y-3">
+        {ORDER_FLOW.map((step, idx) => {
+          const done = idx <= currentIdx;
+          return (
+            <li key={step} className="flex items-center">
+              <span
+                className={`font-body text-[11px] uppercase tracking-wide px-2.5 py-1.5 border ${
+                  done ? "border-emerald-500 text-emerald-700 bg-emerald-50" : "border-chrome-500 text-muted"
+                }`}
+              >
+                {humanizeStatus(step)}
+              </span>
+              {idx < ORDER_FLOW.length - 1 && <span className="mx-1 text-muted">—</span>}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
   );
 }

@@ -20,6 +20,7 @@ export interface CreateOrderInput {
     paymentMethod: "JAZZCASH" | "EASYPAISA" | "COD" | "CARD";
     email?: string;
     promoCode?: string;
+    deliveryZoneId?: string;
 }
 export declare const PROMO_CODES: Record<string, number>;
 export declare function validatePromoCode(code?: string): {
@@ -99,6 +100,13 @@ export declare function getOrderByNumber(orderNumber: string, email?: string): P
         createdAt: Date;
         updatedAt: Date;
     };
+    statusHistory: {
+        id: string;
+        orderId: string;
+        status: string;
+        statusChangedAt: Date;
+        notes: string | null;
+    }[];
     user: {
         email: string;
         id: string;
@@ -182,6 +190,13 @@ export declare function getMyOrderByNumber(orderNumber: string, userId: string):
         createdAt: Date;
         updatedAt: Date;
     };
+    statusHistory: {
+        id: string;
+        orderId: string;
+        status: string;
+        statusChangedAt: Date;
+        notes: string | null;
+    }[];
     user: {
         email: string;
         id: string;

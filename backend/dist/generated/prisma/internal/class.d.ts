@@ -293,6 +293,83 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
     get campaign(): Prisma.CampaignDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
+    /**
+     * `prisma.deliveryZone`: Exposes CRUD operations for the **DeliveryZone** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more DeliveryZones
+      * const deliveryZones = await prisma.deliveryZone.findMany()
+      * ```
+      */
+    get deliveryZone(): Prisma.DeliveryZoneDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.review`: Exposes CRUD operations for the **Review** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Reviews
+      * const reviews = await prisma.review.findMany()
+      * ```
+      */
+    get review(): Prisma.ReviewDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.notification`: Exposes CRUD operations for the **Notification** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Notifications
+      * const notifications = await prisma.notification.findMany()
+      * ```
+      */
+    get notification(): Prisma.NotificationDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.chatSession`: Exposes CRUD operations for the **ChatSession** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more ChatSessions
+      * const chatSessions = await prisma.chatSession.findMany()
+      * ```
+      */
+    get chatSession(): Prisma.ChatSessionDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.chatMessage`: Exposes CRUD operations for the **ChatMessage** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more ChatMessages
+      * const chatMessages = await prisma.chatMessage.findMany()
+      * ```
+      */
+    get chatMessage(): Prisma.ChatMessageDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.adminActivity`: Exposes CRUD operations for the **AdminActivity** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more AdminActivities
+      * const adminActivities = await prisma.adminActivity.findMany()
+      * ```
+      */
+    get adminActivity(): Prisma.AdminActivityDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.orderStatusHistory`: Exposes CRUD operations for the **OrderStatusHistory** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more OrderStatusHistories
+      * const orderStatusHistories = await prisma.orderStatusHistory.findMany()
+      * ```
+      */
+    get orderStatusHistory(): Prisma.OrderStatusHistoryDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
 }
 export declare function getPrismaClientClass(): PrismaClientConstructor;
 //# sourceMappingURL=class.d.ts.map

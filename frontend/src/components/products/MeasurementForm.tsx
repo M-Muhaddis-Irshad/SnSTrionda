@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check } from "lucide-react";
 import Button from "@/components/ui/Button";
 
 // ---------------------------------------------------------------------------
@@ -153,8 +154,9 @@ export default function MeasurementForm({ apiUrl }: MeasurementFormProps) {
   if (status === "success") {
     return (
       <div className="mt-6 border border-chrome-500 p-6">
-        <p className="font-body text-sm text-foreground">
-          ✓ Measurements saved — we&apos;ll use these when you check out.
+        <p className="font-body text-sm text-foreground flex items-center gap-1.5">
+          <Check size={14} strokeWidth={2} className="text-chrome-200" aria-hidden="true" />
+          Measurements saved — we&apos;ll use these when you check out.
         </p>
         <p className="mt-1 font-body text-xs text-muted">
           Measurement ID: {measurementId}

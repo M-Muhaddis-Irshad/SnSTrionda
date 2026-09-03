@@ -10,6 +10,7 @@ const express_1 = require("express");
 const multer_1 = __importDefault(require("multer"));
 const products_controller_1 = require("./products.controller");
 const products_image_controller_1 = require("./products.image.controller");
+const reviews_controller_1 = require("../reviews/reviews.controller");
 const auth_middleware_1 = require("../auth/auth.middleware");
 const router = (0, express_1.Router)();
 const upload = (0, multer_1.default)({
@@ -46,6 +47,10 @@ router.delete("/:productId/images/:imageId", auth_middleware_1.authenticate, (0,
 // Public category list (for homepage/shop filtering)
 // ---------------------------------------------------------------------------
 router.get("/categories", products_controller_1.handleListCategories);
+// ---------------------------------------------------------------------------
+// Public product reviews — APPROVED reviews only (must precede /:slug)
+// ---------------------------------------------------------------------------
+router.get("/:productId/reviews", reviews_controller_1.handleListProductReviews);
 // ---------------------------------------------------------------------------
 // Product routes (/:slug must come after image routes)
 // ---------------------------------------------------------------------------

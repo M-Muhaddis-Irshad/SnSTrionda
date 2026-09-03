@@ -42,6 +42,13 @@ export declare const ModelName: {
     readonly Activity: 'Activity';
     readonly Image: 'Image';
     readonly Campaign: 'Campaign';
+    readonly DeliveryZone: 'DeliveryZone';
+    readonly Review: 'Review';
+    readonly Notification: 'Notification';
+    readonly ChatSession: 'ChatSession';
+    readonly ChatMessage: 'ChatMessage';
+    readonly AdminActivity: 'AdminActivity';
+    readonly OrderStatusHistory: 'OrderStatusHistory';
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -56,6 +63,7 @@ export declare const CategoryScalarFieldEnum: {
     readonly name: 'name';
     readonly slug: 'slug';
     readonly description: 'description';
+    readonly active: 'active';
     readonly parentId: 'parentId';
     readonly createdAt: 'createdAt';
     readonly updatedAt: 'updatedAt';
@@ -242,11 +250,95 @@ export declare const CampaignScalarFieldEnum: {
     readonly updatedAt: 'updatedAt';
 };
 export type CampaignScalarFieldEnum = (typeof CampaignScalarFieldEnum)[keyof typeof CampaignScalarFieldEnum];
+export declare const DeliveryZoneScalarFieldEnum: {
+    readonly id: 'id';
+    readonly name: 'name';
+    readonly latitude: 'latitude';
+    readonly longitude: 'longitude';
+    readonly deliveryCharges: 'deliveryCharges';
+    readonly estimatedDays: 'estimatedDays';
+    readonly active: 'active';
+    readonly createdAt: 'createdAt';
+    readonly updatedAt: 'updatedAt';
+};
+export type DeliveryZoneScalarFieldEnum = (typeof DeliveryZoneScalarFieldEnum)[keyof typeof DeliveryZoneScalarFieldEnum];
+export declare const ReviewScalarFieldEnum: {
+    readonly id: 'id';
+    readonly userId: 'userId';
+    readonly productId: 'productId';
+    readonly orderId: 'orderId';
+    readonly rating: 'rating';
+    readonly title: 'title';
+    readonly comment: 'comment';
+    readonly status: 'status';
+    readonly approvedAt: 'approvedAt';
+    readonly approvedBy: 'approvedBy';
+    readonly createdAt: 'createdAt';
+    readonly updatedAt: 'updatedAt';
+};
+export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum];
+export declare const NotificationScalarFieldEnum: {
+    readonly id: 'id';
+    readonly userId: 'userId';
+    readonly type: 'type';
+    readonly title: 'title';
+    readonly message: 'message';
+    readonly data: 'data';
+    readonly read: 'read';
+    readonly readAt: 'readAt';
+    readonly createdAt: 'createdAt';
+    readonly updatedAt: 'updatedAt';
+};
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum];
+export declare const ChatSessionScalarFieldEnum: {
+    readonly id: 'id';
+    readonly subject: 'subject';
+    readonly orderId: 'orderId';
+    readonly customerId: 'customerId';
+    readonly adminId: 'adminId';
+    readonly status: 'status';
+    readonly createdAt: 'createdAt';
+    readonly updatedAt: 'updatedAt';
+};
+export type ChatSessionScalarFieldEnum = (typeof ChatSessionScalarFieldEnum)[keyof typeof ChatSessionScalarFieldEnum];
+export declare const ChatMessageScalarFieldEnum: {
+    readonly id: 'id';
+    readonly chatSessionId: 'chatSessionId';
+    readonly senderId: 'senderId';
+    readonly message: 'message';
+    readonly read: 'read';
+    readonly readAt: 'readAt';
+    readonly createdAt: 'createdAt';
+};
+export type ChatMessageScalarFieldEnum = (typeof ChatMessageScalarFieldEnum)[keyof typeof ChatMessageScalarFieldEnum];
+export declare const AdminActivityScalarFieldEnum: {
+    readonly id: 'id';
+    readonly adminId: 'adminId';
+    readonly action: 'action';
+    readonly entityType: 'entityType';
+    readonly entityId: 'entityId';
+    readonly details: 'details';
+    readonly createdAt: 'createdAt';
+};
+export type AdminActivityScalarFieldEnum = (typeof AdminActivityScalarFieldEnum)[keyof typeof AdminActivityScalarFieldEnum];
+export declare const OrderStatusHistoryScalarFieldEnum: {
+    readonly id: 'id';
+    readonly orderId: 'orderId';
+    readonly status: 'status';
+    readonly statusChangedAt: 'statusChangedAt';
+    readonly notes: 'notes';
+};
+export type OrderStatusHistoryScalarFieldEnum = (typeof OrderStatusHistoryScalarFieldEnum)[keyof typeof OrderStatusHistoryScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: 'asc';
     readonly desc: 'desc';
 };
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder];
+export declare const NullableJsonNullValueInput: {
+    readonly DbNull: import("@prisma/client-runtime-utils").DbNullClass;
+    readonly JsonNull: import("@prisma/client-runtime-utils").JsonNullClass;
+};
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput];
 export declare const QueryMode: {
     readonly default: 'default';
     readonly insensitive: 'insensitive';
@@ -257,4 +349,10 @@ export declare const NullsOrder: {
     readonly last: 'last';
 };
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder];
+export declare const JsonNullValueFilter: {
+    readonly DbNull: import("@prisma/client-runtime-utils").DbNullClass;
+    readonly JsonNull: import("@prisma/client-runtime-utils").JsonNullClass;
+    readonly AnyNull: import("@prisma/client-runtime-utils").AnyNullClass;
+};
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter];
 //# sourceMappingURL=prismaNamespaceBrowser.d.ts.map

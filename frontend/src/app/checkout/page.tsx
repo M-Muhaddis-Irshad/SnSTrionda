@@ -21,7 +21,9 @@ import StepIndicator from "./components/StepIndicator";
 import FormStep from "./components/FormStep";
 import Field from "./components/Field";
 import PromoCodeField from "./components/PromoCodeField";
+import CitySelector from "./components/CitySelector";
 import OrderSummaryPanel from "./OrderSummaryPanel";
+import type { DeliveryZone } from "@/types/delivery";
 
 // ---------------------------------------------------------------------------
 // Types & constants
@@ -52,8 +54,6 @@ const STEPS = [
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
-
-const DRAFT_KEY = "trionda-checkout-draft";
 
 const INITIAL_FORM: CheckoutFormData = {
   email: "",
@@ -119,7 +119,7 @@ export default function CheckoutPage() {
   const clearCart = useCartStore((state) => state.clearCart);
   const authUser = useAuthStore((state) => state.user);
   const accessToken = useAuthStore((state) => state.accessToken);
-  const { promoCode, discountPercent, applyPromo, clearPromo } = useCheckoutStore();
+  const { promoCode, discountPercent, resetCheckout, clearCheckout } = useCheckoutStore();
 
   const [form, setForm] = useState<CheckoutFormData>(INITIAL_FORM);
   const [stepIndex, setStepIndex] = useState(0);
@@ -128,98 +128,70 @@ export default function CheckoutPage() {
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
 
+  // Delivery zones (Pakistan cities with charges + map)
+  const [zones, setZones] = useState<DeliveryZone[]>([]);
+  const [zonesLoading, setZonesLoading] = useState(true);
+  const [selectedZone, setSelectedZone] = useState<DeliveryZone | null>(null);
+
   // Submit states
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [loadingStep, setLoadingStep] = useState("");
   const [serverError, setServerError] = useState("");
 
-  // Draft autosave
-  const [draftNote, setDraftNote] = useState(false);
-  const dirtyRef = useRef(false);
-  const draftTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const noteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const stepRef = useRef<HTMLDivElement | null>(null);
 
-  // Refs kept in sync so the autosave interval reads the latest values
-  const formRef = useRef(form);
-  formRef.current = form;
-  const stepIndexRef = useRef(stepIndex);
-  stepIndexRef.current = stepIndex;
+  const deliveryCharges = selectedZone?.deliveryCharges ?? SHIPPING_COST;
 
   const totals = useMemo(
-    () => computeTotals(subtotal, discountPercent),
-    [subtotal, discountPercent]
+    () => computeTotals(subtotal, discountPercent, deliveryCharges),
+    [subtotal, discountPercent, deliveryCharges]
   );
 
   // -------------------------------------------------------------------------
-  // Draft restore + autosave (every 2s while dirty)
+  // Fresh session — clear any promo / stale draft from a previous visit.
+  // The form is never pre-filled from localStorage, so a phone number the
+  // user didn't type can never appear on the payment step.
   // -------------------------------------------------------------------------
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(DRAFT_KEY);
-      if (raw) {
-        const saved = JSON.parse(raw);
-        if (saved?.form) {
-          setForm((prev) => ({ ...prev, ...saved.form }));
-        }
-        if (typeof saved?.stepIndex === "number" && saved.stepIndex < STEPS.length) {
-          setStepIndex(saved.stepIndex);
-          setMaxReached(saved.stepIndex);
-        }
-        if (saved?.promoCode && saved?.discountPercent) {
-          applyPromo(saved.promoCode, saved.discountPercent);
-        }
-      } else if (authUser?.email) {
-        setForm((prev) => ({ ...prev, email: authUser.email || "" }));
-      }
-    } catch {
-      /* ignore corrupted drafts */
+    resetCheckout();
+    if (authUser?.email) {
+      setForm((prev) => ({ ...prev, email: authUser.email || "" }));
     }
-
-    draftTimerRef.current = setInterval(() => {
-      if (!dirtyRef.current) return;
-      dirtyRef.current = false;
-      try {
-        const { promoCode: code, discountPercent: pct } =
-          useCheckoutStore.getState();
-        localStorage.setItem(
-          DRAFT_KEY,
-          JSON.stringify({
-            form: formRef.current,
-            stepIndex: stepIndexRef.current,
-            promoCode: code,
-            discountPercent: pct,
-          })
-        );
-        setDraftNote(true);
-      } catch {
-        /* storage full / unavailable */
-      }
-    }, 2000);
-
-    return () => {
-      if (draftTimerRef.current) clearInterval(draftTimerRef.current);
-      if (noteTimerRef.current) clearTimeout(noteTimerRef.current);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // -------------------------------------------------------------------------
+  // Load delivery zones (city dropdown + map)
+  // -------------------------------------------------------------------------
+
   useEffect(() => {
-    if (!draftNote) return;
-    noteTimerRef.current = setTimeout(() => setDraftNote(false), 1600);
+    let cancelled = false;
+    async function loadZones() {
+      try {
+        const res = await fetch(`${API_URL}/api/delivery-zones`, {
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error("Failed to load delivery zones");
+        const data = await res.json();
+        if (!cancelled) setZones(data.data || []);
+      } catch {
+        // Non-blocking — checkout works with the flat shipping rate
+      } finally {
+        if (!cancelled) setZonesLoading(false);
+      }
+    }
+    loadZones();
     return () => {
-      if (noteTimerRef.current) clearTimeout(noteTimerRef.current);
+      cancelled = true;
     };
-  }, [draftNote]);
+  }, []);
 
   // -------------------------------------------------------------------------
   // Field change / blur handlers
   // -------------------------------------------------------------------------
 
   function handleChange(field: keyof CheckoutFormData, value: string) {
-    dirtyRef.current = true;
     setForm((prev) => ({ ...prev, [field]: value }));
     // Clear this field's error while the user corrects it
     setErrors((prev) => {
@@ -342,6 +314,7 @@ export default function CheckoutPage() {
         paymentMethod,
         email: form.email.trim(),
         promoCode: promoCode || undefined,
+        deliveryZoneId: selectedZone?.id || undefined,
       };
 
       const headers: Record<string, string> = {
@@ -367,8 +340,8 @@ export default function CheckoutPage() {
         `trionda-order-email-${data.data.orderNumber}`,
         form.email.trim()
       );
-      localStorage.removeItem(DRAFT_KEY);
-      clearPromo();
+      // Purge promo + any persisted draft so the next checkout starts clean.
+      clearCheckout();
 
       if (paymentMethod === "CARD") {
         setLoadingStep("Redirecting to payment...");
@@ -511,6 +484,22 @@ export default function CheckoutPage() {
                         onChange={(v) => handleChange("country", v)}
                         selectOptions={[{ value: "Pakistan", label: "Pakistan" }]}
                       />
+                      <CitySelector
+                        zones={zones}
+                        selectedZoneId={selectedZone?.id || null}
+                        loading={zonesLoading}
+                        onSelect={(zone) => {
+                          setSelectedZone(zone);
+                          if (zone) {
+                            // Prefill the city + province from the chosen zone
+                            setForm((prev) => ({
+                              ...prev,
+                              city: prev.city.trim() ? prev.city : zone.name,
+                              province: prev.province.trim() ? prev.province : "",
+                            }));
+                          }
+                        }}
+                      />
                       <div className="checkout-name-row">
                         <Field
                           id="firstName"
@@ -625,8 +614,12 @@ export default function CheckoutPage() {
                     <div className="space-y-3">
                       <ShippingMethodCard
                         title="Standard shipping"
-                        time="3–5 business days"
-                        price={SHIPPING_COST}
+                        time={
+                          selectedZone
+                            ? `Estimated ${selectedZone.estimatedDays <= 1 ? "1 day" : `${selectedZone.estimatedDays - 1}–${selectedZone.estimatedDays} days`} to ${selectedZone.name}`
+                            : "3–5 business days"
+                        }
+                        price={deliveryCharges}
                         selected={shippingMethod === "standard"}
                         onSelect={() => setShippingMethod("standard")}
                       />
@@ -636,7 +629,9 @@ export default function CheckoutPage() {
                         </p>
                       )}
                       <p className="font-body text-xs text-muted">
-                        Delivery within Pakistan only.
+                        {selectedZone
+                          ? `Delivery charges are based on your selected city (${selectedZone.name}).`
+                          : "Select your city in the shipping step to see exact delivery charges."}
                       </p>
                     </div>
                   </FormStep>
@@ -697,7 +692,8 @@ export default function CheckoutPage() {
                       <div className="checkout-review-divider" />
                       <ReviewLine label="Shipping method" onEdit={() => goToStep(3)}>
                         <p className="font-body text-sm text-foreground">
-                          Standard shipping — {formatPrice(SHIPPING_COST)}
+                          Standard shipping — {formatPrice(deliveryCharges)}
+                          {selectedZone ? ` (${selectedZone.name})` : ""}
                         </p>
                       </ReviewLine>
                       <div className="checkout-review-divider" />
@@ -800,21 +796,12 @@ export default function CheckoutPage() {
 
             {/* Right column — order summary (below form on mobile) */}
             <div className="w-full lg:w-[380px] flex-shrink-0">
-              <OrderSummaryPanel />
+              <OrderSummaryPanel shipping={deliveryCharges} deliveryZone={selectedZone} />
             </div>
           </div>
         )}
       </div>
 
-      {/* Draft saved toast */}
-      <div
-        className={`checkout-draft-note ${draftNote ? "opacity-100" : "pointer-events-none opacity-0"}`}
-        role="status"
-        aria-live="polite"
-      >
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-chrome-200 align-middle mr-2" />
-        Draft saved
-      </div>
     </main>
   );
 }

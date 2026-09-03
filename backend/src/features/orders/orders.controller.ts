@@ -4,6 +4,8 @@
 
 import { Request, Response } from "express";
 import { createOrder, getOrderByNumber, getMyOrderByNumber, getMyOrders, OrderError, validatePromoCode } from "./orders.service";
+import { getIO } from "../../lib/socket";
+import { createNotification, pushAdminStats, ORDER_STATUS_LABELS } from "../../services/socketService";
 
 // ---------------------------------------------------------------------------
 // GET /api/orders/promo/validate?code=TRIONDA10 — public promo validation
@@ -110,15 +112,56 @@ export async function handleGetOrder(req: Request, res: Response) {
 
 export async function handleCreateOrder(req: Request, res: Response) {
   try {
-    const { items, shippingAddress, paymentMethod, email, promoCode } = req.body;
+    const { items, shippingAddress, paymentMethod, email, promoCode, deliveryZoneId } = req.body;
 
     // If user is authenticated, their userId will be used; otherwise guest user is created
     const authUserId = req.user?.userId;
 
     const order = await createOrder(
-      { items, shippingAddress, paymentMethod, email, promoCode },
+      { items, shippingAddress, paymentMethod, email, promoCode, deliveryZoneId },
       authUserId
     );
+
+    // Notify connected admins in real time (Socket.IO 'admin' room).
+    // Emit only AFTER the order is committed to the database.
+    try {
+      getIO()
+        .to("admin")
+        .emit("order:created", {
+          orderId: order!.id,
+          orderNumber: order!.orderNumber,
+          total: Number(order!.total),
+          status: order!.status,
+          paymentMethod: order!.paymentMethod,
+          paymentStatus: order!.paymentStatus,
+          createdAt: order!.createdAt,
+          user: order!.user,
+          items: order!.items.map((i) => ({
+            productName: (i.productVariant as any).product?.name ?? "Product",
+            quantity: i.quantity,
+            price: Number(i.priceAtPurchase),
+          })),
+        });
+      console.log(`📡 Socket: emitted order:created for ${order!.orderNumber}`);
+    } catch (emitErr: any) {
+      // Socket failure must never block order placement
+      console.error("Socket emit failed (order still saved):", emitErr?.message || emitErr);
+    }
+
+    // Confirmation notification for the customer (skip guest checkout users)
+    const isGuest = order!.user.email?.toLowerCase().endsWith("@trionda-guest.local");
+    if (!isGuest) {
+      await createNotification(
+        order!.user.id,
+        "ORDER_STATUS",
+        `Order ${order!.orderNumber} — Placed`,
+        `We've received your order ${order!.orderNumber} (${ORDER_STATUS_LABELS[order!.status] || order!.status}). You'll get live updates as it progresses.`,
+        { orderId: order!.id, orderNumber: order!.orderNumber, status: order!.status }
+      );
+    }
+
+    // Refresh live admin dashboard stats without waiting for the 30s tick
+    pushAdminStats().catch(() => {});
 
     res.status(201).json({
       message: "Order placed successfully",

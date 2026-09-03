@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ProductActions from "@/components/products/ProductActions";
+import ProductReviews from "@/components/products/ProductReviews";
 import ProductCard from "@/components/ui/ProductCard";
 import Badge from "@/components/ui/Badge";
 
@@ -196,6 +197,9 @@ export default async function ProductDetailPage({
             />
           </div>
         </div>
+
+        {/* Customer reviews — approved only */}
+        <ProductReviews productId={product.id} />
 
         {/* You Might Also Like */}
         {relatedProducts.length > 0 && (

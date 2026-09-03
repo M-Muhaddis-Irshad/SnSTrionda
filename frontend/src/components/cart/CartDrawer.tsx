@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { useCartStore, selectSubtotal } from "@/stores/cartStore";
 import QuantitySelector from "@/components/products/QuantitySelector";
 
@@ -119,8 +120,9 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             {item.variantLabel}
                           </p>
                           {item.customMeasurementId && (
-                            <p className="cart-item-measurement">
-                              ✓ Custom measurements saved
+                            <p className="cart-item-measurement flex items-center gap-1">
+                              <Check size={12} strokeWidth={2} className="text-chrome-200" aria-hidden="true" />
+                              Custom measurements saved
                             </p>
                           )}
                         </div>
