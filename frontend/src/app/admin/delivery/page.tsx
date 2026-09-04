@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Plus, Truck } from "lucide-react";
+import { Plus, Truck, Pencil, Trash2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import Modal, {
   inputCls,
@@ -288,18 +288,22 @@ export default function DeliveryPage() {
                       </button>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1.5">
                         <button
                           onClick={() => openEdit(zone)}
-                          className="px-2.5 py-1.5 text-xs text-gray-300 border border-gray-700 rounded hover:bg-gray-800 transition"
+                          aria-label={`Edit ${zone.name}`}
+                          title="Edit"
+                          className="p-2 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition"
                         >
-                          Edit
+                          <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => setDeleteTarget(zone)}
-                          className="px-2.5 py-1.5 text-xs text-red-400 border border-red-500/30 rounded hover:bg-red-500/10 transition"
+                          aria-label={`Delete ${zone.name}`}
+                          title="Delete"
+                          className="p-2 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 transition"
                         >
-                          Delete
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </td>

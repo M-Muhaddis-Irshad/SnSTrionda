@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Pencil, Trash2, Eye } from "lucide-react";
 import Modal, { btnPrimaryCls, btnSecondaryCls, btnDangerCls } from "./Modal";
 import ImageModal from "./ImageModal";
 import {
@@ -237,26 +237,32 @@ export default function ImagesTab() {
                       {new Date(img.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
                         <a
                           href={img.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-gray-300 underline underline-offset-2 hover:text-white"
+                          aria-label="View image in a new tab"
+                          title="View"
+                          className="p-2 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition inline-flex"
                         >
-                          View
+                          <Eye size={14} />
                         </a>
                         <button
                           onClick={() => setEditImage(img)}
-                          className="text-xs text-gray-300 hover:text-white transition"
+                          aria-label={`Edit image ${img.name || ""}`}
+                          title="Edit"
+                          className="p-2 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition"
                         >
-                          Edit
+                          <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => setDeleteTarget(img)}
-                          className="text-xs text-red-400 hover:text-red-300 transition"
+                          aria-label={`Delete image ${img.name || ""}`}
+                          title="Delete"
+                          className="p-2 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 transition"
                         >
-                          Delete
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </td>

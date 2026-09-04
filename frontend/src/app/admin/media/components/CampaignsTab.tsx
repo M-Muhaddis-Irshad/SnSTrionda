@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import Modal, { btnDangerCls, btnSecondaryCls } from "./Modal";
 import CampaignModal from "./CampaignModal";
 import {
@@ -262,18 +263,22 @@ export default function CampaignsTab() {
                         {new Date(c.endDate).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => setEditCampaign(c)}
-                            className="text-xs text-gray-300 hover:text-white transition"
+                            aria-label={`Edit campaign ${c.title}`}
+                            title="Edit"
+                            className="p-2 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition"
                           >
-                            Edit
+                            <Pencil size={14} />
                           </button>
                           <button
                             onClick={() => setDeleteTarget(c)}
-                            className="text-xs text-red-400 hover:text-red-300 transition"
+                            aria-label={`Delete campaign ${c.title}`}
+                            title="Delete"
+                            className="p-2 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 transition"
                           >
-                            Delete
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>

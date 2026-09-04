@@ -160,72 +160,65 @@ export default function AdminReviewsPage() {
     }
   }
 
+  const rowActionBtn =
+    "inline-flex items-center justify-center p-2 rounded border transition disabled:opacity-50";
+
   const actions = (review: AdminReview) => {
+    const approve = (
+      <button
+        key="approve"
+        onClick={() => act(`/reviews/${review.id}/approve`)}
+        disabled={busy}
+        aria-label={`Approve review by ${review.user.name || review.user.email}`}
+        title="Approve"
+        className={`${rowActionBtn} bg-green-500/10 text-green-400 border-green-500/30 hover:bg-green-500/20`}
+      >
+        <Check size={14} />
+      </button>
+    );
+    const reject = (
+      <button
+        key="reject"
+        onClick={() => act(`/reviews/${review.id}/reject`)}
+        disabled={busy}
+        aria-label={`Reject review by ${review.user.name || review.user.email}`}
+        title="Reject"
+        className={`${rowActionBtn} bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20`}
+      >
+        <X size={14} />
+      </button>
+    );
+    const unapprove = (
+      <button
+        key="unapprove"
+        onClick={() => act(`/reviews/${review.id}/unapprove`)}
+        disabled={busy}
+        aria-label={`Unapprove review by ${review.user.name || review.user.email}`}
+        title="Unapprove"
+        className={`${rowActionBtn} text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/10`}
+      >
+        <RotateCcw size={14} />
+      </button>
+    );
+    const del = (
+      <button
+        key="delete"
+        onClick={() => setDeleteTarget(review)}
+        disabled={busy}
+        aria-label={`Delete review by ${review.user.name || review.user.email}`}
+        title="Delete"
+        className={`${rowActionBtn} text-red-400 border-red-500/30 hover:bg-red-500/10`}
+      >
+        <Trash2 size={14} />
+      </button>
+    );
     switch (review.status) {
       case "PENDING":
-        return (
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => act(`/reviews/${review.id}/approve`)}
-              disabled={busy}
-              className="px-2.5 py-1.5 text-xs bg-green-500/10 text-green-400 border border-green-500/30 rounded hover:bg-green-500/20 transition flex items-center gap-1 disabled:opacity-50"
-            >
-              <Check size={12} /> Approve
-            </button>
-            <button
-              onClick={() => act(`/reviews/${review.id}/reject`)}
-              disabled={busy}
-              className="px-2.5 py-1.5 text-xs bg-red-500/10 text-red-400 border border-red-500/30 rounded hover:bg-red-500/20 transition flex items-center gap-1 disabled:opacity-50"
-            >
-              <X size={12} /> Reject
-            </button>
-            <button
-              onClick={() => setDeleteTarget(review)}
-              disabled={busy}
-              className="px-2.5 py-1.5 text-xs text-gray-400 border border-gray-700 rounded hover:bg-gray-800 transition flex items-center gap-1 disabled:opacity-50"
-            >
-              <Trash2 size={12} /> Delete
-            </button>
-          </div>
-        );
+        return [approve, reject, del];
       case "APPROVED":
-        return (
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => act(`/reviews/${review.id}/unapprove`)}
-              disabled={busy}
-              className="px-2.5 py-1.5 text-xs text-yellow-400 border border-yellow-500/30 rounded hover:bg-yellow-500/10 transition flex items-center gap-1 disabled:opacity-50"
-            >
-              <RotateCcw size={12} /> Unapprove
-            </button>
-            <button
-              onClick={() => setDeleteTarget(review)}
-              disabled={busy}
-              className="px-2.5 py-1.5 text-xs text-gray-400 border border-gray-700 rounded hover:bg-gray-800 transition flex items-center gap-1 disabled:opacity-50"
-            >
-              <Trash2 size={12} /> Delete
-            </button>
-          </div>
-        );
+        return [unapprove, del];
       default:
-        return (
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => act(`/reviews/${review.id}/approve`)}
-              disabled={busy}
-              className="px-2.5 py-1.5 text-xs bg-green-500/10 text-green-400 border border-green-500/30 rounded hover:bg-green-500/20 transition flex items-center gap-1 disabled:opacity-50"
-            >
-              <Check size={12} /> Re-approve
-            </button>
-            <button
-              onClick={() => setDeleteTarget(review)}
-              disabled={busy}
-              className="px-2.5 py-1.5 text-xs text-gray-400 border border-gray-700 rounded hover:bg-gray-800 transition flex items-center gap-1 disabled:opacity-50"
-            >
-              <Trash2 size={12} /> Delete
-            </button>
-          </div>
-        );
+        return [approve, reject, del];
     }
   };
 
@@ -322,12 +315,14 @@ export default function AdminReviewsPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex justify-end items-center gap-2">
+                      <div className="flex justify-end items-center gap-1.5">
                         <button
                           onClick={() => setViewing(review)}
-                          className="px-2.5 py-1.5 text-xs text-gray-300 border border-gray-700 rounded hover:bg-gray-800 transition flex items-center gap-1"
+                          aria-label={`View full review by ${review.user.name || review.user.email}`}
+                          title="View full review"
+                          className="p-2 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition"
                         >
-                          <Eye size={12} /> View Full
+                          <Eye size={14} />
                         </button>
                         {actions(review)}
                       </div>
