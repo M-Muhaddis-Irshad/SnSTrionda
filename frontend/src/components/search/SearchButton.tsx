@@ -143,8 +143,12 @@ export default function SearchButton() {
   return (
     <div ref={containerRef} className="relative">
       {open ? (
-        // Inline expanding panel — anchored to the header, no modal/backdrop
-        <div className="absolute right-0 top-full z-50 mt-1 w-[min(88vw,440px)] border border-chrome-500 bg-surface shadow-2xl">
+        // Inline expanding panel — anchored to the header, no modal/backdrop.
+        // Mobile (<sm): full-width bar docked under the sticky header
+        // (fixed inset-x-0 top-16) — anchoring an 88vw panel to the 40px-wide
+        // search icon with right-0 overflowed the left edge on narrow screens.
+        // sm+: desktop dropdown, right-aligned to the icon as before.
+        <div className="fixed inset-x-0 top-16 z-50 border border-chrome-500 bg-surface shadow-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-1 sm:w-[min(88vw,440px)]">
           {/* Input row */}
           <div className="flex items-center gap-3 border-b border-chrome-500 px-4">
             <span className="text-chrome-400">
