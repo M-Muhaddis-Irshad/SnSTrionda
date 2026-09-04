@@ -13,6 +13,7 @@ const measurements_routes_1 = __importDefault(require("./features/measurements/m
 const orders_routes_1 = __importDefault(require("./features/orders/orders.routes"));
 const payments_routes_1 = __importDefault(require("./features/payments/payments.routes"));
 const admin_routes_1 = __importDefault(require("./features/admin/admin.routes"));
+const users_routes_1 = __importDefault(require("./features/users/users.routes"));
 const delivery_routes_1 = __importDefault(require("./features/delivery/delivery.routes"));
 const reviews_routes_1 = __importDefault(require("./features/reviews/reviews.routes"));
 const chat_routes_1 = __importDefault(require("./features/chat/chat.routes"));
@@ -53,6 +54,7 @@ app.use("/api/measurements", measurements_routes_1.default);
 app.use("/api/orders", orders_routes_1.default);
 app.use("/api/payments", payments_routes_1.default);
 app.use("/api/admin", admin_routes_1.default);
+app.use("/api/admin/users", users_routes_1.default);
 app.use("/api/delivery-zones", delivery_routes_1.default);
 app.use("/api/reviews", reviews_routes_1.default);
 app.use("/api/chat", chat_routes_1.default);

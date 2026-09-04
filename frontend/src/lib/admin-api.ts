@@ -153,6 +153,27 @@ export function deleteAdminVariant(variantId: string) {
   return adminFetch(`/variants/${variantId}`, { method: "DELETE" });
 }
 
+// Users (admin user management)
+export function fetchAdminUsers(params?: { page?: number; limit?: number; role?: string; search?: string }) {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  if (params?.role) query.set("role", params.role);
+  if (params?.search) query.set("search", params.search);
+  return adminFetch(`/users?${query.toString()}`);
+}
+
+export function fetchAdminUser(userId: string) {
+  return adminFetch(`/users/${userId}`);
+}
+
+export function updateAdminUserRole(userId: string, role: string) {
+  return adminFetch(`/users/${userId}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
+}
+
 // Orders
 export function fetchAdminOrders(params?: { page?: number; limit?: number; status?: string; search?: string }) {
   const query = new URLSearchParams();
