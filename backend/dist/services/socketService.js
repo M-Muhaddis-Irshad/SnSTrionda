@@ -12,14 +12,14 @@ exports.logAdminActivity = logAdminActivity;
 exports.broadcastOrderStatusUpdate = broadcastOrderStatusUpdate;
 exports.notifyAdminsNewChatSession = notifyAdminsNewChatSession;
 const db_1 = require("../db");
-const socket_1 = require("../lib/socket");
-Object.defineProperty(exports, "pushAdminStats", { enumerable: true, get: function () { return socket_1.broadcastAdminStats; } });
+const sockets_1 = require("../sockets");
+Object.defineProperty(exports, "pushAdminStats", { enumerable: true, get: function () { return sockets_1.broadcastAdminStats; } });
 // ---------------------------------------------------------------------------
 // Small helpers
 // ---------------------------------------------------------------------------
 function safeEmit(room, event, payload) {
     try {
-        (0, socket_1.getIO)().to(room).emit(event, payload);
+        (0, sockets_1.getIO)().to(room).emit(event, payload);
     }
     catch (err) {
         console.error(`Socket emit to "${room}" (${event}) failed:`, err);
@@ -132,7 +132,7 @@ async function broadcastOrderStatusUpdate(order, opts = {}) {
             });
         }
         // 4. Refresh dashboard stats right away (don't wait for the 30s tick)
-        (0, socket_1.broadcastAdminStats)().catch(() => { });
+        (0, sockets_1.broadcastAdminStats)().catch(() => { });
     }
     catch (err) {
         console.error("broadcastOrderStatusUpdate failed:", err);

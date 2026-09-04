@@ -20,4 +20,4 @@ export declare function getIO(): Server;
 export declare function computeAdminStats(): Promise<AdminStats>;
 export declare function broadcastAdminStats(): Promise<void>;
 export declare function initSocket(httpServer: http.Server): Server;
-//# sourceMappingURL=socket.d.ts.map
+//# sourceMappingURL=index.d.ts.map

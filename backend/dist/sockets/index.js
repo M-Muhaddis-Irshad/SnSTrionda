@@ -237,4 +237,4 @@ function initSocket(httpServer) {
         statsTimer.unref();
     return io;
 }
-//# sourceMappingURL=socket.js.map
+//# sourceMappingURL=index.js.map

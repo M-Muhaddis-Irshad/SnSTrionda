@@ -5,7 +5,7 @@
 // =============================================================================
 
 import { prisma } from "../db";
-import { getIO, broadcastAdminStats } from "../lib/socket";
+import { getIO, broadcastAdminStats } from "../sockets";
 
 // ---------------------------------------------------------------------------
 // Small helpers

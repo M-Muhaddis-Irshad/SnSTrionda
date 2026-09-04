@@ -11,7 +11,6 @@ const payments_service_1 = require("./payments.service");
 // ---------------------------------------------------------------------------
 async function handleCreateCheckout(req, res) {
     try {
-        console.log("[Payments] handleCreateCheckout called, body:", JSON.stringify(req.body));
         const { orderId } = req.body;
         if (!orderId) {
             return res.status(400).json({ error: "orderId is required." });

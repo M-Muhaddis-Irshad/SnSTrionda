@@ -1,4 +1,4 @@
-import { broadcastAdminStats } from "../lib/socket";
+import { broadcastAdminStats } from "../sockets";
 export declare function safeEmit(room: string, event: string, payload: unknown): void;
 export declare const ORDER_STATUS_LABELS: Record<string, string>;
 export declare function createNotification(userId: string, type: string, title: string, message: string, data?: Record<string, unknown> | null): Promise<{

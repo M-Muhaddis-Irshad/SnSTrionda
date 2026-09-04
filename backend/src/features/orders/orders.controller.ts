@@ -4,7 +4,7 @@
 
 import { Request, Response } from "express";
 import { createOrder, getOrderByNumber, getMyOrderByNumber, getMyOrders, OrderError, validatePromoCode } from "./orders.service";
-import { getIO } from "../../lib/socket";
+import { getIO } from "../../sockets";
 import { createNotification, pushAdminStats, ORDER_STATUS_LABELS } from "../../services/socketService";
 
 // ---------------------------------------------------------------------------

@@ -9,7 +9,7 @@ exports.handleGetMyOrder = handleGetMyOrder;
 exports.handleGetOrder = handleGetOrder;
 exports.handleCreateOrder = handleCreateOrder;
 const orders_service_1 = require("./orders.service");
-const socket_1 = require("../../lib/socket");
+const sockets_1 = require("../../sockets");
 const socketService_1 = require("../../services/socketService");
 // ---------------------------------------------------------------------------
 // GET /api/orders/promo/validate?code=TRIONDA10 — public promo validation
@@ -105,7 +105,7 @@ async function handleCreateOrder(req, res) {
         // Notify connected admins in real time (Socket.IO 'admin' room).
         // Emit only AFTER the order is committed to the database.
         try {
-            (0, socket_1.getIO)()
+            (0, sockets_1.getIO)()
                 .to("admin")
                 .emit("order:created", {
                 orderId: order.id,
