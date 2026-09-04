@@ -169,7 +169,7 @@ body {
 }
 
 .header-nav {
-  @apply hidden md:flex items-center gap-6 overflow-x-auto;
+  @apply hidden lg:flex items-center gap-6 overflow-x-auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -268,12 +268,18 @@ body {
    ============================================================================= */
 
 .mobile-menu-wrapper {
-  @apply md:hidden;
+  /* Menu infra (slide-in panel + overlay) stays available below lg so the
+     bottom nav's "Menu" tab still opens it on phones; only the hamburger
+     button itself is hidden on very small screens. */
+  @apply lg:hidden;
 }
 
 .mobile-menu-toggle {
-  @apply relative flex h-10 w-10 items-center justify-center text-foreground
-         transition-colors hover:text-chrome-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm;
+  /* Hamburger visible between 640px and 1024px only. Below 640px the bottom
+     nav is the only navigation; at/above lg the desktop nav takes over. */
+  @apply relative hidden h-10 w-10 items-center justify-center text-foreground
+         transition-colors hover:text-chrome-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm
+         sm:flex;
 }
 
 .mobile-menu-overlay {
@@ -1437,7 +1443,7 @@ body {
    ============================================================================= */
 
 .mobile-bottom-nav {
-  @apply fixed bottom-0 left-0 right-0 z-30 border-t border-chrome-500 bg-surface md:hidden;
+  @apply fixed bottom-0 left-0 right-0 z-30 border-t border-chrome-500 bg-surface lg:hidden;
 }
 
 .mobile-bottom-nav-inner {

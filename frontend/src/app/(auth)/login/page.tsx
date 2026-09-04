@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import TermsConditionsModal from '@/components/modals/TermsConditionsModal';
 
 const LOGIN_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788284310/trionda-wears/auth/auth-login.jpg';
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
@@ -70,6 +71,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showTCModal, setShowTCModal] = useState(false);
 
   const {
     register,
@@ -251,12 +253,30 @@ function LoginForm() {
             {/* Google */}
             <GoogleSignInButton onSuccess={handleGoogleSuccess} />
 
+            {/* Terms link — opens the T&C modal, no navigation */}
+            <p className="auth-terms-text mt-6 text-center">
+              By signing in you agree to our{' '}
+              <button
+                type="button"
+                onClick={() => setShowTCModal(true)}
+                className="auth-terms-link cursor-pointer bg-transparent p-0"
+              >
+                Terms &amp; Conditions
+              </button>
+            </p>
+
             {/* Signup Link */}
             <p className="auth-switch-text">
               NEW TO TRIONDA WEARS?{' '}
               <a href="/signup" className="auth-switch-link">CREATE AN ACCOUNT</a>
             </p>
           </form>
+
+          {/* Terms & Conditions modal */}
+          <TermsConditionsModal
+            isOpen={showTCModal}
+            onClose={() => setShowTCModal(false)}
+          />
         </div>
       </div>
     </div>

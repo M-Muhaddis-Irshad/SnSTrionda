@@ -33,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           defer
         />
       </head>
-      <body className="min-h-screen overflow-x-hidden bg-background text-foreground font-body antialiased pb-14 md:pb-0">
+      <body className="min-h-screen overflow-x-hidden bg-background text-foreground font-body antialiased pb-14 lg:pb-0">
         <InitialPreloader />
         <ConditionalShell>
           {children}

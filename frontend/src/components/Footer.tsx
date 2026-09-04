@@ -9,14 +9,14 @@ const shopLinks = [
 ];
 
 const companyLinks = [
-  { label: "About", href: "#" },
-  { label: "Contact", href: "#" },
-  { label: "Wholesale", href: "#" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "Wholesale", href: "/contact" },
 ];
 
 const supportLinks = [
-  { label: "Shipping", href: "/faq" },
-  { label: "Returns", href: "/faq" },
+  { label: "Shipping", href: "/shipping" },
+  { label: "Returns", href: "/returns" },
   { label: "FAQ", href: "/faq" },
 ];
 
@@ -67,9 +67,9 @@ export default function Footer() {
             <ul className="footer-link-list">
               {companyLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="footer-link">
+                  <Link href={link.href} className="footer-link">
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -133,12 +133,12 @@ export default function Footer() {
             © 2026 Trionda Wears. All rights reserved.
           </p>
           <div className="footer-legal-links">
-            <a href="#" className="footer-legal-link">
-              Terms
-            </a>
-            <a href="#" className="footer-legal-link">
+            <Link href="/terms-and-conditions" className="footer-legal-link">
+              Terms &amp; Conditions
+            </Link>
+            <Link href="/privacy" className="footer-legal-link">
               Privacy
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { Eye, EyeOff, Check, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import TermsConditionsModal from '@/components/modals/TermsConditionsModal';
 
 const SIGNUP_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788284311/trionda-wears/auth/auth-signup.jpg';
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
@@ -74,6 +75,7 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showTCModal, setShowTCModal] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({
     hasUpperCase: false,
     hasLowerCase: false,
@@ -84,6 +86,7 @@ export default function SignupPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
     watch,
   } = useForm<SignupFormInputs>({ mode: 'onSubmit' });
@@ -359,12 +362,25 @@ export default function SignupPage() {
               />
               <span className="auth-terms-text">
                 I agree to the{' '}
-                <a href="/terms" className="auth-terms-link">Terms of Service</a>
+                <button
+                  type="button"
+                  onClick={() => setShowTCModal(true)}
+                  className="auth-terms-link cursor-pointer bg-transparent p-0"
+                >
+                  Terms of Service
+                </button>
                 {' '}and{' '}
                 <a href="/privacy" className="auth-terms-link">Privacy Policy</a>
               </span>
             </label>
             {errors.agreeToTerms && <p className="auth-error auth-error--inline">{errors.agreeToTerms.message}</p>}
+
+            {/* Terms & Conditions modal */}
+            <TermsConditionsModal
+              isOpen={showTCModal}
+              onClose={() => setShowTCModal(false)}
+              onAgree={() => setValue('agreeToTerms', true)}
+            />
 
             {/* Error */}
             {error && <div className="auth-error-banner auth-error-banner--small">{error}</div>}

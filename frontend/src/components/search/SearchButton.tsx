@@ -1,8 +1,11 @@
 "use client";
 
 // =============================================================================
-// SearchButton — header search icon + full product search overlay.
-// Queries the existing public GET /api/products endpoint (?search= param).
+// SearchButton — header search icon + inline expanding search bar.
+// Clicking the icon expands an inline search panel anchored to the header
+// (no modal, no backdrop). Results appear in a dropdown below the input.
+// Escape or clicking outside collapses it. Queries the existing public
+// GET /api/products endpoint (?search= param).
 // =============================================================================
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -61,33 +64,9 @@ export default function SearchButton() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [status, setStatus] = useState<Status>("idle");
+  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchIdRef = useRef(0);
-
-  // Body scroll lock while the overlay is open
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
-
-  // Autofocus the input when opened
-  useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
-
-  // Esc closes the overlay
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -95,6 +74,37 @@ export default function SearchButton() {
     setResults([]);
     setStatus("idle");
   }, []);
+
+  // Autofocus the input when expanded
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
+  // Esc collapses the inline search
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, close]);
+
+  // Clicking outside the search panel collapses it
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        close();
+      }
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+    };
+  }, [open, close]);
 
   // Debounced search against the existing products endpoint
   useEffect(() => {
@@ -131,120 +141,110 @@ export default function SearchButton() {
   }, [open, query]);
 
   return (
-    <>
-      <button
-        type="button"
-        className="header-icon-btn"
-        aria-label="Search products"
-        onClick={() => setOpen(true)}
-      >
-        <SearchIcon />
-      </button>
-
-      {open && (
-        <div
-          className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Search products"
-          onClick={close}
-        >
-          <div
-            className="mx-auto mt-24 w-[min(92vw,600px)] border border-chrome-500 bg-surface shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Input row */}
-            <div className="flex items-center gap-3 border-b border-chrome-500 px-4">
-              <span className="text-chrome-400">
-                <SearchIcon />
-              </span>
-              <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search products…"
-                aria-label="Search products"
-                className="h-14 w-full bg-transparent font-body text-sm tracking-wide text-foreground placeholder:text-chrome-400 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={close}
-                aria-label="Close search"
-                className="flex h-8 w-8 items-center justify-center text-chrome-400 transition-colors hover:text-foreground"
+    <div ref={containerRef} className="relative">
+      {open ? (
+        // Inline expanding panel — anchored to the header, no modal/backdrop
+        <div className="absolute right-0 top-full z-50 mt-1 w-[min(88vw,440px)] border border-chrome-500 bg-surface shadow-2xl">
+          {/* Input row */}
+          <div className="flex items-center gap-3 border-b border-chrome-500 px-4">
+            <span className="text-chrome-400">
+              <SearchIcon />
+            </span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search products…"
+              aria-label="Search products"
+              className="h-12 w-full bg-transparent font-body text-sm tracking-wide text-foreground placeholder:text-chrome-400 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={close}
+              aria-label="Close search"
+              className="flex h-8 w-8 items-center justify-center text-chrome-400 transition-colors hover:text-foreground"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                aria-hidden="true"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  aria-hidden="true"
-                >
-                  <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
+                <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
 
-            {/* Results */}
-            <div className="max-h-[60vh] overflow-y-auto">
-              {status === "searching" && (
-                <p className="px-4 py-6 font-body text-sm text-muted">Searching…</p>
-              )}
+          {/* Results dropdown */}
+          <div className="max-h-[60vh] overflow-y-auto">
+            {status === "searching" && (
+              <p className="px-4 py-6 font-body text-sm text-muted">Searching…</p>
+            )}
 
-              {status === "done" && query.trim() !== "" && results.length === 0 && (
-                <p className="px-4 py-6 font-body text-sm text-muted">
-                  No products found for “{query.trim()}”.
-                </p>
-              )}
+            {status === "done" && query.trim() !== "" && results.length === 0 && (
+              <p className="px-4 py-6 font-body text-sm text-muted">
+                No products found for “{query.trim()}”.
+              </p>
+            )}
 
-              {status === "idle" && (
-                <p className="px-4 py-6 font-body text-sm text-muted">
-                  Type to search the collection.
-                </p>
-              )}
+            {status === "idle" && (
+              <p className="px-4 py-6 font-body text-sm text-muted">
+                Type to search the collection.
+              </p>
+            )}
 
-              {results.length > 0 && (
-                <ul className="divide-y divide-chrome-500/60">
-                  {results.map((p) => (
-                    <li key={p.id}>
-                      <Link
-                        href={`/products/${p.slug}`}
-                        onClick={close}
-                        className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-chrome-500/30"
-                      >
-                        <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden border border-chrome-500 bg-background">
-                          {p.images[0]?.url ? (
-                            <img
-                              src={p.images[0].url}
-                              alt={p.images[0].altText || p.name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-chrome-400">—</span>
-                          )}
+            {results.length > 0 && (
+              <ul className="divide-y divide-chrome-500/60">
+                {results.map((p) => (
+                  <li key={p.id}>
+                    <Link
+                      href={`/products/${p.slug}`}
+                      onClick={close}
+                      className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-chrome-500/30"
+                    >
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden border border-chrome-500 bg-background">
+                        {p.images[0]?.url ? (
+                          <img
+                            src={p.images[0].url}
+                            alt={p.images[0].altText || p.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-chrome-400">—</span>
+                        )}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-body text-sm text-foreground">
+                          {p.name}
                         </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate font-body text-sm text-foreground">
-                            {p.name}
-                          </span>
-                          <span className="block font-body text-xs uppercase tracking-wider text-muted">
-                            {p.category.name}
-                          </span>
+                        <span className="block font-body text-xs uppercase tracking-wider text-muted">
+                          {p.category.name}
                         </span>
-                        <span className="shrink-0 font-body text-sm text-foreground">
-                          Rs. {Number(p.basePrice).toLocaleString("en-PK")}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+                      </span>
+                      <span className="shrink-0 font-body text-sm text-foreground">
+                        Rs. {Number(p.basePrice).toLocaleString("en-PK")}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
+      ) : (
+        <button
+          type="button"
+          className="header-icon-btn"
+          aria-label="Search products"
+          onClick={() => setOpen(true)}
+        >
+          <SearchIcon />
+        </button>
       )}
-    </>
+    </div>
   );
 }
