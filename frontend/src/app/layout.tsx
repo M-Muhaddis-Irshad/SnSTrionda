@@ -18,9 +18,47 @@ const inter = Inter({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sns-trionda.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Trionda Wears",
-  description: "Premium luxury clothing — fabrics, shirts, trousers & made-to-order apparel.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Trionda Wears — Luxury Menswear & Made-to-Order Clothing",
+    template: "%s | Trionda Wears",
+  },
+  description:
+    "Premium luxury menswear from Pakistan — premium fabrics, shirts, trousers, sherwanis & made-to-order bespoke apparel. Shop online with nationwide delivery.",
+  keywords: [
+    "luxury menswear Pakistan",
+    "premium fabrics Pakistan",
+    "made to order shirts",
+    "made to order trousers",
+    "bespoke apparel Pakistan",
+    "luxury shirts online",
+    "premium fabric shirts",
+    "sherwani Pakistan",
+    "designer menswear online",
+    "trionda wears",
+    "online clothing store Pakistan",
+    "tailored menswear",
+  ],
+  openGraph: {
+    title: "Trionda Wears — Luxury Menswear & Made-to-Order Clothing",
+    description:
+      "Premium luxury menswear from Pakistan — premium fabrics, shirts, trousers, sherwanis & made-to-order bespoke apparel.",
+    url: SITE_URL,
+    siteName: "Trionda Wears",
+    locale: "en_PK",
+    type: "website",
+    images: [
+      {
+        url: "/logo/trionda-icon-mark.png",
+        width: 512,
+        height: 512,
+        alt: "Trionda Wears",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

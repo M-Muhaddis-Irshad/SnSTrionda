@@ -16,7 +16,6 @@ import {
 
 export async function handleCreateCheckout(req: Request, res: Response) {
   try {
-    console.log("[Payments] handleCreateCheckout called, body:", JSON.stringify(req.body));
     const { orderId } = req.body;
 
     if (!orderId) {

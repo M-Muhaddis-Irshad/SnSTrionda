@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ProductGallery from "@/components/products/ProductGallery";
@@ -107,6 +108,40 @@ async function fetchRelatedProducts(categoryId: string, excludeId: string): Prom
     console.error("Error fetching related products:", err);
     return [];
   }
+}
+
+// ---------------------------------------------------------------------------
+// generateMetadata — per-product title/description/OG image
+// ---------------------------------------------------------------------------
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await fetchProduct(slug);
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "This product is no longer available.",
+    };
+  }
+
+  const description =
+    product.description?.slice(0, 155) ||
+    `Shop ${product.name} — premium quality from Trionda Wears with nationwide delivery across Pakistan.`;
+
+  return {
+    title: product.name,
+    description,
+    openGraph: {
+      title: product.name,
+      description,
+      images: product.images.length > 0 ? [product.images[0].url] : undefined,
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------

@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import ShopFilters, { type ShopFacets, type ShopQuery } from "@/components/shop/ShopFilters";
 import ShopResults from "@/components/shop/ShopResults";
 import BenefitsBar from "@/components/BenefitsBar";
+
+export const metadata: Metadata = {
+  title: "Shop All — Luxury Menswear",
+  description:
+    "Browse the full Trionda Wears collection — premium fabric shirts, trousers, sherwanis & made-to-order pieces. Filter by category, size, colour and fabric.",
+};
 
 // ---------------------------------------------------------------------------
 // Types
