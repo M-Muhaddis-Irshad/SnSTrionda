@@ -9,6 +9,9 @@ export declare function handleCreateProduct(req: Request, res: Response): Promis
 export declare function handleUpdateProduct(req: Request, res: Response): Promise<void>;
 export declare function handleDeleteProduct(req: Request, res: Response): Promise<void>;
 export declare function handleListCategories(_req: Request, res: Response): Promise<void>;
+export declare function handleCreateCategory(req: Request, res: Response): Promise<void>;
+export declare function handleUpdateCategory(req: Request, res: Response): Promise<void>;
+export declare function handleDeleteCategory(req: Request, res: Response): Promise<void>;
 export declare function handleCreateVariant(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 export declare function handleUpdateVariant(req: Request, res: Response): Promise<void>;
 export declare function handleDeleteVariant(req: Request, res: Response): Promise<void>;

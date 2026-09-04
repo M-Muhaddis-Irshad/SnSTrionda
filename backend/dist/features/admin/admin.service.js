@@ -14,6 +14,9 @@ exports.createProduct = createProduct;
 exports.updateProduct = updateProduct;
 exports.deleteProduct = deleteProduct;
 exports.listCategories = listCategories;
+exports.createCategory = createCategory;
+exports.updateCategory = updateCategory;
+exports.deleteCategory = deleteCategory;
 exports.updateVariant = updateVariant;
 exports.deleteVariant = deleteVariant;
 exports.createVariant = createVariant;
@@ -409,10 +412,163 @@ async function deleteProduct(productId) {
     return { deleted: true, productId };
 }
 async function listCategories() {
+    // Admin view — full fields + product/child counts so the UI can render the
+    // tree client-side and pre-empt delete blocks. Flat with parentId; nesting
+    // is resolved by the client.
     return db_1.prisma.category.findMany({
         orderBy: { name: "asc" },
-        select: { id: true, name: true, slug: true },
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            active: true,
+            parentId: true,
+            createdAt: true,
+            _count: { select: { products: true, children: true } },
+        },
     });
+}
+async function createCategory(input) {
+    const name = input.name?.trim();
+    if (!name) {
+        throw new AdminError("Category name is required", 400);
+    }
+    if (input.parentId) {
+        const parent = await db_1.prisma.category.findUnique({ where: { id: input.parentId } });
+        if (!parent) {
+            throw new AdminError("Parent category not found", 400);
+        }
+    }
+    // Auto-generate slug from the name, uniquify on collision (product pattern)
+    let slug = (input.slug?.trim() || generateSlug(name)) || generateSlug(name);
+    const existingSlug = await db_1.prisma.category.findUnique({ where: { slug } });
+    if (existingSlug) {
+        slug = `${slug}-${Date.now()}`;
+    }
+    return db_1.prisma.category.create({
+        data: {
+            name,
+            slug,
+            description: input.description?.trim() || null,
+            parentId: input.parentId || null,
+            active: input.active ?? true,
+        },
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            active: true,
+            parentId: true,
+            createdAt: true,
+            _count: { select: { products: true, children: true } },
+        },
+    });
+}
+// Walk ancestors from `startId` upwards; returns true if `targetId` is ever
+// reached (i.e. attaching startId under targetId would create a cycle).
+async function wouldCreateCycle(startId, targetId) {
+    let current = null;
+    const seen = new Set();
+    let cursor = targetId;
+    while (cursor) {
+        if (cursor === startId)
+            return true;
+        if (seen.has(cursor))
+            break;
+        seen.add(cursor);
+        current = await db_1.prisma.category.findUnique({
+            where: { id: cursor },
+            select: { id: true, parentId: true },
+        });
+        if (!current)
+            break;
+        cursor = current.parentId || "";
+    }
+    return false;
+}
+async function updateCategory(categoryId, input) {
+    const existing = await db_1.prisma.category.findUnique({ where: { id: categoryId } });
+    if (!existing) {
+        throw new AdminError("Category not found", 404);
+    }
+    const data = {};
+    if (input.name !== undefined) {
+        const name = input.name.trim();
+        if (!name)
+            throw new AdminError("Category name cannot be empty", 400);
+        data.name = name;
+    }
+    if (input.slug !== undefined) {
+        const slug = input.slug.trim();
+        if (!slug)
+            throw new AdminError("Category slug cannot be empty", 400);
+        const dup = await db_1.prisma.category.findUnique({ where: { slug } });
+        if (dup && dup.id !== categoryId) {
+            throw new AdminError(`A category with the slug "${slug}" already exists`, 400);
+        }
+        data.slug = slug;
+    }
+    if (input.description !== undefined)
+        data.description = input.description.trim() || null;
+    if (input.active !== undefined)
+        data.active = input.active;
+    if (input.parentId !== undefined) {
+        const parentId = input.parentId || null;
+        if (parentId === categoryId) {
+            throw new AdminError("A category cannot be its own parent", 400);
+        }
+        if (parentId) {
+            const parent = await db_1.prisma.category.findUnique({ where: { id: parentId } });
+            if (!parent) {
+                throw new AdminError("Parent category not found", 400);
+            }
+            if (await wouldCreateCycle(categoryId, parentId)) {
+                throw new AdminError("That would create a circular category hierarchy", 400);
+            }
+        }
+        data.parentId = parentId;
+    }
+    return db_1.prisma.category.update({
+        where: { id: categoryId },
+        data,
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            active: true,
+            parentId: true,
+            createdAt: true,
+            _count: { select: { products: true, children: true } },
+        },
+    });
+}
+async function deleteCategory(categoryId) {
+    const existing = await db_1.prisma.category.findUnique({ where: { id: categoryId } });
+    if (!existing) {
+        throw new AdminError("Category not found", 404);
+    }
+    // Refuse while anything references it — the DB constraints are RESTRICT on
+    // both relations, but we pre-check so the API returns a clear 400 with
+    // counts instead of a raw constraint error.
+    const [productCount, childCount] = await Promise.all([
+        db_1.prisma.product.count({ where: { categoryId } }),
+        db_1.prisma.category.count({ where: { parentId: categoryId } }),
+    ]);
+    if (productCount > 0 || childCount > 0) {
+        const parts = [];
+        if (productCount > 0) {
+            parts.push(`${productCount} product${productCount === 1 ? "" : "s"}`);
+        }
+        if (childCount > 0) {
+            parts.push(`${childCount} sub-categor${childCount === 1 ? "y" : "ies"}`);
+        }
+        throw new AdminError(`Cannot delete "${existing.name}": it still has ${parts.join(" and ")} referencing it. Reassign or delete them first.`, 400);
+    }
+    await db_1.prisma.category.delete({ where: { id: categoryId } });
+    return { deleted: true, categoryId };
 }
 async function updateVariant(variantId, input) {
     const existing = await db_1.prisma.productVariant.findUnique({ where: { id: variantId } });

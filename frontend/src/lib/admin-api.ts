@@ -134,6 +134,24 @@ export function fetchCategories() {
   return adminFetch("/categories");
 }
 
+export function createAdminCategory(data: any) {
+  return adminFetch("/categories", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateAdminCategory(categoryId: string, data: any) {
+  return adminFetch(`/categories/${categoryId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteAdminCategory(categoryId: string) {
+  return adminFetch(`/categories/${categoryId}`, { method: "DELETE" });
+}
+
 // Variants
 export function createAdminVariant(productId: string, data: any) {
   return adminFetch(`/products/${productId}/variants`, {

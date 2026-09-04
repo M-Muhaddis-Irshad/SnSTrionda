@@ -86,6 +86,9 @@ export const ACTIVITY_ACTION_LABELS: Record<string, string> = {
   UPDATE_DELIVERY_ZONE: "Updated delivery zone",
   DELETE_DELIVERY_ZONE: "Deleted delivery zone",
   UPDATE_USER_ROLE: "Changed user role",
+  CREATE_CATEGORY: "Created category",
+  UPDATE_CATEGORY: "Updated category",
+  DELETE_CATEGORY: "Deleted category",
 };
 
 // ---------------------------------------------------------------------------

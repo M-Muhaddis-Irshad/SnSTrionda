@@ -15,6 +15,9 @@ import {
   handleUpdateProduct,
   handleDeleteProduct,
   handleListCategories,
+  handleCreateCategory,
+  handleUpdateCategory,
+  handleDeleteCategory,
   handleCreateVariant,
   handleUpdateVariant,
   handleDeleteVariant,
@@ -78,10 +81,13 @@ router.use("/images", imageRouter);
 router.use("/campaigns", campaignRouter);
 
 // ---------------------------------------------------------------------------
-// Categories (read-only for admin forms)
+// Categories — full CRUD (write routes added for the admin Categories page)
 // ---------------------------------------------------------------------------
 
 router.get("/categories", handleListCategories);
+router.post("/categories", handleCreateCategory);
+router.put("/categories/:categoryId", handleUpdateCategory);
+router.delete("/categories/:categoryId", handleDeleteCategory);
 
 // ---------------------------------------------------------------------------
 // Delivery zones — full CRUD

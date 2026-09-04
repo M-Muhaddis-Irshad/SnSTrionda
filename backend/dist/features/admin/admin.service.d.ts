@@ -450,10 +450,62 @@ export declare function deleteProduct(productId: string): Promise<{
     productId: string;
 }>;
 export declare function listCategories(): Promise<{
+    _count: {
+        children: number;
+        products: number;
+    };
+    active: boolean;
+    createdAt: Date;
+    description: string | null;
     id: string;
     name: string;
+    parentId: string | null;
     slug: string;
 }[]>;
+export interface CreateCategoryInput {
+    name: string;
+    slug?: string;
+    description?: string;
+    parentId?: string;
+    active?: boolean;
+}
+export declare function createCategory(input: CreateCategoryInput): Promise<{
+    _count: {
+        children: number;
+        products: number;
+    };
+    active: boolean;
+    createdAt: Date;
+    description: string | null;
+    id: string;
+    name: string;
+    parentId: string | null;
+    slug: string;
+}>;
+export interface UpdateCategoryInput {
+    name?: string;
+    slug?: string;
+    description?: string;
+    parentId?: string;
+    active?: boolean;
+}
+export declare function updateCategory(categoryId: string, input: UpdateCategoryInput): Promise<{
+    _count: {
+        children: number;
+        products: number;
+    };
+    active: boolean;
+    createdAt: Date;
+    description: string | null;
+    id: string;
+    name: string;
+    parentId: string | null;
+    slug: string;
+}>;
+export declare function deleteCategory(categoryId: string): Promise<{
+    deleted: boolean;
+    categoryId: string;
+}>;
 export interface UpdateVariantInput {
     size?: string;
     color?: string;

@@ -13,6 +13,9 @@ exports.handleCreateProduct = handleCreateProduct;
 exports.handleUpdateProduct = handleUpdateProduct;
 exports.handleDeleteProduct = handleDeleteProduct;
 exports.handleListCategories = handleListCategories;
+exports.handleCreateCategory = handleCreateCategory;
+exports.handleUpdateCategory = handleUpdateCategory;
+exports.handleDeleteCategory = handleDeleteCategory;
 exports.handleCreateVariant = handleCreateVariant;
 exports.handleUpdateVariant = handleUpdateVariant;
 exports.handleDeleteVariant = handleDeleteVariant;
@@ -170,6 +173,52 @@ async function handleListCategories(_req, res) {
     try {
         const categories = await (0, admin_service_1.listCategories)();
         res.json({ data: categories });
+    }
+    catch (err) {
+        handleAdminError(err, res);
+    }
+}
+async function handleCreateCategory(req, res) {
+    try {
+        const { name, slug, description, parentId, active } = req.body;
+        const category = await (0, admin_service_1.createCategory)({
+            name,
+            slug,
+            description,
+            parentId,
+            active: active !== undefined ? Boolean(active) : undefined,
+        });
+        res.status(201).json({ data: category, message: "Category created successfully" });
+        track(req.user?.userId, "CREATE_CATEGORY", "Category", category.id, { name: category.name });
+    }
+    catch (err) {
+        handleAdminError(err, res);
+    }
+}
+async function handleUpdateCategory(req, res) {
+    try {
+        const categoryId = req.params.categoryId;
+        const { name, slug, description, parentId, active } = req.body;
+        const category = await (0, admin_service_1.updateCategory)(categoryId, {
+            name,
+            slug,
+            description,
+            parentId,
+            active: active !== undefined ? Boolean(active) : undefined,
+        });
+        res.json({ data: category, message: "Category updated successfully" });
+        track(req.user?.userId, "UPDATE_CATEGORY", "Category", categoryId, { name: category?.name });
+    }
+    catch (err) {
+        handleAdminError(err, res);
+    }
+}
+async function handleDeleteCategory(req, res) {
+    try {
+        const categoryId = req.params.categoryId;
+        const result = await (0, admin_service_1.deleteCategory)(categoryId);
+        res.json({ ...result, message: "Category deleted successfully" });
+        track(req.user?.userId, "DELETE_CATEGORY", "Category", categoryId);
     }
     catch (err) {
         handleAdminError(err, res);

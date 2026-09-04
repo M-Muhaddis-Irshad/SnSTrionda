@@ -14,7 +14,7 @@ import { ACTIVITY_ACTION_LABELS } from '@/types/realtime';
 
 const PAGE_SIZE = 20;
 
-const ENTITY_TYPES = ['Product', 'Variant', 'Order', 'Review', 'DeliveryZone', 'Chat', 'User'];
+const ENTITY_TYPES = ['Product', 'Variant', 'Order', 'Review', 'DeliveryZone', 'Chat', 'User', 'Category'];
 const ACTIONS = Object.keys(ACTIVITY_ACTION_LABELS);
 
 function formatWhen(dateStr: string): string {

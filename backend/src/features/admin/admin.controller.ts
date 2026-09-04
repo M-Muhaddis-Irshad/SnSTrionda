@@ -14,6 +14,9 @@ import {
   updateProduct,
   deleteProduct,
   listCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
   updateVariant,
   deleteVariant,
   createVariant,
@@ -187,6 +190,56 @@ export async function handleListCategories(_req: Request, res: Response) {
   try {
     const categories = await listCategories();
     res.json({ data: categories });
+  } catch (err: any) {
+    handleAdminError(err, res);
+  }
+}
+
+export async function handleCreateCategory(req: Request, res: Response) {
+  try {
+    const { name, slug, description, parentId, active } = req.body;
+
+    const category = await createCategory({
+      name,
+      slug,
+      description,
+      parentId,
+      active: active !== undefined ? Boolean(active) : undefined,
+    });
+
+    res.status(201).json({ data: category, message: "Category created successfully" });
+    track(req.user?.userId, "CREATE_CATEGORY", "Category", category.id, { name: category.name });
+  } catch (err: any) {
+    handleAdminError(err, res);
+  }
+}
+
+export async function handleUpdateCategory(req: Request, res: Response) {
+  try {
+    const categoryId = req.params.categoryId as string;
+    const { name, slug, description, parentId, active } = req.body;
+
+    const category = await updateCategory(categoryId, {
+      name,
+      slug,
+      description,
+      parentId,
+      active: active !== undefined ? Boolean(active) : undefined,
+    });
+
+    res.json({ data: category, message: "Category updated successfully" });
+    track(req.user?.userId, "UPDATE_CATEGORY", "Category", categoryId, { name: category?.name });
+  } catch (err: any) {
+    handleAdminError(err, res);
+  }
+}
+
+export async function handleDeleteCategory(req: Request, res: Response) {
+  try {
+    const categoryId = req.params.categoryId as string;
+    const result = await deleteCategory(categoryId);
+    res.json({ ...result, message: "Category deleted successfully" });
+    track(req.user?.userId, "DELETE_CATEGORY", "Category", categoryId);
   } catch (err: any) {
     handleAdminError(err, res);
   }

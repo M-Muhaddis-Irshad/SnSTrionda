@@ -43,9 +43,12 @@ router.delete("/products/:productId", admin_controller_1.handleDeleteProduct);
 router.use("/images", image_routes_1.default);
 router.use("/campaigns", campaign_routes_1.default);
 // ---------------------------------------------------------------------------
-// Categories (read-only for admin forms)
+// Categories — full CRUD (write routes added for the admin Categories page)
 // ---------------------------------------------------------------------------
 router.get("/categories", admin_controller_1.handleListCategories);
+router.post("/categories", admin_controller_1.handleCreateCategory);
+router.put("/categories/:categoryId", admin_controller_1.handleUpdateCategory);
+router.delete("/categories/:categoryId", admin_controller_1.handleDeleteCategory);
 // ---------------------------------------------------------------------------
 // Delivery zones — full CRUD
 // ---------------------------------------------------------------------------
