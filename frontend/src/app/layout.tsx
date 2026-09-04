@@ -4,6 +4,8 @@ import ClientShell from "@/components/ClientShell";
 import ConditionalShell from "@/components/ConditionalShell";
 import RealtimeClient from "@/components/realtime/RealtimeClient";
 import InitialPreloader from "@/components/InitialPreloader";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import InstallPrompt from "@/components/InstallPrompt";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -22,6 +24,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sns-trionda.vercel
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  manifest: "/manifest.json",
   title: {
     default: "Trionda Wears — Luxury Menswear & Made-to-Order Clothing",
     template: "%s | Trionda Wears",
@@ -70,6 +73,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           async
           defer
         />
+        <meta name="theme-color" content="#000000" />
       </head>
       <body className="min-h-screen overflow-x-hidden bg-background text-foreground font-body antialiased pb-14 lg:pb-0">
         <InitialPreloader />
@@ -78,6 +82,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </ConditionalShell>
         <ClientShell />
         <RealtimeClient />
+        <ServiceWorkerRegister />
+        <InstallPrompt />
       </body>
     </html>
   );
