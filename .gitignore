@@ -23,3 +23,9 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Audits 
+.audit-*
+.chrome-audit/
+.err.log
+*-token.tmp
