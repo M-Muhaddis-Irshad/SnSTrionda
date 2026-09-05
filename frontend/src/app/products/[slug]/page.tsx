@@ -142,7 +142,7 @@ export async function generateMetadata({
       // images: product.images.length > 0 ? [product.images[0].url] : undefined,
       images: [
         {
-          url: "/Trionda OG Image.png",
+          url: "https://res.cloudinary.com/gbor3ceh/image/upload/v1788586190/Trionda_OG_Image.png",
           width: 1200,
           height: 630,
           alt: "Trionda Wears",

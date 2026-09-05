@@ -43,11 +43,28 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       accessToken: null,
       refreshToken: null,
 
-      setAuth: (user, accessToken, refreshToken) =>
-        set({ user, accessToken, refreshToken }),
+      setAuth: (user, accessToken, refreshToken) => {
+        // Mirror the access token into a cookie so edge middleware can
+        // role-gate routes. 7 days matches the refresh-token lifetime; the
+        // token itself is refreshed silently by lib/auth.ts, which re-calls
+        // setAuth (and therefore re-syncs this cookie).
+        try {
+          document.cookie =
+            `authToken=${encodeURIComponent(accessToken)}; path=/; max-age=604800; samesite=lax`;
+        } catch {
+          /* non-browser environment */
+        }
+        set({ user, accessToken, refreshToken });
+      },
 
-      clearAuth: () =>
-        set({ user: null, accessToken: null, refreshToken: null }),
+      clearAuth: () => {
+        try {
+          document.cookie = "authToken=; path=/; max-age=0";
+        } catch {
+          /* non-browser environment */
+        }
+        set({ user: null, accessToken: null, refreshToken: null });
+      },
 
       isAuthenticated: () => !!get().accessToken && !!get().user,
 

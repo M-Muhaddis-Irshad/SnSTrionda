@@ -65,7 +65,7 @@ function GoogleSignInButton({ onSuccess }: { onSuccess: (credential: string) => 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/shop';
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const [showPassword, setShowPassword] = useState(false);
