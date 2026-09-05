@@ -24,7 +24,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Audits 
+# Audits        
 .audit-*
 .chrome-audit/
 .err.log
