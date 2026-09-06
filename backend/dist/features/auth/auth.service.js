@@ -16,7 +16,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const google_auth_library_1 = require("google-auth-library");
 const db_1 = require("../../db");
-const googleClient = new google_auth_library_1.OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+const googleClient = new google_auth_library_1.OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // ---------------------------------------------------------------------------
 // Config — these come from environment variables
 // ---------------------------------------------------------------------------
@@ -174,7 +174,7 @@ async function googleLogin(body) {
     try {
         ticket = await googleClient.verifyIdToken({
             idToken: credential,
-            audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+            audience: process.env.GOOGLE_CLIENT_ID,
         });
     }
     catch (err) {

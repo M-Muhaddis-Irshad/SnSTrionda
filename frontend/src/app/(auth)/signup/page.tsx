@@ -8,11 +8,11 @@ import { Eye, EyeOff, Check, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import TermsConditionsModal from '@/components/modals/TermsConditionsModal';
 
-const SIGNUP_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788284311/trionda-wears/auth/auth-signup.jpg';
+const SIGNUP_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788373850/ChatGPT_Image_Sep_2_2026_11_27_48_PM.png';
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 
 interface SignupFormInputs {
   firstName: string;

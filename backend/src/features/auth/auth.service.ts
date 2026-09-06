@@ -16,7 +16,7 @@ import type {
   RefreshTokenPayload,
 } from "./auth.types";
 
-const googleClient = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ---------------------------------------------------------------------------
 // Config — these come from environment variables
@@ -206,7 +206,7 @@ export async function googleLogin(body: GoogleLoginRequestBody): Promise<AuthTok
   try {
     ticket = await googleClient.verifyIdToken({
       idToken: credential,
-      audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
   } catch (err) {
     throw new AppError("Invalid Google token", 401);
