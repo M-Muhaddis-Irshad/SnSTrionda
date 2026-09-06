@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Eye, EyeOff, Check, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import TermsConditionsModal from '@/components/modals/TermsConditionsModal';
+import Script from "next/script";
 
 const SIGNUP_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788373850/ChatGPT_Image_Sep_2_2026_11_27_48_PM.png';
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
@@ -28,40 +29,51 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 /* ---------- Google button renderer ---------- */
-function GoogleSignInButton({ onSuccess }: { onSuccess: (credential: string) => void }) {
+function GoogleSignInButton({
+  onSuccess,
+}: {
+  onSuccess: (credential: string) => void;
+}) {
   const btnRef = useRef<HTMLDivElement>(null);
   const rendered = useRef(false);
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID || rendered.current) return;
 
-    const checkGoogle = setInterval(() => {
-      if (window.google?.accounts?.id && btnRef.current) {
-        clearInterval(checkGoogle);
-        rendered.current = true;
+    const renderGoogleButton = () => {
+      if (
+        window.google?.accounts?.id &&
+        btnRef.current &&
+        !rendered.current
+      ) {
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
-          callback: (response: { credential: string }) => onSuccess(response.credential),
+          callback: (response: { credential: string }) => {
+            if (response.credential) {
+              onSuccess(response.credential);
+            }
+          },
         });
-        window.google.accounts.id.renderButton(btnRef.current, {
-          // Google's official dark variant — matches the site's black theme
-          // (the avatar+email pill in the reference is Google's native One Tap
-          // UI, which only renders via google.accounts.id.prompt() — it is NOT
-          // something a rendered button or custom button can replicate).
-          theme: 'filled_black',
-          size: 'large',
-          width: btnRef.current.offsetWidth,
-          text: 'continue_with',
-        });
-      }
-    }, 100);
 
-    return () => clearInterval(checkGoogle);
+        window.google.accounts.id.renderButton(btnRef.current, {
+          theme: "filled_black",
+          size: "large",
+          width: btnRef.current.offsetWidth,
+          text: "continue_with"
+        });
+
+        rendered.current = true;
+      }
+    };
+
+    const interval = setInterval(renderGoogleButton, 100);
+
+    return () => clearInterval(interval);
   }, [onSuccess]);
 
   return (
-    <div className="google-button-container">
-      <div ref={btnRef} className="w-full" />
+    <div className="google-button-container w-full">
+      <div ref={btnRef} className="w-full flex justify-center min-h-[44px]" />
     </div>
   );
 }
@@ -335,8 +347,8 @@ export default function SignupPage() {
                   placeholder="Confirm password"
                   {...register('confirmPassword', { required: 'Confirm password required' })}
                   className={`auth-input auth-input--small auth-input--with-icon ${errors.confirmPassword || (confirmPassword && confirmPassword !== password)
-                      ? 'auth-input--error'
-                      : ''
+                    ? 'auth-input--error'
+                    : ''
                     }`}
                 />
                 <button
@@ -396,6 +408,11 @@ export default function SignupPage() {
               <span className="auth-divider-text">OR</span>
               <div className="auth-divider-line" />
             </div>
+
+            <Script
+              src="https://accounts.google.com/gsi/client"
+              strategy="afterInteractive"
+            />
 
             {/* Google */}
             <GoogleSignInButton onSuccess={handleGoogleSuccess} />

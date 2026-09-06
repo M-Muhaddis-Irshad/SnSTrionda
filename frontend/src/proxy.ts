@@ -17,7 +17,7 @@ const STOREFRONT_ROUTES = [
 ];
 const ADMIN_ROUTES = ["/admin"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip middleware for static assets, API routes, auth pages
