@@ -7,12 +7,13 @@ import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import TermsConditionsModal from '@/components/modals/TermsConditionsModal';
+import Script from 'next/script';
 
 const LOGIN_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788284310/trionda-wears/auth/auth-login.jpg';
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 interface LoginFormInputs {
   email: string;
@@ -285,17 +286,26 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="auth-loading">
-          <div className="auth-loading-inner">
-            <div className="auth-spinner" />
-            <p className="auth-loading-text">Loading...</p>
+    <>
+
+      <Script
+        src="https://accounts.google.com/gsi/client"
+        strategy="afterInteractive"
+      />
+
+      <Suspense
+        fallback={
+          <div className="auth-loading">
+            <div className="auth-loading-inner">
+              <div className="auth-spinner" />
+              <p className="auth-loading-text">Loading...</p>
+            </div>
           </div>
-        </div>
-      }
-    >
-      <LoginForm />
-    </Suspense>
+        }
+      >
+        <LoginForm />
+      </Suspense>
+
+    </>
   );
 }

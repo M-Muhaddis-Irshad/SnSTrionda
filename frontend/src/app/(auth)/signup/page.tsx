@@ -12,7 +12,7 @@ const SIGNUP_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788373850/
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 interface SignupFormInputs {
   firstName: string;
@@ -334,11 +334,10 @@ export default function SignupPage() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirm password"
                   {...register('confirmPassword', { required: 'Confirm password required' })}
-                  className={`auth-input auth-input--small auth-input--with-icon ${
-                    errors.confirmPassword || (confirmPassword && confirmPassword !== password)
+                  className={`auth-input auth-input--small auth-input--with-icon ${errors.confirmPassword || (confirmPassword && confirmPassword !== password)
                       ? 'auth-input--error'
                       : ''
-                  }`}
+                    }`}
                 />
                 <button
                   type="button"
