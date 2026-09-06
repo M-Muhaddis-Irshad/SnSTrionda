@@ -3,7 +3,7 @@ import ProductCard from "@/components/ui/ProductCard";
 interface ProductImage { id: string; url: string; altText: string | null; displayOrder: number; }
 interface ProductVariant { id: string; size: string | null; color: string | null; price: number | null; stockQuantity: number; }
 interface Category { id: string; name: string; slug: string; }
-interface Product { id: string; name: string; slug: string; basePrice: number; category: Category; images: ProductImage[]; variants: ProductVariant[]; }
+interface Product { id: string; name: string; slug: string; basePrice: number; isCustomizable?: boolean; category: Category; images: ProductImage[]; variants: ProductVariant[]; }
 interface ProductsResponse { message: string; data: Product[]; pagination: { page: number; limit: number; total: number; totalPages: number; hasNext: boolean; hasPrev: boolean; }; }
 
 const CLOTHING_SLUGS = new Set(["shirts", "trousers", "sherwanis"]);

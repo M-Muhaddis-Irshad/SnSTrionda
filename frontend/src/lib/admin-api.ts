@@ -123,10 +123,21 @@ export async function uploadProductImage(productId: string, file: File, altText?
   return res.json();
 }
 
-export function deleteProductImage(productId: string, imageId: string) {
-  return adminFetch(`/../../products/${productId}/images/${imageId}`, {
+export async function deleteProductImage(productId: string, imageId: string) {
+  const { accessToken } = useAuthStore.getState();
+  if (!accessToken) throw new Error("Not authenticated");
+
+  const res = await fetch(`${API_URL}/api/products/${productId}/images/${imageId}`, {
     method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Image delete failed");
+  }
+
+  return res.json();
 }
 
 // Categories

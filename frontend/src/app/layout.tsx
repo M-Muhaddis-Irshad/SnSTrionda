@@ -45,17 +45,20 @@ export const metadata: Metadata = {
     "online clothing store Pakistan",
     "tailored menswear",
   ],
+  verification: {
+    google: "IMS19bBUhRZbpAX4ke-7tiDLE310lOBW69f-HgspvI0",
+  },
   openGraph: {
-    title: "Trionda Wears — Luxury Menswear & Made-to-Order Clothing",
+    title: "Trionda Wears — Luxury Wear & Made-to-Order Clothing",
     description:
       "Premium luxury menswear from Pakistan — premium fabrics, shirts, trousers, sherwanis & made-to-order bespoke apparel.",
-    url: SITE_URL,
+    url: `snstrionda.com`,
     siteName: "Trionda Wears",
     locale: "en_PK",
     type: "website",
     images: [
       {
-        url: "/logo/trionda-icon-mark.png",
+        url: "/logo/Trionda-OG-Image.png",
         width: 512,
         height: 512,
         alt: "Trionda Wears",

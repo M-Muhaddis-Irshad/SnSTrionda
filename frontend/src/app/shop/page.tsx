@@ -35,6 +35,7 @@ interface Product {
   name: string;
   slug: string;
   basePrice: number;
+  isCustomizable?: boolean;
   category: { id: string; name: string; slug: string };
   images: ProductImage[];
   variants: ProductVariant[];

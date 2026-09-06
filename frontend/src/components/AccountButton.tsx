@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
+import { useMounted } from "@/lib/useMounted";
 
 export default function AccountButton() {
+  const mounted = useMounted();
   const { isAuthenticated, isAdmin } = useAuthStore();
-  const authenticated = isAuthenticated();
-  const admin = isAdmin();
+  const authenticated = mounted && isAuthenticated();
+  const admin = mounted && isAdmin();
 
   const href = !authenticated ? "/login" : admin ? "/admin" : "/account";
   const label = !authenticated ? "Sign In" : admin ? "Admin" : "Account";

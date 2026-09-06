@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useWishlistStore } from "@/stores/wishlistStore";
 import CategoryBadge from "@/components/CategoryBadge";
+import { useMounted } from "@/lib/useMounted";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,6 +30,7 @@ interface Product {
   name: string;
   slug: string;
   basePrice: number;
+  isCustomizable?: boolean;
   category: { id: string; name: string; slug: string };
   images: ProductImage[];
   variants: ProductVariant[];
@@ -123,9 +125,11 @@ export default function ProductCard({
   /** Show a "View" affordance under the price (homepage grid). */
   showViewCta?: boolean;
 }) {
+  const mounted = useMounted();
   const [imgError, setImgError] = useState(false);
   const toggle = useWishlistStore((s) => s.toggle);
-  const isWished = useWishlistStore((s) => s.items.includes(product.id));
+  const wishlistItems = useWishlistStore((s) => s.items);
+  const isWished = mounted && wishlistItems.includes(product.id);
 
   const handleWishlist = useCallback(
     (e: React.MouseEvent) => {
@@ -140,7 +144,12 @@ export default function ProductCard({
   const imgSrc = primaryImage?.url || "";
   const imgAlt = primaryImage?.altText || product.name;
 
-  const isSoldOut = product.variants.every((v) => v.stockQuantity <= 0);
+  // Made-to-order products are never stock-gated; zero-variant products
+  // show as "not yet configured" rather than "sold out" ([].every === true).
+  const isSoldOut =
+    !product.isCustomizable &&
+    product.variants.length > 0 &&
+    product.variants.every((v) => v.stockQuantity <= 0);
   const isNew = false;
 
   const categoryText = product.category.name.toUpperCase();

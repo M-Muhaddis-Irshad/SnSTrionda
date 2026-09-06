@@ -36,6 +36,7 @@ export interface Product {
   name: string;
   slug: string;
   basePrice: number;
+  isCustomizable?: boolean;
   category: Category;
   images: ProductImage[];
   variants: ProductVariant[];

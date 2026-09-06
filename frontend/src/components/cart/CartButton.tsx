@@ -3,10 +3,13 @@
 import { useState, useEffect } from "react";
 import { useCartStore, selectTotalItems } from "@/stores/cartStore";
 import CartDrawer from "./CartDrawer";
+import { useMounted } from "@/lib/useMounted";
 
 export default function CartButton() {
+  const mounted = useMounted();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const totalItems = useCartStore(selectTotalItems);
+  const cartTotalItems = useCartStore(selectTotalItems);
+  const totalItems = mounted ? cartTotalItems : 0;
 
   useEffect(() => {
     const handleOpenCart = () => setIsDrawerOpen(true);

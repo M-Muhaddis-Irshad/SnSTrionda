@@ -8,8 +8,8 @@
 //   • Renders a dark card with the brand mark, three feature rows, an
 //     "Install App" (primary) and "Not Now" (outlined) button, plus an X close.
 //   • "Install App" calls the deferred prompt() — the real browser install flow.
-//   • "Not Now" dismisses for 7 days (timestamp in localStorage, checked on
-//     mount) so the prompt never reappears on every page load.
+//   • Any dismissal (X, "Not Now", or "appinstalled") sets a permanent
+//     localStorage flag so the prompt never reappears — no expiry, no reset.
 //   • Browsers that never fire `beforeinstallprompt` (e.g. iOS Safari, which
 //     requires the native Share → "Add to Home Screen") simply render nothing —
 //     this component is hidden entirely there by design.
@@ -50,9 +50,11 @@ const FEATURES = [
   },
 ];
 
-// localStorage key holding the "Not Now" dismissal timestamp (ms since epoch).
-const DISMISS_KEY = "trionda:install-dismissed-at";
-const DISMISS_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+// localStorage key: permanent "seen" flag. Once the prompt has been shown
+// (or the app installed), it never shows again — no expiry, no reset.
+const SEEN_KEY = "trionda:install-prompt-seen";
+// Legacy key kept for one migration read (7-day dismissal from old code).
+const OLD_DISMISS_KEY = "trionda:install-dismissed-at";
 
 // Minimal typing — BeforeInstallPromptEvent isn't in older TS libs.
 interface BeforeInstallPromptEvent extends Event {
@@ -66,14 +68,23 @@ export default function InstallPrompt() {
   const [installing, setInstalling] = useState(false);
   const dismissedRef = useRef(false);
 
-  // 7-day "Not Now" guard: if the user dismissed within the last 7 days,
-  // never capture/show the prompt for this session.
+  // Permanent "seen" guard: if the prompt was ever shown/dismissed/installed,
+  // never show again. Also migrates the old 7-day dismissal key.
   useEffect(() => {
     try {
-      const ts = Number(localStorage.getItem(DISMISS_KEY) || 0);
-      if (ts && Date.now() - ts < DISMISS_MS) dismissedRef.current = true;
+      if (localStorage.getItem(SEEN_KEY)) {
+        dismissedRef.current = true;
+        return;
+      }
+      // Migrate old 7-day dismissal → permanent seen
+      const oldTs = Number(localStorage.getItem(OLD_DISMISS_KEY) || 0);
+      if (oldTs) {
+        localStorage.setItem(SEEN_KEY, "1");
+        localStorage.removeItem(OLD_DISMISS_KEY);
+        dismissedRef.current = true;
+      }
     } catch {
-      // localStorage unavailable (private mode etc.) — allow the prompt.
+      // localStorage unavailable — allow the prompt.
     }
   }, []);
 
@@ -90,6 +101,8 @@ export default function InstallPrompt() {
 
     // Fired when the app is actually installed (via prompt or manually).
     const onAppInstalled = () => {
+      // Mark as seen so it never shows again
+      try { localStorage.setItem(SEEN_KEY, "1"); } catch {}
       setVisible(false);
       setDeferredEvent(null);
     };
@@ -102,7 +115,11 @@ export default function InstallPrompt() {
     };
   }, []);
 
-  const hide = () => setVisible(false);
+  const hide = () => {
+    // Mark as seen on any dismissal (X button, backdrop click, etc.)
+    try { localStorage.setItem(SEEN_KEY, "1"); } catch {}
+    setVisible(false);
+  };
 
   const handleInstall = async () => {
     if (!deferredEvent) return;
@@ -118,11 +135,7 @@ export default function InstallPrompt() {
   };
 
   const handleNotNow = () => {
-    try {
-      localStorage.setItem(DISMISS_KEY, String(Date.now()));
-    } catch {
-      // Ignore storage failures.
-    }
+    // handleNotNow calls hide() which already sets SEEN_KEY
     hide();
   };
 

@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import { getSocket, authedFetch } from "@/lib/socket";
+import { useMounted } from "@/lib/useMounted";
 import type { AppNotification } from "@/types/realtime";
 
 const TYPE_DOT: Record<string, string> = {
@@ -21,6 +22,7 @@ const TYPE_DOT: Record<string, string> = {
 };
 
 export default function NotificationBell() {
+  const mounted = useMounted();
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const [open, setOpen] = useState(false);
@@ -29,8 +31,9 @@ export default function NotificationBell() {
   const notifications = useNotificationStore((s) => s.notifications);
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
-  const isAdmin = user?.role === "ADMIN";
-  const visible = isAuthenticated() && !isAdmin;
+  // Gate behind mount to match server render (server always renders null)
+  const isAdmin = mounted && user?.role === "ADMIN";
+  const visible = mounted && isAuthenticated() && !isAdmin;
 
   // Close on outside click
   useEffect(() => {

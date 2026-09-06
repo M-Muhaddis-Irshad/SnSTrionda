@@ -15,7 +15,7 @@
 //   DELETE /api/admin/variants/:variantId
 // =============================================================================
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from "react";
 import {
   Package,
   Plus,
@@ -498,6 +498,7 @@ function ProductFormModal({
   const [successNote, setSuccessNote] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const variantEditorRef = useRef<VariantEditorHandle>(null);
 
   // Load full detail on edit
   useEffect(() => {
@@ -555,6 +556,20 @@ function ProductFormModal({
     setFormError("");
     setSaving(true);
     try {
+      // Flush any unsaved variant row edits before saving details
+      if (variantEditorRef.current) {
+        const { saved, errors } = await variantEditorRef.current.saveAllDirty();
+        if (errors.length > 0) {
+          setFormError(errors.join("; "));
+          setSaving(false);
+          return;
+        }
+        if (saved > 0) {
+          // Variant rows were auto-saved; reload detail to reflect changes
+          const refreshed = await fetchAdminProduct(currentId!);
+          setDetail(refreshed.data as AdminProduct);
+        }
+      }
       if (mode === "create") {
         const res = await createAdminProduct({
           name: name.trim(),
@@ -822,6 +837,7 @@ function ProductFormModal({
               </p>
               {detail && (
                 <VariantEditor
+                  ref={variantEditorRef}
                   productId={currentId}
                   variants={detail.variants}
                   onVariantsChanged={async () => {
@@ -855,17 +871,21 @@ interface VariantDraft {
   stockQuantity: string;
 }
 
-function VariantEditor({
-  productId,
-  variants,
-  onVariantsChanged,
-  onError,
-}: {
+interface VariantEditorHandle {
+  saveAllDirty: () => Promise<{ saved: number; errors: string[] }>;
+}
+
+const VariantEditor = forwardRef<VariantEditorHandle, {
   productId: string;
   variants: AdminVariant[];
   onVariantsChanged: () => Promise<void>;
   onError: (msg: string) => void;
-}) {
+}>(function VariantEditor({
+  productId,
+  variants,
+  onVariantsChanged,
+  onError,
+}, ref) {
   const [rows, setRows] = useState<VariantDraft[]>([]);
   const [busyKey, setBusyKey] = useState("");
 
@@ -980,6 +1000,35 @@ function VariantEditor({
       setBusyKey("");
     }
   }
+
+  // Expose saveAllDirty to parent via ref
+  useImperativeHandle(ref, () => ({
+    async saveAllDirty() {
+      const dirtyRows = rows.filter((r) => isDirty(r));
+      const errors: string[] = [];
+      let saved = 0;
+      for (const row of dirtyRows) {
+        const payload = toPayload(row);
+        if (!payload.sku) {
+          errors.push(`SKU is required for variant row: ${row.sku || "(new)"}`);
+          continue;
+        }
+        try {
+          if (row.id) {
+            await updateAdminVariant(row.id, payload);
+          } else {
+            await createAdminVariant(productId, payload);
+          }
+          saved++;
+        } catch (err: any) {
+          errors.push(err.message || `Failed to save variant ${row.sku || "(new)"}`);
+        }
+      }
+      if (errors.length > 0) onError(errors.join("; "));
+      if (saved > 0) await onVariantsChanged();
+      return { saved, errors };
+    },
+  }));
 
   const inputCell =
     "w-full bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-gray-500 transition";
@@ -1125,4 +1174,4 @@ function VariantEditor({
       </button>
     </div>
   );
-}
+})

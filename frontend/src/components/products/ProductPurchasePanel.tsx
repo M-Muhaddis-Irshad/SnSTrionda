@@ -113,27 +113,28 @@ export default function ProductPurchasePanel({
   );
 
   // A size/color option is selectable if at least one matching variant has stock
+  // (made-to-order products skip stock gating — all options are always available)
   const sizeAvailable = useMemo(() => {
     const map = new Map<string, boolean>();
     for (const size of sizes) {
       map.set(
         size,
-        variants.some((v) => v.size === size && v.stockQuantity > 0)
+        isCustomizable || variants.some((v) => v.size === size && v.stockQuantity > 0)
       );
     }
     return map;
-  }, [sizes, variants]);
+  }, [sizes, variants, isCustomizable]);
 
   const colorAvailable = useMemo(() => {
     const map = new Map<string, boolean>();
     for (const color of colors) {
       map.set(
         color,
-        variants.some((v) => v.color === color && v.stockQuantity > 0)
+        isCustomizable || variants.some((v) => v.color === color && v.stockQuantity > 0)
       );
     }
     return map;
-  }, [colors, variants]);
+  }, [colors, variants, isCustomizable]);
 
   // Matched variant (size + color; either dimension optional)
   const matchedVariant = useMemo(
@@ -157,8 +158,13 @@ export default function ProductPurchasePanel({
   const hasSale =
     matchedVariant?.price != null && matchedVariant.price !== basePrice;
   const stock = variantToAdd?.stockQuantity ?? 0;
-  const isSoldOut = variantToAdd ? stock <= 0 : false;
-  const lowStock = !isSoldOut && stock > 0 && stock <= 5;
+  // Made-to-order products are never stock-gated; zero-variant products
+  // show as "no variant selected" rather than "sold out".
+  const isSoldOut =
+    !isCustomizable &&
+    variantToAdd !== null &&
+    stock <= 0;
+  const lowStock = !isCustomizable && !isSoldOut && stock > 0 && stock <= 5;
 
   const canAddToCart = variantToAdd !== null && !isSoldOut;
 

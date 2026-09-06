@@ -16,6 +16,7 @@ export interface ShopProduct {
   name: string;
   slug: string;
   basePrice: number;
+  isCustomizable?: boolean;
   category: { id: string; name: string; slug: string };
   images: { id: string; url: string; altText: string | null; displayOrder: number }[];
   variants: { id: string; size: string | null; color: string | null; price: number | null; stockQuantity: number }[];
