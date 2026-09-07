@@ -5,12 +5,14 @@
 import { Request, Response } from "express";
 import {
   listCampaigns,
+  listActiveCampaigns,
   createCampaign,
   updateCampaign,
   deleteCampaign,
   setCampaignsActive,
   CampaignError,
 } from "./campaign.service";
+import { broadcastCatalogChange } from "../../services/socketService";
 
 function handleError(err: any, res: Response) {
   if (err instanceof CampaignError) {
@@ -56,6 +58,7 @@ export async function handleCreateCampaign(req: Request, res: Response) {
       active,
     });
     res.status(201).json({ data: campaign, message: "Campaign created successfully" });
+    broadcastCatalogChange("created", "settings", { entity: "campaign", id: campaign.id, title: campaign.title });
   } catch (err: any) {
     handleError(err, res);
   }
@@ -81,6 +84,7 @@ export async function handleUpdateCampaign(req: Request, res: Response) {
       active,
     });
     res.json({ data: campaign, message: "Campaign updated successfully" });
+    broadcastCatalogChange("updated", "settings", { entity: "campaign", id: campaign.id, title: campaign.title });
   } catch (err: any) {
     handleError(err, res);
   }
@@ -95,6 +99,7 @@ export async function handleDeleteCampaign(req: Request, res: Response) {
     const campaignId = req.params.id as string;
     const result = await deleteCampaign(campaignId);
     res.json({ ...result, message: "Campaign deleted successfully" });
+    broadcastCatalogChange("deleted", "settings", { entity: "campaign", id: campaignId });
   } catch (err: any) {
     handleError(err, res);
   }
@@ -109,6 +114,20 @@ export async function handleBulkCampaignStatus(req: Request, res: Response) {
     const { ids, active } = req.body;
     const result = await setCampaignsActive(ids, !!active);
     res.json({ ...result, message: "Campaigns updated successfully" });
+    broadcastCatalogChange("updated", "settings", { entity: "campaign", ids, active: !!active });
+  } catch (err: any) {
+    handleError(err, res);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/campaigns — public: active campaigns for the storefront
+// ---------------------------------------------------------------------------
+
+export async function handleListActiveCampaigns(req: Request, res: Response) {
+  try {
+    const campaigns = await listActiveCampaigns();
+    res.json({ data: campaigns });
   } catch (err: any) {
     handleError(err, res);
   }

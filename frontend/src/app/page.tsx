@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HeroSection from "@/components/home/HeroSection";
+import PromoCampaigns from "@/components/home/PromoCampaigns";
 import CategoryCards from "@/components/home/CategoryCards";
 import FeaturedCollection from "@/components/home/FeaturedCollection";
 import BrandStory from "@/components/home/BrandStory";
@@ -14,6 +15,7 @@ export default function Home() {
   return (
     <main>
       <HeroSection />
+      <PromoCampaigns />
       <CategoryCards />
       <FeaturedCollection />
       <BrandStory />

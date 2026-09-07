@@ -165,7 +165,7 @@ export async function getOrderByNumber(orderNumber: string, email?: string) {
       items: {
         include: {
           productVariant: {
-            include: { product: { select: { name: true, slug: true } } },
+            include: { product: { select: { id: true, name: true, slug: true } } },
           },
           customMeasurement: true,
         },
@@ -204,7 +204,7 @@ export async function getMyOrderByNumber(orderNumber: string, userId: string) {
       items: {
         include: {
           productVariant: {
-            include: { product: { select: { name: true, slug: true } } },
+            include: { product: { select: { id: true, name: true, slug: true } } },
           },
           customMeasurement: true,
         },
@@ -237,7 +237,7 @@ export async function getMyOrders(userId: string) {
       items: {
         include: {
           productVariant: {
-            include: { product: { select: { name: true, slug: true } } },
+            include: { product: { select: { id: true, name: true, slug: true } } },
           },
         },
       },
@@ -414,7 +414,7 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
         items: {
           include: {
             productVariant: {
-              include: { product: { select: { name: true, slug: true } } },
+              include: { product: { select: { id: true, name: true, slug: true } } },
             },
             customMeasurement: true,
           },

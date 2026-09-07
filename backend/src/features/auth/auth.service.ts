@@ -285,12 +285,12 @@ export async function googleLogin(body: GoogleLoginRequestBody): Promise<AuthTok
       },
     });
   } else {
-    // Existing user — refresh the avatar whenever Google provides one (keeps
-    // the profile icon in sync if the user changes their Google photo), and
-    // backfill the name once if it was never set.
+    // Existing user — backfill the name once if it was never set. Only copy
+    // the Google photo when the user has no avatar of their own (an uploaded
+    // profile picture must never be silently replaced by the Google one).
     const patch: any = {};
     if (!user.name && name) patch.name = name;
-    if (picture && picture !== user.image) patch.image = picture;
+    if (picture && !user.image) patch.image = picture;
     if (Object.keys(patch).length > 0) {
       user = await prisma.user.update({ where: { id: user.id }, data: patch });
     }

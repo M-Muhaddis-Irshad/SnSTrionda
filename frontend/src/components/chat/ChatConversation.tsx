@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSocket, authedFetch, joinChatRoom, leaveChatRoom } from "@/lib/socket";
+import { useAuthStore } from "@/stores/authStore";
 import type { ChatMessage, ChatSessionSummary } from "@/types/realtime";
 
 interface ChatConversationProps {
@@ -193,7 +194,7 @@ export default function ChatConversation({
         if (text) formData.append("message", text);
         formData.append("image", previewImage);
 
-        const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+        const token = useAuthStore.getState().accessToken;
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/chat/sessions/${sessionId}/messages`, {
           method: "POST",
           headers: token ? { Authorization: `Bearer ${token}` } : {},

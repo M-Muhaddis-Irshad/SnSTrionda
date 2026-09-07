@@ -22,6 +22,8 @@ import {
   MessageSquare,
   Activity,
   PanelsTopLeft,
+  BookOpen,
+  UserRound,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useAuthHydrated } from '@/lib/useAuthHydrated';
@@ -40,6 +42,7 @@ const NAV_ITEMS = [
   ]},
   { section: 'Content', items: [
     { href: '/admin/landing', label: 'Landing Page', icon: PanelsTopLeft },
+    { href: '/admin/brand-story', label: 'Brand Story', icon: BookOpen },
     { href: '/admin/media', label: 'Media & Campaigns', icon: Image },
   ]},
   { section: 'Realtime', items: [
@@ -56,6 +59,7 @@ const NAV_ITEMS = [
   ]},
   { section: 'Settings', items: [
     { href: '/admin/settings', label: 'Store Settings', icon: Settings },
+    { href: '/admin/profile', label: 'My Profile', icon: UserRound },
     { href: '/admin/users', label: 'Users', icon: User },
   ]},
 ];
@@ -177,15 +181,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* User Profile */}
           <div className="border-t border-gray-800 px-4 py-4">
-            <div className="flex items-center gap-3 px-3">
-              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm">
-                {user?.name?.charAt(0) || 'A'}
-              </div>
+            <Link href="/admin/profile" className="flex items-center gap-3 px-3 hover:opacity-80 transition">
+              {user?.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.image}
+                  alt={user?.name || 'Admin'}
+                  className="w-10 h-10 rounded-full object-cover border border-gray-700"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm">
+                  {user?.name?.charAt(0) || 'A'}
+                </div>
+              )}
               <div>
                 <p className="text-sm text-white">{user?.name || 'Admin'}</p>
                 <p className="text-xs text-gray-500">super_admin</p>
               </div>
-            </div>
+            </Link>
             <button
               onClick={() => { clearAuth(); router.push('/login'); }}
               className="w-full mt-3 py-2 text-gray-400 hover:text-white text-sm text-left px-3 transition flex items-center gap-3"
@@ -222,9 +235,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               placeholder="Search anything..."
               className="bg-gray-900 text-white text-sm px-4 py-2 rounded border border-gray-800 focus:outline-none focus:border-gray-600"
             />
-            <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs">
-              {user?.name?.charAt(0) || 'A'}
-            </div>
+            {user?.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.image}
+                alt={user?.name || 'Admin'}
+                className="w-8 h-8 rounded-full object-cover border border-gray-700"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs">
+                {user?.name?.charAt(0) || 'A'}
+              </div>
+            )}
           </div>
         </div>
 

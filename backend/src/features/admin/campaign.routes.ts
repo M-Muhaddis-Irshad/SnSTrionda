@@ -11,6 +11,7 @@ import {
   handleUpdateCampaign,
   handleDeleteCampaign,
   handleBulkCampaignStatus,
+  handleListActiveCampaigns,
 } from "./campaign.controller";
 
 const router = Router();
@@ -22,3 +23,7 @@ router.patch("/:id", handleUpdateCampaign);
 router.delete("/:id", handleDeleteCampaign);
 
 export default router;
+
+// Public storefront router — active campaigns only. Mounted at /api/campaigns.
+export const campaignPublicRoutes = Router();
+campaignPublicRoutes.get("/", handleListActiveCampaigns);

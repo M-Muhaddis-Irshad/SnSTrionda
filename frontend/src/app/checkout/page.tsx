@@ -373,6 +373,15 @@ export default function CheckoutPage() {
             return;
           }
 
+          // Keep the tracker token so the order-confirmation page can verify
+          // the payment with Safepay directly (works without a webhook).
+          if (paymentData.data?.trackerToken) {
+            localStorage.setItem(
+              `trionda-order-tracker-${data.data.orderNumber}`,
+              paymentData.data.trackerToken
+            );
+          }
+
           clearCart();
           window.location.href = paymentData.data.checkoutUrl;
           return;

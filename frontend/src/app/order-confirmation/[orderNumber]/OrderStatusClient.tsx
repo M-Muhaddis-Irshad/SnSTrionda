@@ -8,6 +8,7 @@ import Badge from "@/components/ui/Badge";
 // ---------------------------------------------------------------------------
 
 interface OrderData {
+  id: string;
   paymentStatus: string;
   paymentMethod: string;
   status: string;
@@ -17,8 +18,12 @@ interface OrderData {
 // ---------------------------------------------------------------------------
 // OrderStatusClient Component
 // ---------------------------------------------------------------------------
-// Polls the order status endpoint for card-payment orders.
-// Non-card orders (COD, etc.) show a static badge — no polling needed.
+// Polls the order status endpoint for card-payment orders. When the payment is
+// still PENDING it also calls POST /api/payments/safepay/verify with the
+// tracker token captured at checkout — this resolves the payment server-side
+// even when the Safepay webhook can't reach the backend (e.g. localhost dev)
+// or arrives late in production.
+// Non-card orders (COD, etc.) show nothing — no polling needed.
 
 export function OrderStatusClient({ orderNumber }: { orderNumber: string }) {
   const [order, setOrder] = useState<OrderData | null>(null);
@@ -42,6 +47,28 @@ export function OrderStatusClient({ orderNumber }: { orderNumber: string }) {
         const data = await res.json();
         if (!cancelled && data.data) {
           setOrder(data.data);
+
+          // Card payment still pending? Ask the backend to verify the tracker
+          // with Safepay directly — flips the order to PAID/FAILED when the
+          // payment actually finished, no webhook required.
+          const trackerToken =
+            localStorage.getItem(`trionda-order-tracker-${orderNumber}`) || "";
+          if (
+            data.data.paymentMethod === "CARD" &&
+            data.data.paymentStatus === "PENDING" &&
+            data.data.id &&
+            trackerToken
+          ) {
+            const verifyRes = await fetch(`${apiUrl}/api/payments/safepay/verify`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderId: data.data.id, trackerToken }),
+            });
+            if (verifyRes.ok && !cancelled) {
+              const verifyData = await verifyRes.json();
+              if (verifyData.data) setOrder(verifyData.data);
+            }
+          }
         }
       } catch {
         // Silently ignore fetch errors during polling
@@ -52,9 +79,9 @@ export function OrderStatusClient({ orderNumber }: { orderNumber: string }) {
     fetchOrder();
 
     // For CARD payments, poll until we get a definitive status
-    // (webhook may arrive after the redirect)
-    if (pollCount < 15) {
-      // Max 15 polls (every 2s = 30 seconds total)
+    // (payment + verification may take a few seconds after the redirect)
+    if (pollCount < 20) {
+      // Max 20 polls (every 2s = 40 seconds total)
       timeoutId = setTimeout(() => {
         if (!cancelled) {
           setPollCount((c) => c + 1);
@@ -90,7 +117,7 @@ export function OrderStatusClient({ orderNumber }: { orderNumber: string }) {
   return (
     <div className="mt-6">
       <Badge variant={config.variant}>{config.text}</Badge>
-      {order.paymentStatus === "PENDING" && pollCount < 15 && (
+      {order.paymentStatus === "PENDING" && pollCount < 20 && (
         <p className="mt-3 font-body text-xs text-muted">
           Waiting for payment confirmation...
         </p>

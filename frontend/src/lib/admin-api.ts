@@ -449,3 +449,49 @@ export async function updateAdminSlide(slideId: string, formData: FormData) {
 export function deleteAdminSlide(slideId: string) {
   return adminFetch(`/landing/${slideId}`, { method: "DELETE" });
 }
+
+// ---------------------------------------------------------------------------
+// Brand Story — “Our Story” section on the homepage
+// ---------------------------------------------------------------------------
+
+export function fetchAdminBrandStory() {
+  return adminFetch("/brand-story");
+}
+
+export async function createAdminBrandStory(formData: FormData) {
+  const { accessToken } = useAuthStore.getState();
+  if (!accessToken) throw new Error("Not authenticated");
+
+  const res = await fetch(`${API_URL}/api/admin/brand-story`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Brand story creation failed");
+  }
+  return res.json();
+}
+
+export async function updateAdminBrandStory(storyId: string, formData: FormData) {
+  const { accessToken } = useAuthStore.getState();
+  if (!accessToken) throw new Error("Not authenticated");
+
+  const res = await fetch(`${API_URL}/api/admin/brand-story/${storyId}`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Brand story update failed");
+  }
+  return res.json();
+}
+
+export function deleteAdminBrandStory(storyId: string) {
+  return adminFetch(`/brand-story/${storyId}`, { method: "DELETE" });
+}

@@ -92,6 +92,23 @@ export async function listCampaigns(params: CampaignListParams) {
 }
 
 // ---------------------------------------------------------------------------
+// Active campaigns (storefront) — active flag on AND inside the date window.
+// ---------------------------------------------------------------------------
+
+export async function listActiveCampaigns() {
+  const now = new Date();
+  return prisma.campaign.findMany({
+    where: {
+      active: true,
+      startDate: { lte: now },
+      endDate: { gte: now },
+    },
+    orderBy: { createdAt: "desc" },
+    include: { image: imageSelect },
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Create campaign
 // ---------------------------------------------------------------------------
 

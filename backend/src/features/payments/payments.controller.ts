@@ -5,6 +5,7 @@
 import { Request, Response } from "express";
 import {
   createSafepayCheckout,
+  verifySafepayTracker,
   verifyWebhookSignature,
   processWebhookEvent,
   PaymentError,
@@ -40,6 +41,34 @@ export async function handleCreateCheckout(req: Request, res: Response) {
     }
     console.error("Create checkout error:", err?.message || err);
     console.error("Create checkout stack:", err?.stack);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/payments/safepay/verify — server-side tracker verification
+// ---------------------------------------------------------------------------
+// Called by the order-confirmation page after the customer returns from
+// Safepay. Works even when the webhook can't reach us (localhost dev) and
+// acts as a fallback for delayed webhooks in production.
+
+export async function handleVerifyTracker(req: Request, res: Response) {
+  try {
+    const { orderId, trackerToken } = req.body;
+
+    if (!orderId || !trackerToken) {
+      return res
+        .status(400)
+        .json({ error: "orderId and trackerToken are required." });
+    }
+
+    const order = await verifySafepayTracker(orderId, trackerToken);
+    res.json({ data: order });
+  } catch (err: any) {
+    if (err instanceof PaymentError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Verify tracker error:", err?.message || err);
     res.status(500).json({ error: "Internal server error" });
   }
 }

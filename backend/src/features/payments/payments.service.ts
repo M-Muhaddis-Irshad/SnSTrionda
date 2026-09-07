@@ -6,6 +6,20 @@ import crypto from "crypto";
 import Safepay from "@sfpy/node-core";
 import { prisma } from "../../db";
 
+// Minimal fetch types (Node 18+ global fetch)
+interface TrackerFetchResult {
+  ok?: boolean;
+  data?: {
+    token?: string;
+    state?: string;
+    metadata?: {
+      order_id?: { value?: string } | string;
+    };
+    charge?: { is_success?: boolean } | null;
+  };
+  status?: { message?: string; errors?: unknown[] };
+}
+
 // ---------------------------------------------------------------------------
 // Safepay Client Initialization
 // ---------------------------------------------------------------------------
@@ -185,6 +199,82 @@ export async function createSafepayCheckout(
   }
 
   return { checkoutUrl, trackerToken };
+}
+
+// ---------------------------------------------------------------------------
+// Verify a tracker token against Safepay (server-side fallback to the webhook).
+// Works even when Safepay can't reach us (e.g. localhost dev), and doubles as
+// a safety net in production if a webhook delivery is ever delayed/lost.
+// ---------------------------------------------------------------------------
+
+export async function verifySafepayTracker(orderId: string, trackerToken: string) {
+  if (!SAFEPAY_SECRET_KEY) {
+    throw new PaymentError(
+      "Safepay is not configured. Please check server environment variables.",
+      503
+    );
+  }
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: { id: true, paymentMethod: true, paymentStatus: true, status: true },
+  });
+  if (!order) throw new PaymentError("Order not found.", 404);
+  if (order.paymentMethod !== "CARD") {
+    throw new PaymentError("This order is not a card payment.", 400);
+  }
+
+  // Already resolved — nothing to do
+  if (order.paymentStatus === "PAID" || order.paymentStatus === "FAILED") {
+    return order;
+  }
+
+  let tracker: TrackerFetchResult;
+  try {
+    if (!safepay) {
+      throw new Error("Safepay client is not initialized");
+    }
+    tracker = (await safepay.reporter.payments.fetch(trackerToken)) as TrackerFetchResult;
+  } catch (err: any) {
+    console.error("[Safepay] Tracker verification failed:", err?.message || err);
+    throw new PaymentError("Could not verify payment status with Safepay. Please try again.", 502);
+  }
+
+  const state = tracker?.data?.state || "";
+  const metadataOrderId =
+    typeof tracker?.data?.metadata?.order_id === "string"
+      ? tracker.data.metadata.order_id
+      : tracker?.data?.metadata?.order_id?.value;
+
+  console.log(`[Safepay] Tracker ${trackerToken} state=${state} for order ${orderId}`);
+
+  // The tracker must belong to this order — never mark an order paid from a
+  // token that points at a different order.
+  if (metadataOrderId && metadataOrderId !== orderId) {
+    throw new PaymentError("Tracker token does not belong to this order.", 400);
+  }
+
+  if (state === "TRACKER_ENDED" || tracker?.data?.charge?.is_success === true) {
+    return prisma.order.update({
+      where: { id: orderId },
+      data: { paymentStatus: "PAID", status: "CONFIRMED" },
+      select: { id: true, orderNumber: true, paymentMethod: true, paymentStatus: true, status: true, total: true },
+    });
+  }
+
+  if (state === "TRACKER_FAILED") {
+    return prisma.order.update({
+      where: { id: orderId },
+      data: { paymentStatus: "FAILED" },
+      select: { id: true, orderNumber: true, paymentMethod: true, paymentStatus: true, status: true, total: true },
+    });
+  }
+
+  // Still in progress (TRACKER_STARTED / PENDING) — leave the order untouched
+  return prisma.order.findUnique({
+    where: { id: orderId },
+    select: { id: true, orderNumber: true, paymentMethod: true, paymentStatus: true, status: true, total: true },
+  });
 }
 
 // ---------------------------------------------------------------------------
