@@ -21,6 +21,7 @@ import {
   LogOut,
   MessageSquare,
   Activity,
+  PanelsTopLeft,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useAuthHydrated } from '@/lib/useAuthHydrated';
@@ -38,6 +39,7 @@ const NAV_ITEMS = [
     { href: '/admin/reviews', label: 'Reviews', icon: Star },
   ]},
   { section: 'Content', items: [
+    { href: '/admin/landing', label: 'Landing Page', icon: PanelsTopLeft },
     { href: '/admin/media', label: 'Media & Campaigns', icon: Image },
   ]},
   { section: 'Realtime', items: [

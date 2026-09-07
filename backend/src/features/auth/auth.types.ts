@@ -32,6 +32,7 @@ export interface AuthUser {
   email: string;
   name: string | null;
   phone: string | null;
+  image?: string | null;
   role: string;
   createdAt: Date;
   updatedAt: Date;

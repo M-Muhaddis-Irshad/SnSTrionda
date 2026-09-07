@@ -156,11 +156,16 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     resetCheckout();
-    if (authUser?.email) {
-      setForm((prev) => ({ ...prev, email: authUser.email || "" }));
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Signed-in users see their account email pre-filled on the contact step
+  // (asked otherwise). Re-runs when auth hydrates or the user changes, but
+  // never overwrites something the visitor already typed.
+  useEffect(() => {
+    if (!authUser?.email) return;
+    setForm((prev) => (prev.email.trim() ? prev : { ...prev, email: authUser.email }));
+  }, [authUser?.email]);
 
   // -------------------------------------------------------------------------
   // Load delivery zones (city dropdown + map)

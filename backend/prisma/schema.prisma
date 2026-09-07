@@ -211,6 +211,32 @@ model StoreSetting {
   updatedAt DateTime @updatedAt
 }
 
+// =============================================================================
+// LANDING PAGE — hero slides (admin-managed banner images + details)
+// =============================================================================
+// Each slide is one hero/banner on the landing page: background image,
+// heading text, subheading, CTA label + link, and a display order.
+// =============================================================================
+
+model HeroSlide {
+  id          String   @id @default(cuid())
+  heading     String
+  headingAccent String?
+  subheading  String?
+  ctaLabel    String   @default("Shop Collection")
+  ctaHref     String   @default("/shop")
+  imageUrl    String?  // Cloudinary / site media URL for the banner background
+  overlayGradient String? // optional CSS gradient behind the text (used when no image)
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+  @@index([sortOrder])
+}
+
 model ProductVariant {
   id              String       @id @default(cuid())
   size            String?

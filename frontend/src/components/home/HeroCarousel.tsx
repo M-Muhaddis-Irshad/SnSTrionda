@@ -18,6 +18,7 @@ interface Slide {
   ctaLabel: string;
   ctaHref: string;
   overlayGradient: string;
+  imageUrl?: string | null;
 }
 
 const SLIDES: Slide[] = [
@@ -63,6 +64,44 @@ const SLIDES: Slide[] = [
   },
 ];
 
+// Default background when a slide has no image
+const DEFAULT_GRADIENT =
+  "radial-gradient(ellipse at 50% 40%, #1a1a1a 0%, #0d0d0d 40%, #000000 100%)";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+interface ApiSlide {
+  id: string;
+  heading: string;
+  headingAccent: string | null;
+  subheading: string | null;
+  ctaLabel: string;
+  ctaHref: string;
+  imageUrl: string | null;
+  overlayGradient: string | null;
+}
+
+async function fetchLandingSlides(): Promise<Slide[]> {
+  try {
+    const res = await fetch(`${API_URL}/api/landing`, { cache: "no-store" });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const slides: ApiSlide[] = data.data || [];
+    if (slides.length === 0) return [];
+    return slides.map((s) => ({
+      heading: s.heading,
+      headingAccent: s.headingAccent || undefined,
+      subheading: s.subheading || "",
+      ctaLabel: s.ctaLabel || "Shop Collection",
+      ctaHref: s.ctaHref || "/shop",
+      overlayGradient: s.overlayGradient || DEFAULT_GRADIENT,
+      imageUrl: s.imageUrl || null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 // ---------------------------------------------------------------------------
 // HeroCarousel Component
 // ---------------------------------------------------------------------------
@@ -70,6 +109,8 @@ const SLIDES: Slide[] = [
 export default function HeroCarousel() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const entranceDone = useRef(false);
+
+  const [slides, setSlides] = useState<Slide[]>(SLIDES);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
     Autoplay({
@@ -81,6 +122,28 @@ export default function HeroCarousel() {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+
+  // Load admin-managed hero slides; keep the built-in defaults when the API
+  // returns nothing (no slides configured yet or backend unreachable).
+  useEffect(() => {
+    let cancelled = false;
+    fetchLandingSlides().then((loaded) => {
+      if (cancelled || loaded.length === 0) return;
+      setSlides(loaded);
+      setSelectedIndex(0);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Re-init carousel when the slide set changes (admin edits land via a reload)
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.reInit();
+    onSelect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slides, emblaApi]);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -210,19 +273,23 @@ export default function HeroCarousel() {
       {/* Embla viewport */}
       <div ref={emblaRef} className="hero-viewport">
         <div className="hero-track">
-          {SLIDES.map((slide, index) => (
+          {slides.map((slide, index) => (
             <div
-              key={index}
+              key={`${slide.heading}-${index}`}
               className="hero-slide"
               role="group"
               aria-roledescription="slide"
-              aria-label={`Slide ${index + 1} of ${SLIDES.length}`}
+              aria-label={`Slide ${index + 1} of ${slides.length}`}
               aria-hidden={index !== selectedIndex}
             >
-              {/* Slide background */}
+              {/* Slide background — banner image when provided, gradient otherwise */}
               <div
                 className="hero-slide-bg"
-                style={{ background: slide.overlayGradient }}
+                style={{
+                  background: slide.imageUrl
+                    ? `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.75)), url(${slide.imageUrl}) center / cover no-repeat`
+                    : slide.overlayGradient,
+                }}
                 aria-hidden="true"
               />
 
@@ -320,7 +387,7 @@ export default function HeroCarousel() {
         <div className="hero-bottom-inner">
           {/* Slide counter */}
           <span className="hero-counter">
-            {String(selectedIndex + 1).padStart(2, "0")} / {String(SLIDES.length).padStart(2, "0")}
+            {String(selectedIndex + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
           </span>
 
           {/* Dot indicators */}
@@ -329,7 +396,7 @@ export default function HeroCarousel() {
             role="tablist"
             aria-label="Slide indicators"
           >
-            {SLIDES.map((_, index) => (
+            {slides.map((_, index) => (
               <button
                 key={index}
                 type="button"

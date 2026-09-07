@@ -1,33 +1,28 @@
 "use client";
 
-import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+// =============================================================================
+// Google Maps delivery map — replaces the old Leaflet map.
+// Uses the keyless Google Maps embed iframe (output=embed), which needs no API
+// key. The map stays in sync with the checkout in THREE ways:
+//   • picking a city in the dropdown / city chips re-centers the map
+//   • typing an area / landmark pans the map to that location
+//   • "Use my current location" (browser geolocation, with permission) drops a
+//     pin at the user's actual position
+// =============================================================================
+
+import { useEffect, useMemo, useState } from "react";
 import type { DeliveryZone } from "@/types/delivery";
 
-// ---------------------------------------------------------------------------
-// Custom pin icon (avoids Leaflet's broken default marker assets under bundlers)
-// ---------------------------------------------------------------------------
-
-function pinIcon(selected: boolean) {
-  return L.divIcon({
-    className: "",
-    html: `
-      <svg width="30" height="38" viewBox="0 0 30 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,.4));">
-        <path d="M15 0C6.716 0 0 6.716 0 15c0 11.25 15 23 15 23s15-11.75 15-23C30 6.716 23.284 0 15 0z" fill="${selected ? "#1a1a1a" : "#ffffff"}"/>
-        <circle cx="15" cy="15" r="6" fill="${selected ? "#ffffff" : "#1a1a1a"}"/>
-      </svg>
-    `,
-    iconSize: [30, 38],
-    iconAnchor: [15, 36],
-    popupAnchor: [0, -34],
-  });
+function buildEmbedSrc(query: string, zoom: number): string {
+  return `https://maps.google.com/maps?q=${encodeURIComponent(
+    query
+  )}&z=${zoom}&output=embed`;
 }
 
-// ---------------------------------------------------------------------------
-// Map
-// ---------------------------------------------------------------------------
+interface GeoCoords {
+  lat: number;
+  lng: number;
+}
 
 interface DeliveryMapProps {
   zones: DeliveryZone[];
@@ -36,41 +31,200 @@ interface DeliveryMapProps {
 }
 
 export default function DeliveryMap({ zones, selectedZoneId, onSelect }: DeliveryMapProps) {
-  // Ensure the map re-renders at correct size once mounted (common Leaflet-in-React gotcha)
+  const selected = zones.find((z) => z.id === selectedZoneId) || null;
+
+  // Area / landmark typed by the customer — debounced before it pans the map.
+  const [typed, setTyped] = useState("");
+  const [debouncedTyped, setDebouncedTyped] = useState("");
+
+  // Browser geolocation (only when the customer allows it).
+  const [coords, setCoords] = useState<GeoCoords | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [geoError, setGeoError] = useState("");
+
   useEffect(() => {
-    const t = setTimeout(() => window.dispatchEvent(new Event("resize")), 100);
+    const t = setTimeout(() => setDebouncedTyped(typed.trim()), 350);
     return () => clearTimeout(t);
-  }, []);
+  }, [typed]);
+
+  // When the selected city changes, drop the typed area + geolocation so the
+  // map doesn't silently show a stale neighbourhood from a previous city.
+  useEffect(() => {
+    setTyped("");
+    setDebouncedTyped("");
+    setCoords(null);
+    setGeoError("");
+  }, [selectedZoneId]);
+
+  // ── Current location ─────────────────────────────────────────────────────
+  function locateMe() {
+    setGeoError("");
+    if (!("geolocation" in navigator)) {
+      setGeoError("Geolocation is not supported by this browser.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        setTyped(""); // typed area, if any, no longer drives the map
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (err) => {
+        setLocating(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setGeoError("Location permission was denied. You can still type your area above.");
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          setGeoError("Your location could not be determined right now.");
+        } else {
+          setGeoError("Timed out while getting your location. Please try again.");
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  }
+
+  // ── Effective map query ──────────────────────────────────────────────────
+  const query = useMemo(() => {
+    const cityPart = selected ? `${selected.name}, Pakistan` : "Pakistan";
+    // 1) typed area wins
+    if (debouncedTyped) return `${debouncedTyped}, ${cityPart}`;
+    // 2) then the user's live location (shown as lat,lng pin)
+    if (coords) return `${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`;
+    // 3) then the selected city
+    if (selected) return cityPart;
+    return "";
+  }, [debouncedTyped, selected, coords]);
+
+  const zoom = debouncedTyped ? 12 : coords ? 14 : selected ? 11 : 5;
+  const src = query ? buildEmbedSrc(query, zoom) : "";
+
+  const showingMyLocation = !!coords && !debouncedTyped;
 
   return (
-    <MapContainer
-      center={[30.3753, 69.3451]}
-      zoom={5}
-      scrollWheelZoom={false}
-      style={{ height: "320px", width: "100%", zIndex: 0 }}
-      className="border border-chrome-500"
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {zones.map((zone) => (
-        <Marker
-          key={zone.id}
-          position={[zone.latitude, zone.longitude]}
-          icon={pinIcon(zone.id === selectedZoneId)}
-          eventHandlers={{ click: () => onSelect(zone) }}
+    <div className="space-y-3">
+      {/* Area search + current-location row */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="checkout-float-wrap flex-1">
+          <input
+            id="map-area-search"
+            type="text"
+            className="checkout-float-input"
+            value={typed}
+            onChange={(e) => {
+              setTyped(e.target.value);
+              if (coords) setCoords(null);
+              if (geoError) setGeoError("");
+            }}
+            placeholder="e.g. Gulberg, DHA, Model Town…"
+            autoComplete="off"
+          />
+          <label
+            htmlFor="map-area-search"
+            className={`checkout-float-label ${typed ? "checkout-float-label--up" : ""}`}
+          >
+            Area / landmark (optional)
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={locateMe}
+          disabled={locating}
+          className="flex shrink-0 items-center justify-center gap-2 border border-chrome-500 px-4 py-3 font-body text-xs tracking-wider text-muted transition-colors hover:border-chrome-300 hover:text-foreground disabled:opacity-60"
         >
-          <Popup>
-            <strong>{zone.name}</strong>
-            <br />
-            Rs. {zone.deliveryCharges.toLocaleString("en-PK")} ·{" "}
-            {zone.estimatedDays <= 1
-              ? "1 day"
-              : `${zone.estimatedDays - 1}–${zone.estimatedDays} days`}
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+          {locating ? (
+            <svg
+              className="h-4 w-4 animate-spin"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round" />
+            </svg>
+          ) : (
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 21s-6-5.686-6-10a6 6 0 1 1 12 0c0 4.314-6 10-6 10Zm0-7a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+              />
+            </svg>
+          )}
+          {locating ? "Locating…" : "Use my location"}
+        </button>
+      </div>
+
+      {geoError && (
+        <p className="font-body text-xs text-red-400" role="alert">
+          {geoError}
+        </p>
+      )}
+      {showingMyLocation && (
+        <p className="font-body text-[11px] text-chrome-200">
+          Showing your current location ({coords!.lat.toFixed(5)},{" "}
+          {coords!.lng.toFixed(5)}) — the delivery address on your order is the
+          one entered on the form.
+        </p>
+      )}
+
+      {/* Google Maps embed */}
+      <div className="relative overflow-hidden border border-chrome-500 bg-surface">
+        {src ? (
+          <iframe
+            key={src}
+            src={src}
+            title={query ? `Map of ${query}` : "Delivery map"}
+            loading="lazy"
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+            className="h-[320px] w-full border-0"
+          />
+        ) : (
+          <div className="flex h-[320px] items-center justify-center">
+            <span className="font-body text-xs text-muted">
+              Pick a city above to see it on the map.
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Quick city chips — keeps one-tap selection near the map */}
+      {zones.length > 1 && (
+        <div className="flex flex-wrap gap-2">
+          {zones.map((zone) => {
+            const active = zone.id === selectedZoneId;
+            return (
+              <button
+                key={zone.id}
+                type="button"
+                onClick={() => onSelect(zone)}
+                className={`border px-3 py-1 font-body text-xs transition-colors ${
+                  active
+                    ? "border-chrome-200 bg-chrome-500 text-foreground"
+                    : "border-chrome-500 text-muted hover:border-chrome-300 hover:text-foreground"
+                }`}
+              >
+                {zone.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <p className="font-body text-[11px] text-muted">
+        The map updates as you pick a city, type your area, or share your
+        location — it is a visual aid only; your saved address is what the order
+        ships to.
+      </p>
+    </div>
   );
 }

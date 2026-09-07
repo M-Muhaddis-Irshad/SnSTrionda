@@ -44,6 +44,7 @@ import { couponAdminRoutes } from "../coupons/coupon.routes";
 import { discountAdminRoutes } from "../discounts/discount.routes";
 import { collectionAdminRoutes } from "../collections/collection.routes";
 import { settingAdminRoutes } from "../settings/setting.routes";
+import { landingAdminRoutes } from "../landing/landing.routes";
 
 const router = Router();
 
@@ -101,6 +102,7 @@ router.use("/coupons", couponAdminRoutes);
 router.use("/discounts", discountAdminRoutes);
 router.use("/collections", collectionAdminRoutes);
 router.use("/settings", settingAdminRoutes);
+router.use("/landing", landingAdminRoutes);
 
 // ---------------------------------------------------------------------------
 // Delivery zones — full CRUD

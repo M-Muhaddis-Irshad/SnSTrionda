@@ -16,6 +16,7 @@ import { Server, Socket } from "socket.io";
 import http from "http";
 import jwt from "jsonwebtoken";
 import { prisma } from "../db";
+import { getAllowedOrigins } from "../config/corsOrigins";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const ADMIN_STATS_INTERVAL_MS = 30_000; // push admin:stats-updated every 30s
@@ -56,20 +57,10 @@ export function verifySocketToken(token: string): AuthPayload | null {
 }
 
 // ---------------------------------------------------------------------------
-// CORS origins — must match existing Express CORS config
+// CORS origins — shared with the Express CORS config (app.ts)
 // ---------------------------------------------------------------------------
 
-const CORS_ORIGINS = [
-  process.env.CORS_ORIGIN || "http://localhost:3000",
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "http://localhost:3002",
-  "http://localhost:3003",
-  "http://localhost:3004",
-  "http://localhost:3005",
-  "http://localhost:3006",
-  "http://localhost:3007",
-];
+const CORS_ORIGINS = getAllowedOrigins();
 
 // ---------------------------------------------------------------------------
 // Singleton io instance (exported for other modules to emit events later)

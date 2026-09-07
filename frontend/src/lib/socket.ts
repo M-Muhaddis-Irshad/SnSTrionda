@@ -195,6 +195,17 @@ function attachGlobalHandlers(sock: Socket) {
         link: { href: "/admin/chat", label: "Open chat" },
       });
     });
+
+    // Customer replied inside an existing session — alert admins on any page
+    // other than the chat console (which already streams the message live).
+    sock.on("chat:customer-message", (data: any) => {
+      if (isOnPath("/admin/chat")) return;
+      useToastStore.getState().push({
+        title: "New customer message",
+        message: `${data.senderName || "Customer"}: ${data.message}`,
+        link: { href: "/admin/chat", label: "Open chat" },
+      });
+    });
   }
 }
 

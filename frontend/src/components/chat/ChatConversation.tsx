@@ -48,7 +48,9 @@ export default function ChatConversation({
       ? "bg-gray-900 border-gray-800"
       : "bg-surface border-chrome-500",
     header: dark ? "border-gray-800" : "border-chrome-500",
-    mine: dark ? "bg-gray-700 text-white" : "bg-chrome-200 text-foreground",
+    // Sent bubble: light theme uses a light bubble with DARK text (chrome-200 is
+    // light gray; foreground is near-white, which made text invisible before).
+    mine: dark ? "bg-gray-700 text-white" : "bg-chrome-200 text-background",
     theirs: dark ? "bg-gray-800 text-gray-200 border border-gray-700" : "bg-background text-foreground border border-chrome-500",
     meta: dark ? "text-gray-500" : "text-muted",
     input: dark
@@ -119,7 +121,12 @@ export default function ChatConversation({
         read: false,
         createdAt: data.createdAt,
       };
-      setMessages((prev) => [...prev, msg]);
+      // The sender ALSO receives the socket echo of their own message (they are
+      // in the room), and handleSend() already appended the POST response —
+      // dedupe by id so nothing renders twice.
+      setMessages((prev) =>
+        prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]
+      );
       // Auto-mark incoming messages as read when the panel is open
       if (data.senderId !== currentUserId) {
         authedFetch(`/api/chat/sessions/${sessionId}/read`, { method: "PATCH" }).catch(() => {});
@@ -152,7 +159,11 @@ export default function ChatConversation({
         method: "POST",
         body: JSON.stringify({ message: text }),
       });
-      setMessages((prev) => [...prev, res.data]);
+      // The socket echo of this message arrives a moment later too — add the
+      // POST response now, and the socket handler's dedupe keeps it single.
+      setMessages((prev) =>
+        prev.some((m) => m.id === res.data.id) ? prev : [...prev, res.data]
+      );
       setInput("");
       scrollToBottom();
       onSessionChanged?.(); // admin assignment may have changed

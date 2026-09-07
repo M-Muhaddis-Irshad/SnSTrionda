@@ -9,6 +9,8 @@ import {
   googleLogin,
   refreshToken,
   logout,
+  updateProfile,
+  uploadAvatar,
   AppError,
 } from "./auth.service";
 import { prisma } from "../../db";
@@ -160,6 +162,7 @@ export async function handleMe(req: Request, res: Response) {
         email: true,
         name: true,
         phone: true,
+        image: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -183,6 +186,59 @@ export async function handleMe(req: Request, res: Response) {
 
 export function handleAdminCheck(req: Request, res: Response) {
   res.json({ message: "Admin access confirmed.", user: req.user });
+}
+
+// ---------------------------------------------------------------------------
+// PATCH /api/auth/me — update own profile (name, phone)
+// ---------------------------------------------------------------------------
+
+export async function handleUpdateProfile(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    const { name, phone } = req.body || {};
+    if (name === undefined && phone === undefined) {
+      return res.status(400).json({ error: "Nothing to update. Send name and/or phone." });
+    }
+
+    const user = await updateProfile(userId, { name, phone });
+    res.json({ user });
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Update profile error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/auth/me/avatar — upload own profile picture
+// ---------------------------------------------------------------------------
+
+export async function handleUploadAvatar(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Image file is required." });
+    }
+
+    const user = await uploadAvatar(userId, req.file);
+    res.json({ user });
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Avatar upload error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
 
 // ---------------------------------------------------------------------------

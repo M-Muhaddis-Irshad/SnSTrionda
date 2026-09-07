@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { deliveryDaysLabel, type DeliveryZone } from "@/types/delivery";
 
-// The Leaflet map touches `window`, so it must only render on the client.
+// The map only needs the browser, so keep it client-side rendered.
 const DeliveryMap = dynamic(() => import("./DeliveryMap"), {
   ssr: false,
   loading: () => (
@@ -93,15 +93,12 @@ export default function CitySelector({
         </div>
       )}
 
-      {/* Interactive map */}
+      {/* Google map — tracks the selected city + typed area */}
       <DeliveryMap
         zones={zones}
         selectedZoneId={selectedZoneId}
         onSelect={onSelect}
       />
-      <p className="font-body text-[11px] text-muted">
-        Click a marker on the map to choose that city — delivery charges update automatically.
-      </p>
     </div>
   );
 }

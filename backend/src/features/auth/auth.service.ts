@@ -5,6 +5,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
+import cloudinary from "../../config/cloudinary";
 import { prisma } from "../../db";
 import type {
   RegisterRequestBody,
@@ -195,6 +196,57 @@ export function logout(): { message: string } {
 }
 
 // ---------------------------------------------------------------------------
+// Profile update (name / phone) and avatar upload
+// ---------------------------------------------------------------------------
+
+const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+
+export async function updateProfile(
+  userId: string,
+  data: { name?: string; phone?: string }
+): Promise<AuthUser> {
+  const patch: any = {};
+  if (data.name !== undefined) patch.name = data.name.trim() || null;
+  if (data.phone !== undefined) patch.phone = data.phone.trim() || null;
+
+  const user = await prisma.user.update({ where: { id: userId }, data: patch });
+  return sanitizeUser(user);
+}
+
+export async function uploadAvatar(userId: string, file: Express.Multer.File): Promise<AuthUser> {
+  if (!ALLOWED_AVATAR_TYPES.includes(file.mimetype)) {
+    throw new AppError(
+      `Invalid file type: ${file.mimetype}. Allowed: JPEG, PNG, WebP, GIF.`,
+      400
+    );
+  }
+
+  // Upload to Cloudinary (buffer from multer memory storage)
+  const result = await new Promise<any>((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "trionda-wears/avatars",
+        public_id: `user-${userId}-${Date.now()}`,
+        resource_type: "image",
+        transformation: { width: 512, height: 512, crop: "limit" },
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        if (!result) return reject(new Error("Upload failed — no result returned"));
+        resolve(result);
+      }
+    );
+    uploadStream.end(file.buffer);
+  });
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { image: result.secure_url },
+  });
+  return sanitizeUser(user);
+}
+
+// ---------------------------------------------------------------------------
 // Google Login
 // ---------------------------------------------------------------------------
 
@@ -232,12 +284,16 @@ export async function googleLogin(body: GoogleLoginRequestBody): Promise<AuthTok
         emailVerified: new Date(),
       },
     });
-  } else if (!user.name && name) {
-    // Update name if user exists but has no name
-    user = await prisma.user.update({
-      where: { id: user.id },
-      data: { name, image: user.image || picture || null },
-    });
+  } else {
+    // Existing user — refresh the avatar whenever Google provides one (keeps
+    // the profile icon in sync if the user changes their Google photo), and
+    // backfill the name once if it was never set.
+    const patch: any = {};
+    if (!user.name && name) patch.name = name;
+    if (picture && picture !== user.image) patch.image = picture;
+    if (Object.keys(patch).length > 0) {
+      user = await prisma.user.update({ where: { id: user.id }, data: patch });
+    }
   }
 
   const tokens = generateTokens(user);

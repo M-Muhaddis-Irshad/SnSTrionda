@@ -403,3 +403,49 @@ export function updateAdminSettings(data: any) {
     body: JSON.stringify(data),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Landing page — hero slides/banners
+// ---------------------------------------------------------------------------
+
+export function fetchAdminSlides() {
+  return adminFetch("/landing");
+}
+
+export async function createAdminSlide(formData: FormData) {
+  const { accessToken } = useAuthStore.getState();
+  if (!accessToken) throw new Error("Not authenticated");
+
+  const res = await fetch(`${API_URL}/api/admin/landing`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Slide creation failed");
+  }
+  return res.json();
+}
+
+export async function updateAdminSlide(slideId: string, formData: FormData) {
+  const { accessToken } = useAuthStore.getState();
+  if (!accessToken) throw new Error("Not authenticated");
+
+  const res = await fetch(`${API_URL}/api/admin/landing/${slideId}`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Slide update failed");
+  }
+  return res.json();
+}
+
+export function deleteAdminSlide(slideId: string) {
+  return adminFetch(`/landing/${slideId}`, { method: "DELETE" });
+}

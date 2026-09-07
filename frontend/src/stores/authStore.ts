@@ -14,6 +14,8 @@ export interface AuthUser {
   email: string;
   name: string;
   phone?: string | null;
+  /** Profile picture — set when the user signs in with Google. */
+  image?: string | null;
   role: string;
   createdAt?: string;
   updatedAt?: string;
@@ -27,6 +29,7 @@ interface AuthState {
 
 interface AuthActions {
   setAuth: (user: AuthUser, accessToken: string, refreshToken: string) => void;
+  updateUser: (user: AuthUser) => void;
   clearAuth: () => void;
   isAuthenticated: () => boolean;
   isAdmin: () => boolean;
@@ -64,6 +67,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           /* non-browser environment */
         }
         set({ user: null, accessToken: null, refreshToken: null });
+      },
+
+      // Refresh just the user object (profile edits, avatar uploads) while
+      // keeping the existing tokens.
+      updateUser: (user) => {
+        set({ user });
       },
 
       isAuthenticated: () => !!get().accessToken && !!get().user,
