@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
+import { useMounted } from "@/lib/useMounted";
 import { gsap } from "@/lib/motion";
 
 export const OPEN_MENU_EVENT = "trionda:open-menu";
@@ -18,9 +19,10 @@ const navLinks = [
 ];
 
 export default function MobileMenu() {
+  const mounted = useMounted();
   const { isAuthenticated, isAdmin } = useAuthStore();
-  const authenticated = isAuthenticated();
-  const admin = isAdmin();
+  const authenticated = mounted && isAuthenticated();
+  const admin = mounted && isAdmin();
   const accountHref = !authenticated ? "/login" : admin ? "/admin" : "/account";
   const accountLabel = !authenticated ? "Sign In" : "My Account";
 

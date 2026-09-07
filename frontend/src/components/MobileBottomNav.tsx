@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useCartStore, selectTotalItems } from "@/stores/cartStore";
+import { useMounted } from "@/lib/useMounted";
 
 // ---------------------------------------------------------------------------
 // Navigation items
@@ -96,7 +97,9 @@ interface MobileBottomNavProps {
 export default function MobileBottomNav({ onMenuToggle }: MobileBottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const totalItems = useCartStore(selectTotalItems);
+  const mounted = useMounted();
+  const cartTotalItems = useCartStore(selectTotalItems);
+  const totalItems = mounted ? cartTotalItems : 0;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
