@@ -20,6 +20,13 @@ export interface ShopProduct {
   category: { id: string; name: string; slug: string };
   images: { id: string; url: string; altText: string | null; displayOrder: number }[];
   variants: { id: string; size: string | null; color: string | null; price: number | null; stockQuantity: number }[];
+  discount?: {
+    id: string;
+    name: string;
+    type: "PERCENT" | "FLAT";
+    value: number;
+  } | null;
+  discountedPrice?: number | null;
 }
 
 interface ShopResultsProps {
@@ -126,8 +133,18 @@ export default function ShopResults({
             const variantPrices = product.variants
               .map((v) => v.price)
               .filter((p): p is number => p !== null);
-            const hasSale = variantPrices.length > 0 && variantPrices.some((p) => p < product.basePrice);
-            const price = hasSale ? Math.min(...variantPrices) : product.basePrice;
+            const hasVariantSale =
+              variantPrices.length > 0 && variantPrices.some((p) => p < product.basePrice);
+            const adminSale =
+              product.discountedPrice !== undefined &&
+              product.discountedPrice !== null &&
+              product.discountedPrice < product.basePrice;
+            const price = adminSale
+              ? product.discountedPrice!
+              : hasVariantSale
+                ? Math.min(...variantPrices)
+                : product.basePrice;
+            const showStrike = adminSale || hasVariantSale;
             return (
               <li key={product.id}>
                 <Link
@@ -150,7 +167,7 @@ export default function ShopResults({
                     </span>
                   </span>
                   <span className="shrink-0 text-right">
-                    {hasSale && (
+                    {showStrike && (
                       <span className="block font-body text-xs text-chrome-400 line-through">
                         Rs. {product.basePrice.toLocaleString("en-PK")}
                       </span>

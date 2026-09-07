@@ -1,0 +1,65 @@
+# =============================================================================
+# Render Blueprint — Trionda Wears backend (Express + Socket.IO + Prisma/Neon)
+# =============================================================================
+# How to use:
+#   1. Push this repo to GitHub.
+#   2. In Render: New → Blueprint → pick the repo → "Apply".
+#      (Or render deploy after linking — see DEPLOYMENT.md.)
+#   3. Secrets (sync: false) are prompted / filled in the dashboard once the
+#      service is created. generateValue:true secrets are auto-created.
+# =============================================================================
+
+services:
+  - type: web
+    name: trionda-backend
+    runtime: node
+    rootDir: backend
+    plan: free # upgrade to starter/pro for always-on websockets
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Node version — Prisma 7 / TypeScript 7 need a modern runtime
+      - key: NODE_VERSION
+        value: "22"
+
+      # The Vercel frontend origin — MUST match exactly (scheme + host, no
+      # trailing slash). Also the only origin allowed to open a Socket.IO
+      # connection. Update when a custom domain is added.
+      - key: CORS_ORIGIN
+        value: https://sns-trionda.vercel.app
+
+      # Neon database (see backend/.env.example for which string goes where)
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+
+      # JWT signing secrets (auto-generated if left empty)
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+      # Cloudinary (product / media / banner image uploads)
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # Safepay card payments (optional — warnings only when missing)
+      - key: SAFEPAY_SECRET_KEY
+        sync: false
+      - key: SAFEPAY_API_KEY
+        sync: false
+      - key: SAFEPAY_WEBHOOK_SECRET
+        sync: false
+      - key: SAFEPAY_ENV
+        value: sandbox
+
+      # Google OAuth — the backend verifies Google ID tokens with this client id
+      - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
+        sync: false

@@ -34,6 +34,15 @@ interface Product {
   category: { id: string; name: string; slug: string };
   images: ProductImage[];
   variants: ProductVariant[];
+  /** Admin-managed sale (from the discounts feature) — present when live. */
+  discount?: {
+    id: string;
+    name: string;
+    type: "PERCENT" | "FLAT";
+    value: number;
+  } | null;
+  /** Computed sale price on the base price (null = not on admin sale). */
+  discountedPrice?: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -83,26 +92,40 @@ function Badge({
 function PriceDisplay({
   basePrice,
   variants,
+  discountedPrice,
 }: {
   basePrice: number;
   variants: ProductVariant[];
+  discountedPrice?: number | null;
 }) {
   const variantPrices = variants
     .map((v) => v.price)
     .filter((p): p is number => p !== null);
 
-  const hasSale = variantPrices.length > 0 && variantPrices.some((p) => p < basePrice);
-  const lowestPrice = hasSale ? Math.min(...variantPrices) : null;
+  // Admin-managed sale takes precedence; otherwise a variant priced below the
+  // base price counts as the item's own sale (existing behavior).
+  const adminSale =
+    discountedPrice !== undefined && discountedPrice !== null && discountedPrice < basePrice;
+  const variantSale =
+    variantPrices.length > 0 && variantPrices.some((p) => p < basePrice);
+  const lowestVariantPrice = variantSale ? Math.min(...variantPrices) : null;
+
+  const showOriginal = adminSale || (variantSale && lowestVariantPrice !== null);
+  const currentPrice = adminSale
+    ? discountedPrice!
+    : variantSale && lowestVariantPrice !== null
+      ? lowestVariantPrice
+      : basePrice;
 
   return (
     <div className="product-card-price">
-      {hasSale && lowestPrice !== null && (
+      {showOriginal && (
         <span className="product-card-price-original">
           Rs. {basePrice.toLocaleString("en-PK")}
         </span>
       )}
       <span className="product-card-price-current">
-        Rs. {(hasSale && lowestPrice !== null ? lowestPrice : basePrice).toLocaleString("en-PK")}
+        Rs. {currentPrice.toLocaleString("en-PK")}
       </span>
     </div>
   );
@@ -152,6 +175,12 @@ export default function ProductCard({
     product.variants.every((v) => v.stockQuantity <= 0);
   const isNew = false;
 
+  // Admin-managed sale (discounts feature)
+  const adminOnSale =
+    product.discountedPrice !== undefined &&
+    product.discountedPrice !== null &&
+    product.discountedPrice < product.basePrice;
+
   const categoryText = product.category.name.toUpperCase();
   const variantInfo = product.variants.find((v) => v.size || v.color);
   const subText = [categoryText, variantInfo?.size, variantInfo?.color]
@@ -165,7 +194,7 @@ export default function ProductCard({
 
   if (isSoldOut) {
     badge = { label: "Sold Out", variant: "default" };
-  } else if (hasSale) {
+  } else if (adminOnSale || hasSale) {
     badge = { label: "Sale", variant: "sale" };
   } else if (isNew) {
     badge = { label: "New", variant: "new" };
@@ -234,7 +263,11 @@ export default function ProductCard({
             </p>
           )}
           <div>
-            <PriceDisplay basePrice={product.basePrice} variants={product.variants} />
+            <PriceDisplay
+              basePrice={product.basePrice}
+              variants={product.variants}
+              discountedPrice={product.discountedPrice}
+            />
           </div>
           {showViewCta && (
             <span className="product-card-view">

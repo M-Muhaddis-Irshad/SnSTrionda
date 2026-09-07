@@ -310,3 +310,96 @@ export function bulkUpdateCampaigns(ids: string[], active: boolean) {
     body: JSON.stringify({ ids, active }),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Coupons
+// ---------------------------------------------------------------------------
+
+export function fetchAdminCoupons() {
+  return adminFetch("/coupons");
+}
+
+export function createAdminCoupon(data: any) {
+  return adminFetch("/coupons", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateAdminCoupon(couponId: string, data: any) {
+  return adminFetch(`/coupons/${couponId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteAdminCoupon(couponId: string) {
+  return adminFetch(`/coupons/${couponId}`, { method: "DELETE" });
+}
+
+// ---------------------------------------------------------------------------
+// Discounts
+// ---------------------------------------------------------------------------
+
+export function fetchAdminDiscounts() {
+  return adminFetch("/discounts");
+}
+
+export function createAdminDiscount(data: any) {
+  return adminFetch("/discounts", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateAdminDiscount(discountId: string, data: any) {
+  return adminFetch(`/discounts/${discountId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteAdminDiscount(discountId: string) {
+  return adminFetch(`/discounts/${discountId}`, { method: "DELETE" });
+}
+
+// ---------------------------------------------------------------------------
+// Collections
+// ---------------------------------------------------------------------------
+
+export function fetchAdminCollections() {
+  return adminFetch("/collections");
+}
+
+export function createAdminCollection(data: any) {
+  return adminFetch("/collections", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateAdminCollection(collectionId: string, data: any) {
+  return adminFetch(`/collections/${collectionId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteAdminCollection(collectionId: string) {
+  return adminFetch(`/collections/${collectionId}`, { method: "DELETE" });
+}
+
+// ---------------------------------------------------------------------------
+// Store Settings
+// ---------------------------------------------------------------------------
+
+export function fetchAdminSettings() {
+  return adminFetch("/settings");
+}
+
+export function updateAdminSettings(data: any) {
+  return adminFetch("/settings", {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}

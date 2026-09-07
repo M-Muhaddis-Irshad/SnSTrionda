@@ -3,13 +3,16 @@
 import { useState } from "react";
 import { API_URL } from "@/lib/checkout";
 import { useCheckoutStore } from "@/stores/checkoutStore";
+import { useCartStore, selectSubtotal } from "@/stores/cartStore";
 
 interface PromoCodeFieldProps {
   id?: string;
 }
 
 export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProps) {
-  const { promoCode, discountPercent, applyPromo, clearPromo } = useCheckoutStore();
+  const { promoCode, discountPercent, discountAmount, applyPromo, clearPromo } =
+    useCheckoutStore();
+  const subtotal = useCartStore(selectSubtotal);
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,16 +30,22 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
 
     try {
       const res = await fetch(
-        `${API_URL}/api/orders/promo/validate?code=${encodeURIComponent(code)}`
+        `${API_URL}/api/orders/promo/validate?code=${encodeURIComponent(
+          code
+        )}&subtotal=${encodeURIComponent(String(Math.round(subtotal)))}`
       );
       const data = await res.json();
 
       if (!res.ok || !data.valid) {
-        setError(data.message || "Invalid or expired promo code.");
+        setError(data.message || "Invalid or expired coupon code.");
         return;
       }
 
-      applyPromo(data.code || code.toUpperCase(), data.discountPercent);
+      applyPromo(
+        data.code || code.toUpperCase(),
+        data.discountPercent ?? null,
+        data.discountAmount ?? null
+      );
       setInput("");
     } catch {
       setError("Could not reach the server. Please try again.");
@@ -46,7 +55,7 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
   }
 
   // Applied state
-  if (promoCode && discountPercent) {
+  if (promoCode && (discountPercent || discountAmount)) {
     return (
       <div>
         <div className="checkout-promo-applied">
@@ -56,7 +65,12 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
             </svg>
             <div>
               <p className="font-body text-sm text-foreground">
-                {promoCode} — {discountPercent}% off subtotal
+                {promoCode}
+                {discountPercent
+                  ? ` — ${discountPercent}% off subtotal`
+                  : discountAmount
+                    ? ` — Rs. ${discountAmount.toLocaleString("en-PK")} off`
+                    : ""}
               </p>
               <p className="font-body text-[11px] text-muted">
                 Discount applied to your order summary.
@@ -115,8 +129,8 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
       )}
       {!error && (
         <p className="mt-2 font-body text-xs text-muted">
-          Try <span className="text-chrome-200">TRIONDA10</span> (10% off) or{" "}
-          <span className="text-chrome-200">TRIONDA20</span> (20% off).
+          Have a coupon code? Enter it above — codes are validated live against
+          the store&apos;s active coupons.
         </p>
       )}
     </form>

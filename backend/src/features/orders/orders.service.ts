@@ -4,6 +4,7 @@
 
 import { prisma } from "../../db";
 import bcrypt from "bcryptjs";
+import { validateCouponCode } from "../coupons/coupon.service";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -36,26 +37,10 @@ export interface CreateOrderInput {
   deliveryZoneId?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Promo codes — server-validated, percent discount off subtotal
-// ---------------------------------------------------------------------------
-
-export const PROMO_CODES: Record<string, number> = {
-  TRIONDA10: 10,
-  TRIONDA20: 20,
-};
-
-export function validatePromoCode(code?: string) {
-  if (!code || !code.trim()) {
-    return { valid: false, message: "Enter a promo code." };
-  }
-  const normalized = code.trim().toUpperCase();
-  const percent = PROMO_CODES[normalized];
-  if (!percent) {
-    return { valid: false, message: "Invalid or expired promo code." };
-  }
-  return { valid: true, code: normalized, discountPercent: percent, message: `Promo applied — ${percent}% off your subtotal.` };
-}
+// Coupon codes are no longer hardcoded — they live in the Coupon table and are
+// validated by the coupons feature (validateCouponCode), which enforces the
+// type (PERCENT/FLAT), date window, minimum order, usage limit and per-user
+// limit. Order creation calls it directly with the real subtotal + user id.
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -313,16 +298,25 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
     };
   });
 
-  // Promo code — server validated, percent discount off subtotal
+  // Resolve the buyer id early so coupon per-user limits apply to guests too.
+  const userId = authUserId || (await findOrCreateGuestUser(input.email));
+
+  // Coupon code — validated against the Coupon table (type, date window, usage
+  // and per-user limits). PERCENT discounts are capped at maxDiscount.
   let discount = 0;
   let promoCode: string | null = null;
+  let couponId: string | null = null;
   if (input.promoCode && input.promoCode.trim()) {
-    const promo = validatePromoCode(input.promoCode);
+    const promo = await validateCouponCode(input.promoCode, { subtotal, userId });
     if (!promo.valid || !promo.code) {
-      throw new OrderError("Invalid or expired promo code.", 400);
+      throw new OrderError(promo.message || "Invalid or expired coupon code.", 400);
     }
-    discount = (subtotal * promo.discountPercent!) / 100;
     promoCode = promo.code;
+    couponId = promo.couponId || null;
+    discount =
+      promo.discountAmount !== undefined && promo.discountAmount !== null
+        ? promo.discountAmount
+        : Math.round((subtotal * (promo.discountPercent || 0)) / 100);
   }
 
   // Delivery charge — from the selected delivery zone when provided, otherwise
@@ -342,7 +336,6 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
   }
   const total = Math.max(0, subtotal + shippingCost - discount);
 
-  const userId = authUserId || (await findOrCreateGuestUser(input.email));
   const orderNumber = await generateOrderNumber();
 
   const order = await prisma.$transaction(async (tx) => {
@@ -400,6 +393,18 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
         data: {
           stockQuantity: { decrement: itemData.quantity },
         },
+      });
+    }
+
+    // Coupon redemption — bump usage + persist the redemption atomically with
+    // the order so limits can never be bypassed by a partial failure.
+    if (couponId && promoCode) {
+      await tx.coupon.update({
+        where: { id: couponId },
+        data: { usedCount: { increment: 1 } },
+      });
+      await tx.couponRedemption.create({
+        data: { couponId, userId, orderId: order.id, discount },
       });
     }
 

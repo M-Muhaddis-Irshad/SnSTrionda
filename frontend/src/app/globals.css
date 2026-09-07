@@ -784,23 +784,31 @@ body {
   @apply text-sm;
 }
 
-/* Google Identity Services button — span full available width like form fields */
+/* Google Identity Services button — match auth-submit-btn sizing */
 .google-button-container {
   width: 100%;
   max-width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .google-button-container > div {
   width: 100%;
   max-width: 100%;
+  min-height: 48px;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .google-button-container iframe {
-  width: 100% !important;
-  max-width: 100% !important;
+  height: 48px !important;
+  margin: 0 !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
 }
 
 .auth-switch-text {

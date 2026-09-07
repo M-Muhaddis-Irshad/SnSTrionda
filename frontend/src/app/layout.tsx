@@ -3,6 +3,7 @@ import { Bodoni_Moda, Inter } from "next/font/google";
 import ClientShell from "@/components/ClientShell";
 import ConditionalShell from "@/components/ConditionalShell";
 import RealtimeClient from "@/components/realtime/RealtimeClient";
+import CatalogRealtime from "@/components/realtime/CatalogRealtime";
 import InitialPreloader from "@/components/InitialPreloader";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import InstallPrompt from "@/components/InstallPrompt";
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </ConditionalShell>
         <ClientShell />
         <RealtimeClient />
+        <CatalogRealtime />
         <ServiceWorkerRegister />
         <InstallPrompt />
       </body>

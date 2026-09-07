@@ -726,8 +726,9 @@ export async function deleteVariant(variantId: string) {
     throw new AdminError("Variant not found", 404);
   }
 
+  const productId = existing.productId;
   await prisma.productVariant.delete({ where: { id: variantId } });
-  return { deleted: true, variantId };
+  return { deleted: true, variantId, productId };
 }
 
 export async function createVariant(productId: string, input: UpdateVariantInput) {

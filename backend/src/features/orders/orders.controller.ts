@@ -3,22 +3,32 @@
 // =============================================================================
 
 import { Request, Response } from "express";
-import { createOrder, getOrderByNumber, getMyOrderByNumber, getMyOrders, OrderError, validatePromoCode } from "./orders.service";
+import { createOrder, getOrderByNumber, getMyOrderByNumber, getMyOrders, OrderError } from "./orders.service";
+import { validateCouponCode } from "../coupons/coupon.service";
 import { getIO } from "../../sockets";
 import { createNotification, pushAdminStats, ORDER_STATUS_LABELS } from "../../services/socketService";
 
 // ---------------------------------------------------------------------------
-// GET /api/orders/promo/validate?code=TRIONDA10 — public promo validation
+// GET /api/orders/promo/validate?code=...&subtotal=... — public coupon validation
 // ---------------------------------------------------------------------------
+// Validates a coupon code against the Coupon table. `subtotal` (optional) lets
+// the endpoint honour minimum-order rules at apply time.
 
 export async function handleValidatePromo(req: Request, res: Response) {
   try {
     const code = (req.query.code as string) || "";
-    const result = validatePromoCode(code);
+    const subtotalRaw = req.query.subtotal;
+    const subtotal =
+      subtotalRaw !== undefined && !isNaN(Number(subtotalRaw))
+        ? Number(subtotalRaw)
+        : undefined;
+    const userId = (req as any).user?.userId;
+
+    const result = await validateCouponCode(code, { subtotal, userId });
     res.status(result.valid ? 200 : 400).json(result);
   } catch (err: any) {
-    console.error("Validate promo error:", err?.message || err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Validate coupon error:", err?.message || err);
+    res.status(500).json({ valid: false, message: "Could not validate coupon." });
   }
 }
 

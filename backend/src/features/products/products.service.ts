@@ -5,6 +5,46 @@
 import { prisma } from "../../db";
 
 // ---------------------------------------------------------------------------
+// Live discount mapping — shared by the products API and the collections API.
+// Each product is annotated with its currently-live discount (if any) plus a
+// computed `discountedPrice` on the base price, so the storefront can render
+// sale badges / strikethrough prices without joining the Discount table itself.
+// ---------------------------------------------------------------------------
+
+export function attachLiveDiscounts(products: any[]) {
+  const now = new Date();
+  return products.map((p: any) => {
+    const disc = (p.discounts || []).find(
+      (d: any) =>
+        d.active &&
+        (!d.startsAt || new Date(d.startsAt) <= now) &&
+        (!d.expiresAt || new Date(d.expiresAt) >= now)
+    );
+    let discountedPrice: number | null = null;
+    if (disc) {
+      const base = Number(p.basePrice);
+      discountedPrice =
+        disc.type === "FLAT"
+          ? Math.max(0, base - Number(disc.value))
+          : Math.round(base * (1 - Number(disc.value) / 100));
+    }
+    const { discounts, ...rest } = p;
+    return {
+      ...rest,
+      discount: disc
+        ? {
+            id: disc.id,
+            name: disc.name,
+            type: disc.type,
+            value: Number(disc.value),
+          }
+        : null,
+      discountedPrice,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -53,10 +93,14 @@ export async function listProducts(params: ListProductsParams): Promise<Paginate
       }
     : {};
 
-  // Category (comma-separated slugs), price window, variant faceting — all REAL filters
-  const categoryQuery = params.category
-    ? { category: { slug: { in: params.category.split(",").map((c) => c.trim()).filter(Boolean) } } }
-    : {};
+  // Category filter — comma-separated slugs, merged with the storefront rule
+  // that products under deactivated categories never surface (category.active).
+  const categoryFilter = {
+    active: true,
+    ...(params.category
+      ? { slug: { in: params.category.split(",").map((c) => c.trim()).filter(Boolean) } }
+      : {}),
+  };
 
   const priceQuery =
     params.minPrice !== undefined || params.maxPrice !== undefined
@@ -108,7 +152,7 @@ export async function listProducts(params: ListProductsParams): Promise<Paginate
 
   const [products, total] = await Promise.all([
     prisma.product.findMany({
-      where: { isActive: true, ...searchQuery, ...categoryQuery, ...priceQuery, ...facetQuery },
+      where: { isActive: true, ...searchQuery, category: categoryFilter, ...priceQuery, ...facetQuery },
       skip,
       take: limit,
       orderBy: sortOrder,
@@ -124,17 +168,20 @@ export async function listProducts(params: ListProductsParams): Promise<Paginate
         variants: {
           select: { id: true, size: true, color: true, price: true, stockQuantity: true },
         },
+        discounts: {
+          select: { id: true, name: true, type: true, value: true, startsAt: true, expiresAt: true, active: true },
+        },
       },
     }),
     prisma.product.count({
-      where: { isActive: true, ...searchQuery, ...categoryQuery, ...priceQuery, ...facetQuery },
+      where: { isActive: true, ...searchQuery, category: categoryFilter, ...priceQuery, ...facetQuery },
     }),
   ]);
 
   const totalPages = Math.ceil(total / limit);
 
   return {
-    data: products,
+    data: attachLiveDiscounts(products),
     pagination: {
       page,
       limit,
@@ -191,6 +238,9 @@ export async function getProductBySlug(slug: string) {
         },
         orderBy: { createdAt: "asc" },
       },
+      discounts: {
+        select: { id: true, name: true, type: true, value: true, startsAt: true, expiresAt: true, active: true },
+      },
     },
   });
 
@@ -198,5 +248,5 @@ export async function getProductBySlug(slug: string) {
     return null;
   }
 
-  return product;
+  return attachLiveDiscounts([product])[0];
 }

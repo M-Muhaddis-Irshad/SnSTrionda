@@ -23,12 +23,14 @@ export default function OrderSummaryPanel({
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const promoCode = useCheckoutStore((state) => state.promoCode);
   const discountPercent = useCheckoutStore((state) => state.discountPercent);
+  const discountAmount = useCheckoutStore((state) => state.discountAmount);
   const [isOpen, setIsOpen] = useState(false);
 
   const { shipping: shippingCost, discount, total } = computeTotals(
     subtotal,
     discountPercent,
-    shipping
+    shipping,
+    discountAmount
   );
 
   return (

@@ -75,6 +75,28 @@ async function fetchProducts(params: URLSearchParams): Promise<ProductsResponse 
 }
 
 // ---------------------------------------------------------------------------
+// Fetch the live category list (ACTIVE categories only) — the same endpoint
+// the homepage cards use. The shop filter must read from here rather than
+// deriving categories from the product set, otherwise admin add / activate /
+// deactivate / delete changes never reflect on the storefront.
+// ---------------------------------------------------------------------------
+
+async function fetchCategories(): Promise<{ id: string; name: string; slug: string }[]> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  try {
+    const res = await fetch(`${apiUrl}/api/products/categories`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data || [];
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Compute filter facets from the full catalog (real values from the DB)
 // ---------------------------------------------------------------------------
 
@@ -146,9 +168,10 @@ export default async function ShopPage({
 
   const sort = searchParamsObj.get("sort") || "newest";
 
-  const [gridResult, facetResult] = await Promise.all([
+  const [gridResult, facetResult, categoryResult] = await Promise.all([
     fetchProducts(searchParamsObj),
     fetchProducts(new URLSearchParams({ limit: "200" })),
+    fetchCategories(),
   ]);
 
   const products = gridResult?.data ?? [];
@@ -162,6 +185,10 @@ export default async function ShopPage({
   };
 
   const facets = computeFacets(facetResult?.data ?? []);
+  // Override the product-derived category list with the live ACTIVE categories
+  // from the API — so category adds/activations/deactivations/deletes made in
+  // the admin panel show up in the shop filter immediately.
+  facets.categories = categoryResult;
   const query = parseQuery(searchParamsObj);
 
   return (

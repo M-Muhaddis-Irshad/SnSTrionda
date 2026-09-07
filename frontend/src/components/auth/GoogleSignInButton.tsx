@@ -43,12 +43,43 @@ export default function GoogleSignInButton({ onSuccess }: GoogleSignInButtonProp
 
       // Render button into THIS mount's DOM ref (every mount)
       if (!disposed && btnRef.current) {
+        const containerWidth = btnRef.current.offsetWidth || 300;
+
         window.google.accounts.id.renderButton(btnRef.current, {
           theme: 'filled_black',
           size: 'large',
-          width: btnRef.current.offsetWidth || 300,
+          width: containerWidth,
           text: 'continue_with',
         });
+
+        // GSI sets its own inline width on the iframe that may differ from
+        // what we requested. Force the iframe to fill the full container
+        // width by overwriting its inline style after it renders.
+        const forceWidth = () => {
+          if (disposed || !btnRef.current) return;
+          const iframe = btnRef.current.querySelector('iframe');
+          if (!iframe) return;
+          const w = btnRef.current.offsetWidth;
+          if (w > 0) {
+            iframe.style.width = w + 'px';
+            iframe.style.maxWidth = '100%';
+            iframe.style.height = '48px';
+            iframe.style.margin = '0';
+            iframe.style.position = 'static';
+          }
+        };
+
+        // Run multiple times to catch GSI's async style updates
+        forceWidth();
+        setTimeout(forceWidth, 300);
+        setTimeout(forceWidth, 800);
+        setTimeout(forceWidth, 2000);
+
+        // Also watch for GSI modifying the iframe after load
+        const iframe = btnRef.current.querySelector('iframe');
+        if (iframe) {
+          iframe.addEventListener('load', () => setTimeout(forceWidth, 100), { once: true });
+        }
       }
     }, 100);
 

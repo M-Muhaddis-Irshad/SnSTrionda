@@ -11,11 +11,14 @@ export const CHECKOUT_DRAFT_KEY = "trionda-checkout-draft";
 
 interface CheckoutState {
   promoCode: string | null;
+  /** PERCENT coupons — % off the subtotal. */
   discountPercent: number | null;
+  /** FLAT coupons — fixed PKR amount off (mutually exclusive with percent). */
+  discountAmount: number | null;
 }
 
 interface CheckoutActions {
-  applyPromo: (code: string, discountPercent: number) => void;
+  applyPromo: (code: string, discountPercent: number | null, discountAmount?: number | null) => void;
   clearPromo: () => void;
   /** Reset the whole checkout session — clears promo and any persisted draft. */
   resetCheckout: () => void;
@@ -35,19 +38,24 @@ function clearPersistedDraft() {
 export const useCheckoutStore = create<CheckoutState & CheckoutActions>((set) => ({
   promoCode: null,
   discountPercent: null,
+  discountAmount: null,
 
-  applyPromo: (code, discountPercent) =>
-    set({ promoCode: code, discountPercent }),
+  applyPromo: (code, discountPercent, discountAmount) =>
+    set({
+      promoCode: code,
+      discountPercent: discountPercent ?? null,
+      discountAmount: discountAmount ?? null,
+    }),
 
-  clearPromo: () => set({ promoCode: null, discountPercent: null }),
+  clearPromo: () => set({ promoCode: null, discountPercent: null, discountAmount: null }),
 
   resetCheckout: () => {
     clearPersistedDraft();
-    set({ promoCode: null, discountPercent: null });
+    set({ promoCode: null, discountPercent: null, discountAmount: null });
   },
 
   clearCheckout: () => {
     clearPersistedDraft();
-    set({ promoCode: null, discountPercent: null });
+    set({ promoCode: null, discountPercent: null, discountAmount: null });
   },
 }));

@@ -114,6 +114,16 @@ function attachGlobalHandlers(sock: Socket) {
   const { user } = useAuthStore.getState();
   const isAdmin = user?.role === "ADMIN";
 
+  // --- Catalog changes (product / category / coupon / discount / collection /
+  //     settings writes from the admin). CatalogRealtime listens for the
+  //     window event and calls router.refresh() so the current page re-renders
+  //     with fresh data — no manual reload needed for signed-in visitors. ---
+  sock.on("catalog:changed", (data: any) => {
+    window.dispatchEvent(
+      new CustomEvent("trionda:catalog-changed", { detail: data ?? null })
+    );
+  });
+
   // --- Incoming notifications (customers) ----------------------------------
   sock.on("notification:new", (data: any) => {
     const notification: AppNotification = {

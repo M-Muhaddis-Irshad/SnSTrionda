@@ -12,15 +12,22 @@ export function formatPrice(price: number): string {
 
 // Discount is a whole-rupee amount (matches the backend calculation exactly).
 // `shipping` can be overridden with the selected delivery zone's charges.
+// The validate endpoint returns a definitive `discountAmount` (already capped
+// by maxDiscount for PERCENT coupons, and = the flat value for FLAT coupons),
+// so we prefer it when present — this keeps the summary identical to the order
+// the server will create. discountPercent is the proportional fallback.
 export function computeTotals(
   subtotal: number,
   discountPercent: number | null,
-  shipping: number = SHIPPING_COST
+  shipping: number = SHIPPING_COST,
+  discountAmount: number | null = null
 ) {
   const discount =
-    discountPercent && discountPercent > 0
-      ? Math.round((subtotal * discountPercent) / 100)
-      : 0;
+    discountAmount && discountAmount > 0
+      ? Math.min(discountAmount, subtotal)
+      : discountPercent && discountPercent > 0
+        ? Math.round((subtotal * discountPercent) / 100)
+        : 0;
   const shippingCost = shipping;
   const total = Math.max(0, subtotal + shippingCost - discount);
   return { subtotal, shipping: shippingCost, discount, total };

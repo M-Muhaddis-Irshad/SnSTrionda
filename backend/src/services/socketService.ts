@@ -19,6 +19,25 @@ export function safeEmit(room: string, event: string, payload: unknown): void {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Catalog change — broadcast after any admin write that affects storefront
+// data (product/category/coupon/discount/collection/settings). Connected
+// storefront clients listen and call router.refresh() for zero-reload updates.
+// ---------------------------------------------------------------------------
+
+export function broadcastCatalogChange(
+  action: "created" | "updated" | "deleted",
+  entityType: "product" | "category" | "coupon" | "discount" | "collection" | "settings",
+  entity?: Record<string, unknown> | null
+): void {
+  safeEmit("storefront", "catalog:changed", {
+    action,
+    entityType,
+    entity: entity ?? null,
+    at: new Date().toISOString(),
+  });
+}
+
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   PENDING: "Pending",
   CONFIRMED: "Confirmed",

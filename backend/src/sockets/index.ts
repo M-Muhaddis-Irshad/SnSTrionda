@@ -192,6 +192,10 @@ export function initSocket(httpServer: http.Server): Server {
     // Personal room — notifications & order status updates target this
     socket.join(`user:${user.userId}`);
 
+    // Storefront room — catalog changes (products, categories, coupons,
+    // discounts, collections, settings) fan out here for live refresh.
+    socket.join("storefront");
+
     // Admin room — new orders, stats, activity feed
     if (isAdmin) {
       socket.join("admin");

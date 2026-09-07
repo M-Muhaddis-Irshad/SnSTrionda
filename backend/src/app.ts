@@ -13,6 +13,10 @@ import deliveryRoutes from "./features/delivery/delivery.routes";
 import reviewRoutes from "./features/reviews/reviews.routes";
 import chatRoutes from "./features/chat/chat.routes";
 import notificationRoutes from "./features/notifications/notifications.routes";
+import { couponPublicRoutes } from "./features/coupons/coupon.routes";
+import { discountPublicRoutes } from "./features/discounts/discount.routes";
+import { collectionPublicRoutes } from "./features/collections/collection.routes";
+import { settingPublicRoutes } from "./features/settings/setting.routes";
 
 const app = express();
 
@@ -65,5 +69,9 @@ app.use("/api/delivery-zones", deliveryRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/coupons", couponPublicRoutes);
+app.use("/api/discounts", discountPublicRoutes);
+app.use("/api/collections", collectionPublicRoutes);
+app.use("/api/settings", settingPublicRoutes);
 
 export default app;

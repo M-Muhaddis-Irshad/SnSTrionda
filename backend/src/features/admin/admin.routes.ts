@@ -40,6 +40,10 @@ import {
   handleAdminDeleteReview,
 } from "../reviews/reviews.controller";
 import { handleListActivity } from "../activity/activity.controller";
+import { couponAdminRoutes } from "../coupons/coupon.routes";
+import { discountAdminRoutes } from "../discounts/discount.routes";
+import { collectionAdminRoutes } from "../collections/collection.routes";
+import { settingAdminRoutes } from "../settings/setting.routes";
 
 const router = Router();
 
@@ -88,6 +92,15 @@ router.get("/categories", handleListCategories);
 router.post("/categories", handleCreateCategory);
 router.put("/categories/:categoryId", handleUpdateCategory);
 router.delete("/categories/:categoryId", handleDeleteCategory);
+
+// ---------------------------------------------------------------------------
+// Coupons / Discounts / Collections / Store Settings — full CRUD
+// ---------------------------------------------------------------------------
+
+router.use("/coupons", couponAdminRoutes);
+router.use("/discounts", discountAdminRoutes);
+router.use("/collections", collectionAdminRoutes);
+router.use("/settings", settingAdminRoutes);
 
 // ---------------------------------------------------------------------------
 // Delivery zones — full CRUD

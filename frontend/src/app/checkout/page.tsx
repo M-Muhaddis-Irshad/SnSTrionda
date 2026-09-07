@@ -119,7 +119,8 @@ export default function CheckoutPage() {
   const clearCart = useCartStore((state) => state.clearCart);
   const authUser = useAuthStore((state) => state.user);
   const accessToken = useAuthStore((state) => state.accessToken);
-  const { promoCode, discountPercent, resetCheckout, clearCheckout } = useCheckoutStore();
+  const { promoCode, discountPercent, discountAmount, resetCheckout, clearCheckout } =
+    useCheckoutStore();
 
   const [form, setForm] = useState<CheckoutFormData>(INITIAL_FORM);
   const [stepIndex, setStepIndex] = useState(0);
@@ -683,7 +684,12 @@ export default function CheckoutPage() {
                       <ReviewLine label="Promo code" onEdit={() => goToStep(2)}>
                         {promoCode ? (
                           <p className="font-body text-sm text-chrome-200">
-                            {promoCode} — {discountPercent}% off
+                            {promoCode}
+                            {discountPercent
+                              ? ` — ${discountPercent}% off`
+                              : discountAmount
+                                ? ` — Rs. ${discountAmount.toLocaleString("en-PK")} off`
+                                : ""}
                           </p>
                         ) : (
                           <p className="font-body text-sm text-muted">None</p>
