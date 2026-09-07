@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
 import { authedFetch, getSocket } from "@/lib/socket";
 import ChatConversation from "@/components/chat/ChatConversation";
+import { useChatNotificationSound } from "@/hooks/useChatNotificationSound";
 import type { ChatSessionSummary } from "@/types/realtime";
 
 interface OrderPick {
@@ -35,6 +36,7 @@ export default function AccountChatPage() {
   const [orders, setOrders] = useState<OrderPick[]>([]);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
+  const { playChime } = useChatNotificationSound();
 
   const userId = user?.id || "";
   const userName = user?.name || "You";
@@ -71,7 +73,10 @@ export default function AccountChatPage() {
     if (!sock) return;
 
     const onActivity = (data: any) => {
-      // Re-fetch the list for a fresh "last message" preview
+      // Play chime if the message is for a session we're NOT currently viewing
+      if (data.chatSessionId && data.chatSessionId !== activeId) {
+        playChime();
+      }
       refreshSessions();
       if (data.chatSessionId && !activeId) setActiveId(data.chatSessionId);
     };

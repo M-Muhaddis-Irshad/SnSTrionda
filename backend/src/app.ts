@@ -18,6 +18,8 @@ import { discountPublicRoutes } from "./features/discounts/discount.routes";
 import { collectionPublicRoutes } from "./features/collections/collection.routes";
 import { settingPublicRoutes } from "./features/settings/setting.routes";
 import landingRoutes from "./features/landing/landing.routes";
+import brandStoryRoutes from "./features/brand-story/brand-story.routes";
+import newsletterRoutes from "./features/newsletter/newsletter.routes";
 import { getAllowedOrigins } from "./config/corsOrigins";
 
 const app = express();
@@ -111,5 +113,7 @@ app.use("/api/discounts", discountPublicRoutes);
 app.use("/api/collections", collectionPublicRoutes);
 app.use("/api/settings", settingPublicRoutes);
 app.use("/api/landing", landingRoutes);
+app.use("/api/brand-story", brandStoryRoutes);
+app.use("/api/newsletter", newsletterRoutes);
 
 export default app;

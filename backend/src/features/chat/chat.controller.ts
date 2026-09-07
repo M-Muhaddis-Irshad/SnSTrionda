@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { Request, Response } from "express";
+import cloudinary from "../../config/cloudinary";
 import {
   createSession,
   listMySessions,
@@ -13,6 +14,24 @@ import {
   markMessagesRead,
   ChatError,
 } from "./chat.service";
+
+async function uploadChatImage(file: Express.Multer.File): Promise<string> {
+  const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+  if (!ALLOWED.includes(file.mimetype)) {
+    throw new ChatError(`Invalid file type: ${file.mimetype}.`, 400);
+  }
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "trionda-wears/chat-images", public_id: `chat-${Date.now()}`, resource_type: "image" },
+      (error, result) => {
+        if (error) return reject(error);
+        if (!result) return reject(new Error("Upload failed"));
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(file.buffer);
+  });
+}
 
 function handleChatError(err: any, res: Response) {
   if (err instanceof ChatError) {
@@ -102,11 +121,14 @@ export async function handleSendMessage(req: Request, res: Response) {
     const role = req.user?.role || "CUSTOMER";
     if (!userId) return res.status(401).json({ error: "Authentication required." });
 
+    let imageUrl: string | undefined;
+    if (req.file) imageUrl = await uploadChatImage(req.file);
     const message = await sendMessage(
       req.params.id as string,
       userId,
       role,
-      req.body.message
+      req.body.message,
+      imageUrl
     );
 
     res.status(201).json({ message: "Message sent.", data: message });

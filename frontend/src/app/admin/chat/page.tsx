@@ -11,6 +11,7 @@ import { MessageSquare, Search } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { authedFetch, getSocket } from '@/lib/socket';
 import ChatConversation from '@/components/chat/ChatConversation';
+import { useChatNotificationSound } from '@/hooks/useChatNotificationSound';
 import type { ChatSessionSummary } from '@/types/realtime';
 
 type Tab = 'OPEN' | 'RESOLVED' | 'CLOSED' | 'ALL';
@@ -39,6 +40,7 @@ export default function AdminChatPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set());
+  const { playChime } = useChatNotificationSound();
 
   const activeSession = sessions.find((s) => s.id === activeId) || null;
 
@@ -74,9 +76,9 @@ export default function AdminChatPage() {
     };
 
     const onCustomerMessage = (data: any) => {
-      // If the conversation is open, the conversation panel auto-reads.
-      // Otherwise mark the session as having an unread message for a badge.
+      // Play chime if the message is for a session we're NOT currently viewing
       if (data.chatSessionId && data.chatSessionId !== activeId) {
+        playChime();
         setUnreadIds((prev) => new Set(prev).add(data.chatSessionId));
       }
       refresh();

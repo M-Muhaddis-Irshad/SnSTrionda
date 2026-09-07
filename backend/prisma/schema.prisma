@@ -632,6 +632,7 @@ model ChatMessage {
   senderId      String
   sender        User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
   message       String
+  imageUrl      String?     // optional image attachment (Cloudinary URL)
   read          Boolean     @default(false)
   readAt        DateTime?
 
@@ -659,6 +660,37 @@ model AdminActivity {
   @@index([adminId])
   @@index([entityType])
   @@index([createdAt])
+}
+
+// =============================================================================
+// BRAND STORY ("Our Story" — admin-managed homepage section)
+// =============================================================================
+
+model BrandStory {
+  id        String   @id @default(cuid())
+  label     String   @default("Our Story")
+  heading   String
+  text      String   @db.Text
+  ctaLabel  String   @default("Read More")
+  ctaHref   String   @default("/about")
+  imageUrl  String?  // Cloudinary URL for the section image
+  active    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =============================================================================
+// NEWSLETTER SUBSCRIBERS
+// =============================================================================
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  active    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
 }
 
 // Every order status transition, shown as a timeline to the customer and used

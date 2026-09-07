@@ -179,7 +179,7 @@ export default function AccountOverviewPage() {
                 disabled={uploading}
                 aria-label="Upload profile photo"
                 title="Change photo"
-                className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full border border-chrome-500 bg-surface text-foreground flex items-center justify-center hover:bg-chrome-950 hover:text-white transition-colors disabled:opacity-50"
+                className="absolute -top-1 -right-1 h-8 w-8 rounded-full border border-chrome-500 bg-surface text-foreground flex items-center justify-center hover:bg-chrome-950 hover:text-white transition-colors disabled:opacity-50"
               >
                 <Camera size={14} />
               </button>

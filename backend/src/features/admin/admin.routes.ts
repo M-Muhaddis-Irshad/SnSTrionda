@@ -45,6 +45,8 @@ import { discountAdminRoutes } from "../discounts/discount.routes";
 import { collectionAdminRoutes } from "../collections/collection.routes";
 import { settingAdminRoutes } from "../settings/setting.routes";
 import { landingAdminRoutes } from "../landing/landing.routes";
+import { brandStoryAdminRoutes } from "../brand-story/brand-story.routes";
+import { newsletterAdminRoutes } from "../newsletter/newsletter.routes";
 
 const router = Router();
 
@@ -103,6 +105,8 @@ router.use("/discounts", discountAdminRoutes);
 router.use("/collections", collectionAdminRoutes);
 router.use("/settings", settingAdminRoutes);
 router.use("/landing", landingAdminRoutes);
+router.use("/brand-story", brandStoryAdminRoutes);
+router.use("/newsletter", newsletterAdminRoutes);
 
 // ---------------------------------------------------------------------------
 // Delivery zones — full CRUD

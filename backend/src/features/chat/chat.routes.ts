@@ -2,7 +2,8 @@
 // Chat Feature — Route Definitions
 // =============================================================================
 
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
+import multer from "multer";
 import { authenticate } from "../auth/auth.middleware";
 import {
   handleCreateSession,
@@ -15,6 +16,27 @@ import {
 } from "./chat.controller";
 
 const router = Router();
+
+// Image upload for chat (5MB limit)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE", file.fieldname));
+    }
+  },
+});
+
+function handleMulterError(err: any, _req: Request, res: Response, next: NextFunction) {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ error: err.message || "File upload error" });
+  }
+  next(err);
+}
 
 // All chat routes require a logged-in user (customer or admin)
 router.use(authenticate);
@@ -31,8 +53,8 @@ router.get("/sessions/active", handleListActiveSessions);
 // GET /api/chat/sessions/:id — session detail + messages (participant only)
 router.get("/sessions/:id", handleGetSession);
 
-// POST /api/chat/sessions/:id/messages — send a message
-router.post("/sessions/:id/messages", handleSendMessage);
+// POST /api/chat/sessions/:id/messages — send a message (with optional image)
+router.post("/sessions/:id/messages", upload.single("image"), handleMulterError, handleSendMessage);
 
 // PATCH /api/chat/sessions/:id/read — mark incoming messages as read
 router.patch("/sessions/:id/read", handleMarkRead);

@@ -36,6 +36,7 @@ export interface ChatMessage {
   senderId: string;
   sender?: { id: string; name?: string | null };
   message: string;
+  imageUrl?: string | null;
   read: boolean;
   readAt?: string | null;
   createdAt: string;
