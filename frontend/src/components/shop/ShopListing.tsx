@@ -5,6 +5,7 @@
 // =============================================================================
 
 import ProductCard from "@/components/ui/ProductCard";
+import Link from "next/link";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -55,12 +56,12 @@ function EmptyState({ title, message }: { title: string; message: string }) {
       <p className="font-body text-sm text-muted max-w-md mx-auto">
         {message}
       </p>
-      <a
+      <Link
         href="/shop"
         className="inline-block mt-6 px-6 py-2.5 border border-chrome-400 font-body text-sm tracking-wider text-foreground hover:bg-chrome-500 transition-colors duration-200"
       >
         Browse All Products
-      </a>
+      </Link>
     </div>
   );
 }

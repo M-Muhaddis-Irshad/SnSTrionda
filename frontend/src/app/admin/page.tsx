@@ -22,6 +22,7 @@ import { getSocket } from '@/lib/socket';
 import { adminFetch } from '@/lib/admin-api';
 import type { AdminLiveStats, AdminActivityEntry } from '@/types/realtime';
 import { ACTIVITY_ACTION_LABELS } from '@/types/realtime';
+import Link from 'next/link';
 
 interface DashboardData {
   stats: {
@@ -417,7 +418,7 @@ export default function AdminDashboard() {
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-white font-semibold">RECENT ORDERS</h3>
-            <a href="/admin/orders" className="text-gray-400 hover:text-white text-sm">View All</a>
+            <Link href="/admin/orders" className="text-gray-400 hover:text-white text-sm">View All</Link>
           </div>
           <div className="space-y-2">
             {data.recentOrders.length > 0 ? (
@@ -456,7 +457,7 @@ export default function AdminDashboard() {
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-white font-semibold">TOP SELLING PRODUCTS</h3>
-            <a href="/admin/products" className="text-gray-400 hover:text-white text-sm">View All</a>
+            <Link href="/admin/products" className="text-gray-400 hover:text-white text-sm">View All</Link>
           </div>
           <div className="space-y-2">
             {data.topProducts.length > 0 ? (
@@ -483,9 +484,9 @@ export default function AdminDashboard() {
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-white font-semibold">LIVE ACTIVITY</h3>
-          <a href="/admin/activity" className="text-gray-400 hover:text-white text-sm">
+          <Link href="/admin/activity" className="text-gray-400 hover:text-white text-sm">
             View All
-          </a>
+          </Link>
         </div>
         {activities.length === 0 ? (
           <p className="text-gray-500 text-sm text-center py-8">No admin activity yet</p>

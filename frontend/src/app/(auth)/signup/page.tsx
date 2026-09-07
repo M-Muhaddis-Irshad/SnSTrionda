@@ -1,19 +1,19 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { Eye, EyeOff, Check, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import TermsConditionsModal from '@/components/modals/TermsConditionsModal';
-import Script from "next/script";
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import Link from 'next/link';
 
 const SIGNUP_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788373850/ChatGPT_Image_Sep_2_2026_11_27_48_PM.png';
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 interface SignupFormInputs {
   firstName: string;
@@ -27,56 +27,6 @@ interface SignupFormInputs {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
-/* ---------- Google button renderer ---------- */
-function GoogleSignInButton({
-  onSuccess,
-}: {
-  onSuccess: (credential: string) => void;
-}) {
-  const btnRef = useRef<HTMLDivElement>(null);
-  const rendered = useRef(false);
-
-  useEffect(() => {
-    if (!GOOGLE_CLIENT_ID || rendered.current) return;
-
-    const renderGoogleButton = () => {
-      if (
-        window.google?.accounts?.id &&
-        btnRef.current &&
-        !rendered.current
-      ) {
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: (response: { credential: string }) => {
-            if (response.credential) {
-              onSuccess(response.credential);
-            }
-          },
-        });
-
-        window.google.accounts.id.renderButton(btnRef.current, {
-          theme: "filled_black",
-          size: "large",
-          width: btnRef.current.offsetWidth,
-          text: "continue_with"
-        });
-
-        rendered.current = true;
-      }
-    };
-
-    const interval = setInterval(renderGoogleButton, 100);
-
-    return () => clearInterval(interval);
-  }, [onSuccess]);
-
-  return (
-    <div className="google-button-container w-full">
-      <div ref={btnRef} className="w-full flex justify-center min-h-[44px]" />
-    </div>
-  );
-}
 
 /* ---------- Signup Form ---------- */
 export default function SignupPage() {
@@ -381,7 +331,7 @@ export default function SignupPage() {
                   Terms of Service
                 </button>
                 {' '}and{' '}
-                <a href="/privacy" className="auth-terms-link">Privacy Policy</a>
+                <Link href="/privacy" className="auth-terms-link">Privacy Policy</Link>
               </span>
             </label>
             {errors.agreeToTerms && <p className="auth-error auth-error--inline">{errors.agreeToTerms.message}</p>}
@@ -409,18 +359,13 @@ export default function SignupPage() {
               <div className="auth-divider-line" />
             </div>
 
-            <Script
-              src="https://accounts.google.com/gsi/client"
-              strategy="afterInteractive"
-            />
-
             {/* Google */}
             <GoogleSignInButton onSuccess={handleGoogleSuccess} />
 
             {/* Login Link */}
             <p className="auth-switch-text">
               ALREADY HAVE AN ACCOUNT?{' '}
-              <a href="/login" className="auth-switch-link">SIGN IN</a>
+              <Link href="/login" className="auth-switch-link">SIGN IN</Link>
             </p>
           </form>
         </div>

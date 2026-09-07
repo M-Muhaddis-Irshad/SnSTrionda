@@ -1,19 +1,19 @@
 'use client';
 
-import { Suspense, useState, useEffect, useRef } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import TermsConditionsModal from '@/components/modals/TermsConditionsModal';
-import Script from 'next/script';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import Link from 'next/link';
 
 const LOGIN_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788284310/trionda-wears/auth/auth-login.jpg';
 const LOGO_URL = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788285597/trionda-icon-mark.png';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 interface LoginFormInputs {
   email: string;
@@ -22,45 +22,6 @@ interface LoginFormInputs {
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/* ---------- Google button renderer ---------- */
-function GoogleSignInButton({ onSuccess }: { onSuccess: (credential: string) => void }) {
-  const btnRef = useRef<HTMLDivElement>(null);
-  const rendered = useRef(false);
-
-  useEffect(() => {
-    if (!GOOGLE_CLIENT_ID || rendered.current) return;
-
-    const checkGoogle = setInterval(() => {
-      if (window.google?.accounts?.id && btnRef.current) {
-        clearInterval(checkGoogle);
-        rendered.current = true;
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: (response: { credential: string }) => onSuccess(response.credential),
-        });
-        window.google.accounts.id.renderButton(btnRef.current, {
-          // Google's official dark variant — matches the site's black theme
-          // (the avatar+email pill in the reference is Google's native One Tap
-          // UI, which only renders via google.accounts.id.prompt() — it is NOT
-          // something a rendered button or custom button can replicate).
-          theme: 'filled_black',
-          size: 'large',
-          width: btnRef.current.offsetWidth,
-          text: 'continue_with',
-        });
-      }
-    }, 100);
-
-    return () => clearInterval(checkGoogle);
-  }, [onSuccess]);
-
-  return (
-    <div className="google-button-container">
-      <div ref={btnRef} className="w-full" />
-    </div>
-  );
-}
 
 /* ---------- Login Form ---------- */
 function LoginForm() {
@@ -232,7 +193,7 @@ function LoginForm() {
                 <input type="checkbox" {...register('rememberMe')} className="auth-checkbox" />
                 <span className="auth-checkbox-text">Remember me</span>
               </label>
-              <a href="/forgot-password" className="auth-forgot-link">Forgot password?</a>
+              <Link href="/forgot-password" className="auth-forgot-link">Forgot password?</Link>
             </div>
 
             {/* Error */}
@@ -269,7 +230,7 @@ function LoginForm() {
             {/* Signup Link */}
             <p className="auth-switch-text">
               NEW TO TRIONDA WEARS?{' '}
-              <a href="/signup" className="auth-switch-link">CREATE AN ACCOUNT</a>
+              <Link href="/signup" className="auth-switch-link">CREATE AN ACCOUNT</Link>
             </p>
           </form>
 
@@ -287,12 +248,6 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <>
-
-      <Script
-        src="https://accounts.google.com/gsi/client"
-        strategy="afterInteractive"
-      />
-
       <Suspense
         fallback={
           <div className="auth-loading">

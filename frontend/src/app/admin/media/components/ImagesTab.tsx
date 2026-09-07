@@ -17,6 +17,7 @@ import {
   type Paginated,
   type ImageUsage,
 } from "@/types/admin.types";
+import Link from "next/link";
 
 const categoryColors: Record<ImageCategory, string> = {
   HERO: "bg-purple-500/20 text-purple-300",
@@ -238,7 +239,7 @@ export default function ImagesTab() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1.5">
-                        <a
+                        <Link
                           href={img.url}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -247,7 +248,7 @@ export default function ImagesTab() {
                           className="p-2 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition inline-flex"
                         >
                           <Eye size={14} />
-                        </a>
+                        </Link>
                         <button
                           onClick={() => setEditImage(img)}
                           aria-label={`Edit image ${img.name || ""}`}

@@ -13,6 +13,7 @@ import { useNotificationStore } from "@/stores/notificationStore";
 import { getSocket, disconnectSocket, authedFetch } from "@/lib/socket";
 import { ensureValidAccessToken } from "@/lib/auth";
 import { useToastStore } from "@/stores/toastStore";
+import Link from "next/link";
 
 export default function RealtimeClient() {
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -109,12 +110,12 @@ function ToastHost() {
                 <p className="text-xs text-neutral-300 mt-0.5 line-clamp-2">{toast.message}</p>
               )}
               {toast.link && (
-                <a
+                <Link
                   href={toast.link.href}
                   className="inline-block mt-1.5 text-xs font-medium text-amber-300 hover:text-amber-200"
                 >
                   {toast.link.label} →
-                </a>
+                </Link>
               )}
             </div>
             <button

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { type ButtonHTMLAttributes, type AnchorHTMLAttributes } from "react";
 
 type ButtonBaseProps = {
@@ -31,9 +32,9 @@ export default function Button({
   if (props.as === "a") {
     const { as, ...anchorProps } = props;
     return (
-      <a className={classes} {...anchorProps}>
+      <Link className={classes} {...anchorProps}>
         {children}
-      </a>
+      </Link>
     );
   }
 

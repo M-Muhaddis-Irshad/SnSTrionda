@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 // ---------------------------------------------------------------------------
@@ -40,12 +41,12 @@ export default function ContactPage() {
                 {detail.label}
               </p>
               {detail.href ? (
-                <a
+                <Link
                   href={detail.href}
                   className="mt-1 block font-body text-sm text-foreground transition-colors hover:text-chrome-200"
                 >
                   {detail.value}
-                </a>
+                </Link>
               ) : (
                 <p className="mt-1 font-body text-sm text-foreground">
                   {detail.value}
