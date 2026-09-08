@@ -41,9 +41,12 @@ const FIELDS: SettingField[] = [
   { key: "announcement_enabled", label: "Show announcement bar", type: "checkbox", section: "Announcement" },
   { key: "announcement_text", label: "Announcement Text", type: "textarea", section: "Announcement", help: "e.g. Free delivery on orders over Rs. 5,000" },
   { key: "shipping_note", label: "Shipping Note", type: "textarea", section: "Store", help: "Shown near delivery information" },
+  { key: "jazzcash_account_name", label: "Account Name", section: "JazzCash Payments", help: "Name on the JazzCash account (e.g. Trionda Wears)" },
+  { key: "jazzcash_account_number", label: "Account Number", section: "JazzCash Payments", help: "JazzCash mobile number (e.g. 03001234567)" },
+  { key: "jazzcash_instructions", label: "Instructions for Customers", type: "textarea", section: "JazzCash Payments", help: "Shown to customer when they select JazzCash at checkout" },
 ];
 
-const SECTIONS = ["Store", "Contact", "Social", "Announcement"];
+const SECTIONS = ["Store", "Contact", "Social", "Announcement", "JazzCash Payments"];
 
 // ---------------------------------------------------------------------------
 // Page

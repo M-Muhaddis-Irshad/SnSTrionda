@@ -15,6 +15,8 @@ interface AdminOrder {
   status: string;
   paymentStatus: string;
   paymentMethod: string;
+  paymentSlipUrl: string | null;
+  paymentRejectionReason: string | null;
   total: number;
   createdAt: string;
   user: { id: string; email: string; name: string | null };
@@ -153,6 +155,39 @@ export default function OrdersPage() {
     }
   }
 
+  async function handleJazzCashAction(orderId: string, action: "approve" | "reject") {
+    if (action === "reject") {
+      const reason = prompt("Rejection reason (optional):") || undefined;
+      // reason === null means user cancelled
+      if (reason === null) return;
+      try {
+        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const res = await fetch(`${API}/api/payments/jazzcash/verify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, action: "reject", reason }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error || "Reject failed");
+        loadOrders(page, statusFilter);
+      } catch (err: any) {
+        alert(err.message || "Failed to reject payment");
+      }
+    } else {
+      try {
+        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const res = await fetch(`${API}/api/payments/jazzcash/verify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, action: "approve" }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error || "Approve failed");
+        loadOrders(page, statusFilter);
+      } catch (err: any) {
+        alert(err.message || "Failed to approve payment");
+      }
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -249,11 +284,24 @@ export default function OrdersPage() {
                         className={`block text-xs mt-1 px-2 py-0.5 rounded border w-fit ${
                           order.paymentStatus === "PAID"
                             ? "bg-green-500/10 text-green-400 border-green-500/30"
+                            : order.paymentStatus === "FAILED"
+                            ? "bg-red-500/10 text-red-400 border-red-500/30"
                             : "bg-yellow-500/10 text-yellow-400 border-yellow-500/30"
                         }`}
                       >
                         {order.paymentStatus}
                       </span>
+                      {/* JazzCash: view slip + approve/reject */}
+                      {order.paymentMethod === "JAZZCASH" && order.paymentSlipUrl && order.paymentStatus === "PENDING" && (
+                        <div className="mt-2 flex gap-1 flex-wrap">
+                          <a href={order.paymentSlipUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] px-2 py-0.5 rounded bg-gray-800 text-gray-300 hover:bg-gray-700">View Slip</a>
+                          <button onClick={() => handleJazzCashAction(order.id, "approve")} className="text-[10px] px-2 py-0.5 rounded bg-green-600/20 text-green-400 hover:bg-green-600/30">Approve</button>
+                          <button onClick={() => handleJazzCashAction(order.id, "reject")} className="text-[10px] px-2 py-0.5 rounded bg-red-600/20 text-red-400 hover:bg-red-600/30">Reject</button>
+                        </div>
+                      )}
+                      {order.paymentMethod === "JAZZCASH" && !order.paymentSlipUrl && order.paymentStatus === "PENDING" && (
+                        <p className="text-[10px] text-gray-500 mt-1">No slip uploaded yet</p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <select

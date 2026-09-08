@@ -47,9 +47,13 @@ app.use(
 );
 
 app.use((req, res, next) => {
-  // The webhook route uses express.raw() for signature verification —
-  // skip express.json() so the body stream is available for raw parsing.
+  // Skip express.json() for:
+  // 1. The webhook route (uses express.raw())
+  // 2. Multipart uploads (multer needs the raw stream)
   if (req.method === "POST" && req.path === "/api/payments/safepay/webhook") {
+    return next();
+  }
+  if (req.is("multipart/*")) {
     return next();
   }
   express.json()(req, res, next);

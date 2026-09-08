@@ -10,6 +10,8 @@ import {
   processWebhookEvent,
   PaymentError,
 } from "./payments.service";
+import cloudinary from "../../config/cloudinary";
+import { prisma } from "../../db";
 
 // ---------------------------------------------------------------------------
 // POST /api/payments/safepay/create
@@ -121,5 +123,153 @@ export async function handleSafepayWebhook(req: Request, res: Response) {
     console.error("Webhook processing error:", err?.message || err);
     // Still return 200 to prevent Safepay from retrying endlessly on our bug
     res.status(200).json({ received: true, note: "Internal processing error logged" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/payments/jazzcash/upload-slip
+// ---------------------------------------------------------------------------
+
+function uploadSlipToCloudinary(file: Express.Multer.File): Promise<string> {
+  const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+  if (!ALLOWED.includes(file.mimetype)) {
+    throw new PaymentError(`Invalid file type: ${file.mimetype}.`, 400);
+  }
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "trionda-wears/payment-slips",
+        public_id: `slip-${Date.now()}`,
+        resource_type: "image",
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        if (!result) return reject(new Error("Upload failed"));
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(file.buffer);
+  });
+}
+
+export async function handleUploadJazzCashSlip(req: Request, res: Response) {
+  try {
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    const { orderId } = req.body;
+    if (!orderId) {
+      return res.status(400).json({ error: "orderId is required." });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Payment slip image is required." });
+    }
+
+    // Verify the order exists, belongs to this user, and is JAZZCASH
+    const order = await prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found." });
+    }
+    if (order.userId !== userId) {
+      return res.status(403).json({ error: "This order does not belong to you." });
+    }
+    if (order.paymentMethod !== "JAZZCASH") {
+      return res.status(400).json({ error: "This order is not a JazzCash payment." });
+    }
+    // Allow re-upload when payment is PENDING (first time) or FAILED (rejected, re-upload)
+    if (order.paymentStatus !== "PENDING" && order.paymentStatus !== "FAILED") {
+      return res.status(400).json({ error: `Cannot upload slip — payment status is ${order.paymentStatus}.` });
+    }
+
+    // Upload to Cloudinary
+    const slipUrl = await uploadSlipToCloudinary(req.file);
+
+    // Store on the order + reset status to PENDING if it was FAILED (re-upload)
+    const updated = await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        paymentSlipUrl: slipUrl,
+        paymentStatus: "PENDING",
+        paymentRejectionReason: null,
+      },
+    });
+
+    res.json({ data: { paymentSlipUrl: updated.paymentSlipUrl }, message: "Payment slip uploaded successfully." });
+  } catch (err: any) {
+    if (err instanceof PaymentError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Upload slip error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PATCH /api/payments/jazzcash/verify — admin approve/reject
+// ---------------------------------------------------------------------------
+
+export async function handleVerifyJazzCashSlip(req: Request, res: Response) {
+  try {
+    const { orderId, action, reason } = req.body;
+    if (!orderId || !action) {
+      return res.status(400).json({ error: "orderId and action (approve|reject) are required." });
+    }
+    if (action !== "approve" && action !== "reject") {
+      return res.status(400).json({ error: "action must be 'approve' or 'reject'." });
+    }
+
+    const order = await prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found." });
+    }
+    if (order.paymentMethod !== "JAZZCASH") {
+      return res.status(400).json({ error: "This order is not a JazzCash payment." });
+    }
+
+    if (action === "approve") {
+      // Approve: paymentStatus → PAID, order status → CONFIRMED
+      const updated = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          paymentStatus: "PAID",
+          status: "CONFIRMED",
+        },
+        include: {
+          user: { select: { id: true, email: true, name: true } },
+          items: { include: { productVariant: { include: { product: { select: { name: true } } } } } },
+          shippingAddress: true,
+        },
+      });
+
+      // Fire the existing Socket.IO broadcast (order.status changed → notification)
+      try {
+        const { broadcastOrderStatusUpdate } = await import("../../services/socketService");
+        await broadcastOrderStatusUpdate(updated, {
+          fromStatus: order.status,
+          adminId: (req as any).user?.userId,
+          notes: "JazzCash payment verified and approved",
+        });
+      } catch (broadcastErr: any) {
+        console.error("Broadcast failed (order still updated):", broadcastErr?.message);
+      }
+
+      res.json({ data: updated, message: "Payment approved. Order confirmed." });
+    } else {
+      // Reject: paymentStatus → FAILED, order stays PENDING
+      const updated = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          paymentStatus: "FAILED",
+          paymentRejectionReason: reason || null,
+        },
+      });
+      res.json({ data: updated, message: "Payment rejected. Customer can re-upload." });
+    }
+  } catch (err: any) {
+    console.error("Verify JazzCash error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
   }
 }

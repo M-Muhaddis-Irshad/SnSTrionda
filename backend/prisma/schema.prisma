@@ -427,6 +427,8 @@ model Order {
   total             Decimal         @db.Decimal(10, 2)
   paymentMethod     PaymentMethod
   paymentStatus     PaymentStatus   @default(PENDING)
+  paymentSlipUrl    String?         // JazzCash payment slip (Cloudinary URL)
+  paymentRejectionReason String?   // Admin rejection reason for payment slip
 
   userId            String
   user              User            @relation(fields: [userId], references: [id], onDelete: Restrict)

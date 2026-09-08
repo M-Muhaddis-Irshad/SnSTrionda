@@ -36,6 +36,7 @@ interface Product {
   slug: string;
   description: string | null;
   basePrice: number;
+  discountedPrice: number | null;
   isCustomizable: boolean;
   category: { id: string; name: string; slug: string };
   images: ProductImage[];
@@ -210,6 +211,7 @@ export default async function ProductDetailPage({
               productSlug={product.slug}
               categoryName={product.category.name}
               basePrice={Number(product.basePrice)}
+              discountedPrice={product.discountedPrice}
               isCustomizable={product.isCustomizable}
               variants={product.variants}
               images={product.images}

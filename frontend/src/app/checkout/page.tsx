@@ -29,7 +29,7 @@ import type { DeliveryZone } from "@/types/delivery";
 // Types & constants
 // ---------------------------------------------------------------------------
 
-type PaymentMethod = "CARD" | "COD";
+type PaymentMethod = "CARD" | "COD" | "JAZZCASH";
 
 interface CheckoutFormData {
   email: string;
@@ -128,6 +128,7 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<ErrorsMap>({});
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
+  const [jazzcashSettings, setJazzcashSettings] = useState<Record<string, string>>({});
 
   // Delivery zones (Pakistan cities with charges + map)
   const [zones, setZones] = useState<DeliveryZone[]>([]);
@@ -166,6 +167,20 @@ export default function CheckoutPage() {
     if (!authUser?.email) return;
     setForm((prev) => (prev.email.trim() ? prev : { ...prev, email: authUser.email }));
   }, [authUser?.email]);
+
+  // Load JazzCash account details when that payment method is selected
+  useEffect(() => {
+    if (paymentMethod !== "JAZZCASH") return;
+    if (jazzcashSettings.jazzcash_account_name) return; // already loaded
+    let cancelled = false;
+    fetch(`${API_URL}/api/settings`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (!cancelled && res.data) setJazzcashSettings(res.data);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [paymentMethod, jazzcashSettings.jazzcash_account_name]);
 
   // -------------------------------------------------------------------------
   // Load delivery zones (city dropdown + map)
@@ -672,6 +687,25 @@ export default function CheckoutPage() {
                         onSelect={() => setPaymentMethod("COD")}
                         expandedNote="Have the exact amount ready when your order is delivered."
                       />
+                      <PaymentMethodCard
+                        value="JAZZCASH"
+                        title="JazzCash"
+                        description="Transfer via JazzCash, then upload your slip"
+                        selected={paymentMethod === "JAZZCASH"}
+                        onSelect={() => setPaymentMethod("JAZZCASH")}
+                        expandedNote="After placing your order you'll see the JazzCash account details and can upload your payment slip."
+                      />
+                      {/* JazzCash account details */}
+                      {paymentMethod === "JAZZCASH" && jazzcashSettings.jazzcash_account_name && (
+                        <div className="rounded-lg border border-chrome-500 bg-surface p-4 space-y-2">
+                          <p className="font-body text-xs text-muted uppercase tracking-wide">Send payment to:</p>
+                          <p className="font-body text-sm text-foreground font-medium">{jazzcashSettings.jazzcash_account_name}</p>
+                          <p className="font-body text-sm text-foreground font-mono">{jazzcashSettings.jazzcash_account_number}</p>
+                          {jazzcashSettings.jazzcash_instructions && (
+                            <p className="font-body text-xs text-muted mt-2">{jazzcashSettings.jazzcash_instructions}</p>
+                          )}
+                        </div>
+                      )}
                       {errors.paymentMethod && (
                         <p className="checkout-field-error" role="alert">
                           {errors.paymentMethod}

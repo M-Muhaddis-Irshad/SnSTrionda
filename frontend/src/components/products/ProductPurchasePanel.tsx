@@ -39,6 +39,7 @@ interface ProductPurchasePanelProps {
   productSlug: string;
   categoryName: string;
   basePrice: number;
+  discountedPrice?: number | null;
   isCustomizable: boolean;
   variants: PurchaseVariant[];
   images: PurchaseImage[];
@@ -87,6 +88,7 @@ export default function ProductPurchasePanel({
   productSlug,
   categoryName,
   basePrice,
+  discountedPrice,
   isCustomizable,
   variants,
   images,
@@ -175,13 +177,20 @@ export default function ProductPurchasePanel({
 
   function handleAddToCart(navigateToCheckout: boolean) {
     if (!canAddToCart || !variantToAdd) return;
+    // Use the live discounted price when available (backend-computed from
+    // active Discount records).  Fall back to the variant's own price, then
+    // to the base price.
+    const effectivePrice =
+      discountedPrice != null && discountedPrice < basePrice
+        ? discountedPrice
+        : variantToAdd.price ?? basePrice;
     addItem({
       productId,
       variantId: variantToAdd.id,
       productName,
       productSlug,
       variantLabel: buildVariantLabel(),
-      unitPrice: variantToAdd.price ?? basePrice,
+      unitPrice: effectivePrice,
       quantity,
       imageUrl: images[0]?.url || "",
       customMeasurementId: null,

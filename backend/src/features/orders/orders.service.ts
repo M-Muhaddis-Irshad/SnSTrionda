@@ -259,7 +259,25 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
   const variants = await prisma.productVariant.findMany({
     where: { id: { in: variantIds } },
     include: {
-      product: { select: { id: true, name: true, slug: true, basePrice: true } },
+      product: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          basePrice: true,
+          discounts: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              value: true,
+              startsAt: true,
+              expiresAt: true,
+              active: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -284,10 +302,38 @@ export async function createOrder(input: CreateOrderInput, authUserId?: string) 
     }
   }
 
+  // Resolve the live discount for each product — same logic as
+  // attachLiveDiscounts in products.service.ts but applied at order-creation
+  // time so the actual price charged reflects any active sale.
+  const now = new Date();
+  function resolveDiscountedPrice(
+    basePrice: number,
+    discounts: {
+      active: boolean;
+      type: string;
+      value: any;
+      startsAt: Date | null;
+      expiresAt: Date | null;
+    }[]
+  ): number {
+    const activeDisc = discounts.find(
+      (d) =>
+        d.active &&
+        (!d.startsAt || new Date(d.startsAt) <= now) &&
+        (!d.expiresAt || new Date(d.expiresAt) >= now)
+    );
+    if (!activeDisc) return basePrice;
+    const val = Number(activeDisc.value);
+    return activeDisc.type === "FLAT"
+      ? Math.max(0, basePrice - val)
+      : Math.round(basePrice * (1 - val / 100));
+  }
+
   let subtotal = 0;
   const orderItemsData = input.items.map((item) => {
     const variant = variantMap.get(item.variantId)!;
-    const unitPrice = Number(variant.price ?? variant.product.basePrice ?? 0);
+    const basePrice = Number(variant.price ?? variant.product.basePrice ?? 0);
+    const unitPrice = resolveDiscountedPrice(basePrice, variant.product.discounts);
     subtotal += unitPrice * item.quantity;
 
     return {

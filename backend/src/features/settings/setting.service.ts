@@ -22,6 +22,9 @@ export const SETTING_KEYS = [
   "announcement_enabled",
   "announcement_text",
   "shipping_note",
+  "jazzcash_account_name",
+  "jazzcash_account_number",
+  "jazzcash_instructions",
 ] as const;
 
 export type SettingKey = (typeof SETTING_KEYS)[number];
@@ -39,6 +42,9 @@ export const DEFAULT_SETTINGS: Record<SettingKey, string> = {
   announcement_enabled: "false",
   announcement_text: "",
   shipping_note: "",
+  jazzcash_account_name: "",
+  jazzcash_account_number: "",
+  jazzcash_instructions: "Send the exact amount to the account below, then upload your payment slip.",
 };
 
 export async function getAllSettings(): Promise<Record<string, string>> {
