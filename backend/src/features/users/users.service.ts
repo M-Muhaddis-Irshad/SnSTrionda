@@ -12,6 +12,9 @@ import { prisma } from "../../db";
 export const USER_ROLES = ["CUSTOMER", "ADMIN"] as const;
 export type UserRoleValue = (typeof USER_ROLES)[number];
 
+// The original system admin — their role can NEVER be changed by anyone.
+const PROTECTED_ADMIN_EMAIL = "admin@trionda.com";
+
 // ---------------------------------------------------------------------------
 // Custom Error
 // ---------------------------------------------------------------------------
@@ -135,11 +138,17 @@ export async function getUserProfile(userId: string) {
 export async function changeUserRole(actorId: string | undefined, userId: string, role: UserRoleValue) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, role: true },
+    select: { id: true, email: true, role: true },
   });
 
   if (!user) {
     throw new UsersError("User not found", 404);
+  }
+
+  // The original admin account is permanently protected — no one can
+  // change their role, not even another admin or themselves.
+  if (user.email === PROTECTED_ADMIN_EMAIL && user.role === "ADMIN" && role !== "ADMIN") {
+    throw new UsersError("The original admin account cannot be demoted.", 403);
   }
 
   // An admin must never be able to demote themselves — prevents accidental

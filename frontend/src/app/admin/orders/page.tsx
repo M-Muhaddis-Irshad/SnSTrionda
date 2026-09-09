@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Package, RefreshCw, Bell } from "lucide-react";
-import { fetchAdminOrders, updateAdminOrderStatus } from "@/lib/admin-api";
+import { Package, RefreshCw, Bell, Eye, X } from "lucide-react";
+import { fetchAdminOrders, fetchAdminOrder, updateAdminOrderStatus } from "@/lib/admin-api";
 import { getSocket } from "@/lib/socket";
 
 // ---------------------------------------------------------------------------
@@ -22,6 +22,51 @@ interface AdminOrder {
   user: { id: string; email: string; name: string | null };
   items: { quantity: number; priceAtPurchase: number }[];
   shippingAddress: { city: string; province: string; country: string };
+}
+
+interface AdminOrderDetail {
+  id: string;
+  orderNumber: string;
+  status: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  paymentSlipUrl: string | null;
+  paymentRejectionReason: string | null;
+  subtotal: number;
+  shippingCost: number;
+  discount: number;
+  promoCode: string | null;
+  total: number;
+  createdAt: string;
+  user: { id: string; email: string; name: string | null };
+  items: {
+    id: string;
+    quantity: number;
+    priceAtPurchase: number;
+    productVariant: {
+      size: string | null;
+      color: string | null;
+      sku: string;
+      product: { id: string; name: string; slug: string };
+    };
+    customMeasurement?: { label: string } | null;
+  }[];
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    addressLine1: string;
+    addressLine2?: string | null;
+    city: string;
+    province: string;
+    postalCode?: string | null;
+    country: string;
+  };
+  statusHistory?: {
+    id: string;
+    status: string;
+    statusChangedAt: string;
+    notes?: string | null;
+  }[];
 }
 
 interface LiveOrderEvent {
@@ -80,6 +125,9 @@ export default function OrdersPage() {
   }>({ total: 0, totalPages: 1, hasNext: false, hasPrev: false });
   const [liveToast, setLiveToast] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [detailOrder, setDetailOrder] = useState<AdminOrderDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState("");
 
   const loadOrders = useCallback(async (targetPage = page, status = statusFilter) => {
     try {
@@ -155,6 +203,24 @@ export default function OrdersPage() {
     }
   }
 
+  async function openDetail(orderId: string) {
+    setDetailLoading(true);
+    setDetailError("");
+    try {
+      const result = await fetchAdminOrder(orderId);
+      setDetailOrder(result.data || null);
+    } catch (err: any) {
+      setDetailError(err.message || "Failed to load order details");
+    } finally {
+      setDetailLoading(false);
+    }
+  }
+
+  function closeDetail() {
+    setDetailOrder(null);
+    setDetailError("");
+  }
+
   async function handleJazzCashAction(orderId: string, action: "approve" | "reject") {
     if (action === "reject") {
       const reason = prompt("Rejection reason (optional):") || undefined;
@@ -169,6 +235,8 @@ export default function OrdersPage() {
         });
         if (!res.ok) throw new Error((await res.json()).error || "Reject failed");
         loadOrders(page, statusFilter);
+        // Refresh the modal if it's showing this order
+        if (detailOrder && detailOrder.id === orderId) openDetail(orderId);
       } catch (err: any) {
         alert(err.message || "Failed to reject payment");
       }
@@ -182,6 +250,8 @@ export default function OrdersPage() {
         });
         if (!res.ok) throw new Error((await res.json()).error || "Approve failed");
         loadOrders(page, statusFilter);
+        // Refresh the modal if it's showing this order
+        if (detailOrder && detailOrder.id === orderId) openDetail(orderId);
       } catch (err: any) {
         alert(err.message || "Failed to approve payment");
       }
@@ -251,6 +321,7 @@ export default function OrdersPage() {
                   <th className="px-4 py-3 font-semibold">Total</th>
                   <th className="px-4 py-3 font-semibold">Payment</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold"></th>
                 </tr>
               </thead>
               <tbody>
@@ -318,6 +389,15 @@ export default function OrdersPage() {
                         ))}
                       </select>
                     </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => openDetail(order.id)}
+                        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition"
+                      >
+                        <Eye size={13} />
+                        Detail
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -347,6 +427,257 @@ export default function OrdersPage() {
             >
               Next →
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Order Detail Modal */}
+      {detailOrder && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 sm:p-8">
+          <div className="relative w-full max-w-3xl bg-gray-900 border border-gray-800 rounded-xl shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  Order {detailOrder.orderNumber}
+                </h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {formatDate(detailOrder.createdAt)}
+                </p>
+              </div>
+              <button
+                onClick={closeDetail}
+                className="p-2 rounded hover:bg-gray-800 text-gray-400 hover:text-white transition"
+                aria-label="Close detail"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-6">
+              {/* Status badges */}
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs px-3 py-1 rounded border border-gray-700 text-gray-300">
+                  Status: {detailOrder.status}
+                </span>
+                <span
+                  className={`text-xs px-3 py-1 rounded border ${
+                    detailOrder.paymentStatus === "PAID"
+                      ? "bg-green-500/10 text-green-400 border-green-500/30"
+                      : detailOrder.paymentStatus === "FAILED"
+                      ? "bg-red-500/10 text-red-400 border-red-500/30"
+                      : "bg-yellow-500/10 text-yellow-400 border-yellow-500/30"
+                  }`}
+                >
+                  Payment: {detailOrder.paymentStatus}
+                </span>
+                <span className="text-xs px-3 py-1 rounded border border-gray-700 text-gray-300">
+                  Method: {detailOrder.paymentMethod}
+                </span>
+              </div>
+
+              {detailLoading && (
+                <p className="text-sm text-gray-400">Loading details…</p>
+              )}
+              {detailError && (
+                <p className="text-sm text-red-400">{detailError}</p>
+              )}
+
+              {/* Customer */}
+              <section>
+                <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">
+                  Customer
+                </h3>
+                <div className="text-sm text-gray-300 space-y-1">
+                  <p className="text-white font-medium">
+                    {detailOrder.user?.name || "Guest"}
+                  </p>
+                  <p>{detailOrder.user?.email || "—"}</p>
+                </div>
+              </section>
+
+              {/* Shipping address */}
+              <section>
+                <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">
+                  Shipping Address
+                </h3>
+                <div className="text-sm text-gray-300 space-y-0.5">
+                  <p className="text-white">
+                    {detailOrder.shippingAddress?.fullName || "—"}
+                  </p>
+                  <p>{detailOrder.shippingAddress?.addressLine1 || "—"}</p>
+                  {detailOrder.shippingAddress?.addressLine2 && (
+                    <p>{detailOrder.shippingAddress.addressLine2}</p>
+                  )}
+                  <p>
+                    {detailOrder.shippingAddress?.city || "—"}
+                    {detailOrder.shippingAddress?.province
+                      ? `, ${detailOrder.shippingAddress.province}`
+                      : ""}
+                    {detailOrder.shippingAddress?.postalCode
+                      ? ` ${detailOrder.shippingAddress.postalCode}`
+                      : ""}
+                  </p>
+                  <p>{detailOrder.shippingAddress?.country || "—"}</p>
+                  <p className="text-gray-400">
+                    Phone: {detailOrder.shippingAddress?.phone || "—"}
+                  </p>
+                </div>
+              </section>
+
+              {/* Items */}
+              <section>
+                <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">
+                  Items
+                </h3>
+                <div className="space-y-2">
+                  {detailOrder.items?.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-start justify-between gap-3 text-sm border-b border-gray-800/60 pb-2"
+                    >
+                      <div>
+                        <p className="text-white">
+                          {item.productVariant?.product?.name || "Product"}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {item.productVariant?.size || "—"}
+                          {item.productVariant?.color
+                            ? ` / ${item.productVariant.color}`
+                            : ""}
+                          {item.productVariant?.sku
+                            ? ` · SKU: ${item.productVariant.sku}`
+                            : ""}
+                        </p>
+                        {item.customMeasurement?.label && (
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Measurement: {item.customMeasurement.label}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-white">
+                          {formatPrice(Number(item.priceAtPurchase) * item.quantity)}
+                        </p>
+                        <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {(!detailOrder.items || detailOrder.items.length === 0) && (
+                    <p className="text-sm text-gray-500">No items</p>
+                  )}
+                </div>
+
+                {/* Totals */}
+                <div className="mt-4 pt-3 border-t border-gray-800 space-y-1.5">
+                  <div className="flex justify-between text-sm text-gray-400">
+                    <span>Subtotal</span>
+                    <span>{formatPrice(Number(detailOrder.subtotal))}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-400">
+                    <span>Shipping</span>
+                    <span>{formatPrice(Number(detailOrder.shippingCost))}</span>
+                  </div>
+                  {Number(detailOrder.discount) > 0 && (
+                    <div className="flex justify-between text-sm text-green-400">
+                      <span>Discount</span>
+                      <span>−{formatPrice(Number(detailOrder.discount))}</span>
+                    </div>
+                  )}
+                  {detailOrder.promoCode && (
+                    <div className="flex justify-between text-sm text-gray-400">
+                      <span>Promo Code</span>
+                      <span>{detailOrder.promoCode}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm text-white font-semibold pt-1 border-t border-gray-800">
+                    <span>Total</span>
+                    <span>{formatPrice(Number(detailOrder.total))}</span>
+                  </div>
+                </div>
+              </section>
+
+              {/* JazzCash payment slip */}
+              {detailOrder.paymentMethod === "JAZZCASH" && (
+                <section>
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">
+                    JazzCash Payment Slip
+                  </h3>
+                  {detailOrder.paymentSlipUrl ? (
+                    <div className="space-y-3">
+                      <a
+                        href={detailOrder.paymentSlipUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block text-sm text-blue-400 hover:text-blue-300 underline"
+                      >
+                        Open slip image ↗
+                      </a>
+                      <div className="max-h-72 overflow-auto rounded border border-gray-800 bg-black/40">
+                        <img
+                          src={detailOrder.paymentSlipUrl}
+                          alt="JazzCash payment slip"
+                          className="w-full object-contain"
+                        />
+                      </div>
+                      {detailOrder.paymentStatus === "PENDING" && (
+                        <div className="flex gap-2 flex-wrap">
+                          <button
+                            onClick={() => handleJazzCashAction(detailOrder.id, "approve")}
+                            className="text-xs px-4 py-2 rounded bg-green-600/20 text-green-400 border border-green-600/30 hover:bg-green-600/30 transition"
+                          >
+                            Approve Payment
+                          </button>
+                          <button
+                            onClick={() => handleJazzCashAction(detailOrder.id, "reject")}
+                            className="text-xs px-4 py-2 rounded bg-red-600/20 text-red-400 border border-red-600/30 hover:bg-red-600/30 transition"
+                          >
+                            Reject Payment
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No slip uploaded yet.</p>
+                  )}
+                  {detailOrder.paymentRejectionReason && (
+                    <p className="text-sm text-red-400 mt-2">
+                      Rejection reason: {detailOrder.paymentRejectionReason}
+                    </p>
+                  )}
+                </section>
+              )}
+
+              {/* Status history */}
+              {detailOrder.statusHistory && detailOrder.statusHistory.length > 0 && (
+                <section>
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">
+                    Status History
+                  </h3>
+                  <ol className="space-y-2">
+                    {detailOrder.statusHistory.map((entry) => (
+                      <li key={entry.id} className="flex items-baseline justify-between gap-3 text-sm">
+                        <span className="text-gray-300">
+                          {entry.status}
+                          {entry.notes && (
+                            <span className="text-gray-500 text-xs"> — {entry.notes}</span>
+                          )}
+                        </span>
+                        <span className="text-xs text-gray-500 flex-shrink-0">
+                          {new Date(entry.statusChangedAt).toLocaleString("en-PK", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+            </div>
           </div>
         </div>
       )}

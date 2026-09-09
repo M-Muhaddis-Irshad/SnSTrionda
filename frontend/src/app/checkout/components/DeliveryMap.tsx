@@ -116,7 +116,7 @@ export default function DeliveryMap({ zones, selectedZoneId, onSelect }: Deliver
               if (coords) setCoords(null);
               if (geoError) setGeoError("");
             }}
-            placeholder="e.g. Gulberg, DHA, Model Town…"
+            // placeholder="e.g. Gulberg, DHA, Model Town…"
             autoComplete="off"
           />
           <label

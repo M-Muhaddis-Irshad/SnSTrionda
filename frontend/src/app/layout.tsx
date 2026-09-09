@@ -7,6 +7,7 @@ import CatalogRealtime from "@/components/realtime/CatalogRealtime";
 import InitialPreloader from "@/components/InitialPreloader";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import InstallPrompt from "@/components/InstallPrompt";
+import WishlistSync from "@/components/WishlistSync";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -86,6 +87,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </ConditionalShell>
         <ClientShell />
         <RealtimeClient />
+        <WishlistSync />
         <CatalogRealtime />
         <ServiceWorkerRegister />
         <InstallPrompt />

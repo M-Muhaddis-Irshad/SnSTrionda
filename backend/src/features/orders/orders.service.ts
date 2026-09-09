@@ -165,7 +165,14 @@ export async function getOrderByNumber(orderNumber: string, email?: string) {
       items: {
         include: {
           productVariant: {
-            include: { product: { select: { id: true, name: true, slug: true } } },
+            include: {
+              product: {
+                select: {
+                  id: true, name: true, slug: true,
+                  images: { select: { id: true, url: true, altText: true }, orderBy: { displayOrder: "asc" }, take: 1 },
+                },
+              },
+            },
           },
           customMeasurement: true,
         },

@@ -8,11 +8,15 @@
 //   • Renders a dark card with the brand mark, three feature rows, an
 //     "Install App" (primary) and "Not Now" (outlined) button, plus an X close.
 //   • "Install App" calls the deferred prompt() — the real browser install flow.
-//   • Any dismissal (X, "Not Now", or "appinstalled") sets a permanent
-//     localStorage flag so the prompt never reappears — no expiry, no reset.
-//   • Browsers that never fire `beforeinstallprompt` (e.g. iOS Safari, which
-//     requires the native Share → "Add to Home Screen") simply render nothing —
-//     this component is hidden entirely there by design.
+//   • Dismissal/install sets BOTH:
+//       - localStorage `trionda:install-prompt-seen` → permanent, never show again
+//       - sessionStorage `trionda:install-prompt-session` → prevents re-show
+//         within the same browser tab/session (resets on tab close/reopen).
+//   • The event handler checks BOTH flags before showing, so even if
+//     beforeinstallprompt re-fires across client-side navigations, the
+//     prompt won't reappear.
+//   • Browsers that never fire `beforeinstallprompt` (e.g. iOS Safari) simply
+//     render nothing — this component is hidden entirely there by design.
 // =============================================================================
 
 import { useEffect, useRef, useState } from "react";
@@ -50,10 +54,11 @@ const FEATURES = [
   },
 ];
 
-// localStorage key: permanent "seen" flag. Once the prompt has been shown
-// (or the app installed), it never shows again — no expiry, no reset.
+// Permanent "seen" flag — once set in localStorage, never show again across sessions.
 const SEEN_KEY = "trionda:install-prompt-seen";
-// Legacy key kept for one migration read (7-day dismissal from old code).
+// Session flag — prevents re-show within same tab (resets on tab close/reopen).
+const SESSION_KEY = "trionda:install-prompt-session";
+// Legacy key for migration.
 const OLD_DISMISS_KEY = "trionda:install-dismissed-at";
 
 // Minimal typing — BeforeInstallPromptEvent isn't in older TS libs.
@@ -62,17 +67,32 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 
+/** Returns true if the prompt should be blocked (already seen or shown this session). */
+function isPromptBlocked(): boolean {
+  try {
+    if (localStorage.getItem(SEEN_KEY)) return true;
+    if (sessionStorage.getItem(SESSION_KEY)) return true;
+  } catch {
+    // localStorage/sessionStorage unavailable — allow
+  }
+  return false;
+}
+
 export default function InstallPrompt() {
   const [deferredEvent, setDeferredEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [installing, setInstalling] = useState(false);
   const dismissedRef = useRef(false);
 
-  // Permanent "seen" guard: if the prompt was ever shown/dismissed/installed,
-  // never show again. Also migrates the old 7-day dismissal key.
+  // Permanent "seen" guard + session flag: if the prompt was ever
+  // dismissed/installed, or already shown this session, never show again.
   useEffect(() => {
     try {
       if (localStorage.getItem(SEEN_KEY)) {
+        dismissedRef.current = true;
+        return;
+      }
+      if (sessionStorage.getItem(SESSION_KEY)) {
         dismissedRef.current = true;
         return;
       }
@@ -84,15 +104,20 @@ export default function InstallPrompt() {
         dismissedRef.current = true;
       }
     } catch {
-      // localStorage unavailable — allow the prompt.
+      // localStorage unavailable — allow the prompt
     }
   }, []);
 
-  // Capture the browser's install event once.
+  // Capture the browser's install event. Checks BOTH flags on every fire.
   useEffect(() => {
     if (dismissedRef.current) return;
 
     const onBeforeInstallPrompt = (e: Event) => {
+      // Double-check flags on every event fire (prevents re-show after dismiss)
+      if (isPromptBlocked()) {
+        dismissedRef.current = true;
+        return;
+      }
       // Suppress the native mini-infobar — we render our own card.
       e.preventDefault();
       setDeferredEvent(e as BeforeInstallPromptEvent);
@@ -101,10 +126,13 @@ export default function InstallPrompt() {
 
     // Fired when the app is actually installed (via prompt or manually).
     const onAppInstalled = () => {
-      // Mark as seen so it never shows again
-      try { localStorage.setItem(SEEN_KEY, "1"); } catch {}
+      try {
+        localStorage.setItem(SEEN_KEY, "1");
+        sessionStorage.setItem(SESSION_KEY, "1");
+      } catch {}
       setVisible(false);
       setDeferredEvent(null);
+      dismissedRef.current = true;
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
@@ -116,9 +144,13 @@ export default function InstallPrompt() {
   }, []);
 
   const hide = () => {
-    // Mark as seen on any dismissal (X button, backdrop click, etc.)
-    try { localStorage.setItem(SEEN_KEY, "1"); } catch {}
+    try {
+      localStorage.setItem(SEEN_KEY, "1");
+      sessionStorage.setItem(SESSION_KEY, "1");
+    } catch {}
     setVisible(false);
+    setDeferredEvent(null);
+    dismissedRef.current = true;
   };
 
   const handleInstall = async () => {
@@ -135,12 +167,11 @@ export default function InstallPrompt() {
   };
 
   const handleNotNow = () => {
-    // handleNotNow calls hide() which already sets SEEN_KEY
     hide();
   };
 
-  // No event captured (unsupported browser, already installed, or dismissed
-  // within the last 7 days) → render nothing at all.
+  // No event captured (unsupported browser, already installed, dismissed this session,
+  // or permanently dismissed) → render nothing at all.
   if (!visible || !deferredEvent) return null;
 
   return (

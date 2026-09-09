@@ -11,6 +11,8 @@ import QuantitySelector from "./QuantitySelector";
 import MeasurementForm from "./MeasurementForm";
 import { useCartStore } from "@/stores/cartStore";
 import { useWishlistStore } from "@/stores/wishlistStore";
+import { useAuthStore } from "@/stores/authStore";
+import LoginModal from "@/components/ui/LoginModal";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -103,6 +105,10 @@ export default function ProductPurchasePanel({
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
   const isWished = useWishlistStore((s) => s.items.includes(productId));
+  const showLoginModal = useWishlistStore((s) => s.showLoginModal);
+  const setShowLoginModal = useWishlistStore((s) => s.setShowLoginModal);
+  const authed = useAuthStore((s) => s.isAuthenticated());
+  const token = useAuthStore((s) => s.accessToken);
 
   // Unique options
   const sizes = useMemo(
@@ -381,7 +387,7 @@ export default function ProductPurchasePanel({
       {/* Wishlist */}
       <button
         type="button"
-        onClick={() => toggleWishlist(productId)}
+        onClick={() => toggleWishlist(productId, authed, token)}
         className="mt-5 inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.2em] text-muted underline underline-offset-4 transition-colors hover:text-foreground"
       >
         <svg
@@ -417,6 +423,11 @@ export default function ProductPurchasePanel({
           </dd>
         </div>
       </dl>
+    <LoginModal
+      open={showLoginModal}
+      onClose={() => setShowLoginModal(false)}
+      message="Sign in to save items to your wishlist."
+    />
     </div>
   );
 }

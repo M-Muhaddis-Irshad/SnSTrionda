@@ -92,9 +92,8 @@ export default function OrderHistoryPage() {
 
       <div className="space-y-4">
         {orders.map((order) => (
-          <Link
+          <div
             key={order.id}
-            href={`/account/orders/${order.orderNumber}`}
             className="block border border-chrome-500 bg-surface p-5 hover:border-chrome-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chrome-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             {/* Header row */}
@@ -135,7 +134,23 @@ export default function OrderHistoryPage() {
                 </p>
               )}
             </div>
-          </Link>
+
+            {/* Actions */}
+            <div className="flex gap-3 mt-3 pt-3 border-t border-chrome-500">
+              <Link
+                href={`/account/orders/${order.orderNumber}`}
+                className="font-body text-xs uppercase tracking-wider text-chrome-200 hover:text-foreground transition-colors"
+              >
+                View Details
+              </Link>
+              <Link
+                href={`/order-confirmation/${order.orderNumber}`}
+                className="font-body text-xs uppercase tracking-wider text-chrome-200 hover:text-foreground transition-colors"
+              >
+                View Receipt
+              </Link>
+            </div>
+          </div>
         ))}
       </div>
     </div>

@@ -20,6 +20,7 @@ import { settingPublicRoutes } from "./features/settings/setting.routes";
 import landingRoutes from "./features/landing/landing.routes";
 import brandStoryRoutes from "./features/brand-story/brand-story.routes";
 import newsletterRoutes from "./features/newsletter/newsletter.routes";
+import wishlistRoutes from "./features/wishlist/wishlist.routes";
 import { campaignPublicRoutes } from "./features/admin/campaign.routes";
 import { getAllowedOrigins } from "./config/corsOrigins";
 
@@ -121,5 +122,6 @@ app.use("/api/landing", landingRoutes);
 app.use("/api/brand-story", brandStoryRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/campaigns", campaignPublicRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 export default app;

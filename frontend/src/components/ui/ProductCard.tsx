@@ -3,6 +3,8 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useWishlistStore } from "@/stores/wishlistStore";
+import { useAuthStore } from "@/stores/authStore";
+import LoginModal from "@/components/ui/LoginModal";
 import CategoryBadge from "@/components/CategoryBadge";
 import { useMounted } from "@/lib/useMounted";
 
@@ -152,15 +154,20 @@ export default function ProductCard({
   const [imgError, setImgError] = useState(false);
   const toggle = useWishlistStore((s) => s.toggle);
   const wishlistItems = useWishlistStore((s) => s.items);
+  const showLoginModal = useWishlistStore((s) => s.showLoginModal);
+  const setShowLoginModal = useWishlistStore((s) => s.setShowLoginModal);
   const isWished = mounted && wishlistItems.includes(product.id);
+
+  const authed = useAuthStore((s) => s.isAuthenticated());
+  const token = useAuthStore((s) => s.accessToken);
 
   const handleWishlist = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      toggle(product.id);
+      toggle(product.id, authed, token);
     },
-    [toggle, product.id]
+    [toggle, product.id, authed, token]
   );
 
   const primaryImage = product.images[0];
@@ -201,6 +208,7 @@ export default function ProductCard({
   }
 
   return (
+    <>
     <Link
       href={`/products/${product.slug}`}
       className={`product-card product-card--${layout}`}
@@ -291,5 +299,11 @@ export default function ProductCard({
         </div>
       </div>
     </Link>
+    <LoginModal
+      open={showLoginModal}
+      onClose={() => setShowLoginModal(false)}
+      message="Sign in to save items to your wishlist."
+    />
+    </>
   );
 }
