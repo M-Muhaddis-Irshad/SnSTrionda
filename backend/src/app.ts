@@ -22,6 +22,7 @@ import brandStoryRoutes from "./features/brand-story/brand-story.routes";
 import newsletterRoutes from "./features/newsletter/newsletter.routes";
 import wishlistRoutes from "./features/wishlist/wishlist.routes";
 import { campaignPublicRoutes } from "./features/admin/campaign.routes";
+import internalRoutes from "./features/internal/internal.routes";
 import { getAllowedOrigins } from "./config/corsOrigins";
 
 const app = express();
@@ -123,5 +124,6 @@ app.use("/api/brand-story", brandStoryRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/campaigns", campaignPublicRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/internal", internalRoutes);
 
 export default app;

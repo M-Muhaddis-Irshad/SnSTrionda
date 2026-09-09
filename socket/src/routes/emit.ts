@@ -15,13 +15,15 @@ import { safeEmit } from "../services/emitService";
 
 const router = Router();
 
-// Internal API key — backend sets EMIT_API_KEY in its env, socket server
-// checks it here. This keeps the bridge private.
-const EMIT_API_KEY = process.env.EMIT_API_KEY || "";
+// Internal API key — read lazily (dotenv.config() runs before any request)
+function getEmitApiKey(): string {
+  return process.env.EMIT_API_KEY || "";
+}
 
 router.post("/", (req: Request, res: Response) => {
   // Verify internal API key
   const authHeader = req.headers.authorization;
+  const EMIT_API_KEY = getEmitApiKey();
   if (!EMIT_API_KEY || authHeader !== `Bearer ${EMIT_API_KEY}`) {
     return res.status(401).json({ error: "Invalid or missing EMIT_API_KEY." });
   }
@@ -40,6 +42,7 @@ router.post("/", (req: Request, res: Response) => {
 // Batch emit — emit to multiple rooms in one call
 router.post("/batch", (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
+  const EMIT_API_KEY = getEmitApiKey();
   if (!EMIT_API_KEY || authHeader !== `Bearer ${EMIT_API_KEY}`) {
     return res.status(401).json({ error: "Invalid or missing EMIT_API_KEY." });
   }
