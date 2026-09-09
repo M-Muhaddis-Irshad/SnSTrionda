@@ -14,6 +14,8 @@ import { refreshAccessToken } from "@/lib/auth";
 import type { AppNotification } from "@/types/realtime";
 
 export const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+/** Socket server URL — set to the Render deployment URL in production. */
+export const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || BACKEND_URL;
 
 let socket: Socket | null = null;
 
@@ -45,7 +47,7 @@ export function getSocket(): Socket | null {
   }
 
   // Create a fresh connection
-  socket = io(BACKEND_URL, {
+  socket = io(SOCKET_URL, {
     auth: { token: accessToken },
     transports: ["websocket", "polling"],
     reconnection: true,

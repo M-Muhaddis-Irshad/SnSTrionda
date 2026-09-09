@@ -5,8 +5,7 @@
 import { Request, Response } from "express";
 import { createOrder, getOrderByNumber, getMyOrderByNumber, getMyOrders, OrderError } from "./orders.service";
 import { validateCouponCode } from "../coupons/coupon.service";
-import { getIO } from "../../sockets";
-import { createNotification, pushAdminStats, ORDER_STATUS_LABELS } from "../../services/socketService";
+import { safeEmit, createNotification, pushAdminStats, ORDER_STATUS_LABELS } from "../../services/socketService";
 
 // ---------------------------------------------------------------------------
 // GET /api/orders/promo/validate?code=...&subtotal=... — public coupon validation
@@ -135,9 +134,7 @@ export async function handleCreateOrder(req: Request, res: Response) {
     // Notify connected admins in real time (Socket.IO 'admin' room).
     // Emit only AFTER the order is committed to the database.
     try {
-      getIO()
-        .to("admin")
-        .emit("order:created", {
+      safeEmit("admin", "order:created", {
           orderId: order!.id,
           orderNumber: order!.orderNumber,
           total: Number(order!.total),
@@ -171,7 +168,7 @@ export async function handleCreateOrder(req: Request, res: Response) {
     }
 
     // Refresh live admin dashboard stats without waiting for the 30s tick
-    pushAdminStats().catch(() => {});
+    pushAdminStats();
 
     res.status(201).json({
       message: "Order placed successfully",

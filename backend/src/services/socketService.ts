@@ -1,28 +1,64 @@
 // =============================================================================
-// Realtime Service — DB-backed helpers that fan out events over Socket.IO.
-// Controllers/services call these AFTER a DB write succeeds, so a socket
-// failure can never corrupt business state (every emit is fire-and-forget).
+// Realtime Service — HTTP bridge to the standalone Socket.IO server.
+//
+// Instead of calling getIO().to(room).emit(...) directly (which only worked
+// when Socket.IO was co-located), we now POST to the socket server's /emit
+// endpoint. This allows the backend (Vercel) and socket server (Render)
+// to run as separate deployments.
 // =============================================================================
 
 import { prisma } from "../db";
-import { getIO, broadcastAdminStats } from "../sockets";
+
+const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || "http://localhost:5001";
+const EMIT_API_KEY = process.env.EMIT_API_KEY || "";
 
 // ---------------------------------------------------------------------------
-// Small helpers
+// HTTP-based emit — posts to the socket server's /emit bridge
 // ---------------------------------------------------------------------------
 
-export function safeEmit(room: string, event: string, payload: unknown): void {
+async function emitToSocket(room: string, event: string, payload: unknown): Promise<void> {
   try {
-    getIO().to(room).emit(event, payload);
+    await fetch(`${SOCKET_SERVER_URL}/emit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${EMIT_API_KEY}`,
+      },
+      body: JSON.stringify({ room, event, payload }),
+      signal: AbortSignal.timeout(5000), // 5s timeout — fire and forget
+    });
   } catch (err) {
+    // Socket server may be cold-starting on Render — log but never crash
     console.error(`Socket emit to "${room}" (${event}) failed:`, err);
   }
 }
 
+// Safe emit wrapper — same API as before, just HTTP under the hood
+export function safeEmit(room: string, event: string, payload: unknown): void {
+  emitToSocket(room, event, payload).catch(() => {});
+}
+
+// Batch emit — multiple rooms in one HTTP call
+async function emitBatch(
+  emits: Array<{ room: string; event: string; payload: unknown }>
+): Promise<void> {
+  try {
+    await fetch(`${SOCKET_SERVER_URL}/emit/batch`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${EMIT_API_KEY}`,
+      },
+      body: JSON.stringify({ emits }),
+      signal: AbortSignal.timeout(5000),
+    });
+  } catch (err) {
+    console.error("Socket batch emit failed:", err);
+  }
+}
+
 // ---------------------------------------------------------------------------
-// Catalog change — broadcast after any admin write that affects storefront
-// data (product/category/coupon/discount/collection/settings). Connected
-// storefront clients listen and call router.refresh() for zero-reload updates.
+// Catalog change — broadcast after admin writes that affect storefront data
 // ---------------------------------------------------------------------------
 
 export function broadcastCatalogChange(
@@ -50,7 +86,6 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
 // ---------------------------------------------------------------------------
 // Notifications
 // ---------------------------------------------------------------------------
-// type: ORDER_STATUS | REVIEW_STATUS | CHAT_MESSAGE | ADMIN_UPDATE
 
 export async function createNotification(
   userId: string,
@@ -88,7 +123,7 @@ export async function createNotification(
 }
 
 // ---------------------------------------------------------------------------
-// Admin activity log — persisted + live to the admin room
+// Admin activity log
 // ---------------------------------------------------------------------------
 
 export async function logAdminActivity(
@@ -133,7 +168,7 @@ export async function logAdminActivity(
 }
 
 // ---------------------------------------------------------------------------
-// Order status updates — history record + customer notification + broadcasts
+// Order status updates
 // ---------------------------------------------------------------------------
 
 export interface OrderForBroadcast {
@@ -149,7 +184,7 @@ export async function broadcastOrderStatusUpdate(
   opts: { fromStatus?: string | null; adminId?: string; notes?: string | null } = {}
 ) {
   try {
-    // 1. Persist the transition so the customer timeline is accurate
+    // 1. Persist the transition
     const history = await prisma.orderStatusHistory.create({
       data: {
         orderId: order.id,
@@ -160,8 +195,7 @@ export async function broadcastOrderStatusUpdate(
 
     const label = ORDER_STATUS_LABELS[order.status] || order.status;
 
-    // 2. Notify + push to the customer (they get both the inbox entry and a
-    //    live notification:new + order:status-updated event)
+    // 2. Notify + push to the customer
     await createNotification(
       order.userId,
       "ORDER_STATUS",
@@ -185,7 +219,7 @@ export async function broadcastOrderStatusUpdate(
     safeEmit(`user:${order.userId}`, "order:status-updated", payload);
     safeEmit("admin", "order:status-updated", { ...payload, adminId: opts.adminId || null });
 
-    // 3. Audit trail for other admins
+    // 3. Audit trail
     if (opts.adminId) {
       await logAdminActivity(opts.adminId, "UPDATE_ORDER_STATUS", "Order", order.orderNumber, {
         fromStatus: opts.fromStatus || null,
@@ -193,15 +227,17 @@ export async function broadcastOrderStatusUpdate(
       });
     }
 
-    // 4. Refresh dashboard stats right away (don't wait for the 30s tick)
-    broadcastAdminStats().catch(() => {});
+    // 4. Refresh dashboard stats
+    // Note: admin stats are computed by the socket server itself on a 30s tick
+    // We just trigger a refresh via the emit bridge
+    safeEmit("admin", "admin:refresh-stats", {});
   } catch (err) {
     console.error("broadcastOrderStatusUpdate failed:", err);
   }
 }
 
 // ---------------------------------------------------------------------------
-// Chat — notify admins when a customer opens a new session
+// Chat
 // ---------------------------------------------------------------------------
 
 export async function notifyAdminsNewChatSession(session: {
@@ -219,7 +255,9 @@ export async function notifyAdminsNewChatSession(session: {
 }
 
 // ---------------------------------------------------------------------------
-// Refresh admin dashboard stats (e.g. right after an order is placed)
+// Dashboard stats refresh (trigger socket server to recompute)
 // ---------------------------------------------------------------------------
 
-export { broadcastAdminStats as pushAdminStats };
+export function pushAdminStats(): void {
+  safeEmit("admin", "admin:refresh-stats", {});
+}
