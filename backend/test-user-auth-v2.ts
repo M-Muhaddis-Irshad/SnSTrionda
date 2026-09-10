@@ -50,15 +50,17 @@ async function main() {
     console.log(`    → User ID: ${customerUserId}, Role: ${data.user.role}`);
   });
 
-  // ── 2. Login as admin (password: admin123) ──
+  // ── 2. Login as admin ──
+  const adminEmail = process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com";
+  const adminPass = process.env.ADMIN_PASSWORD || "SN_WEARS09@";
   console.log("\n2. Admin Login");
-  await test("POST /api/auth/login — admin (admin@trionda.com)", async () => {
+  await test(`POST /api/auth/login — admin (${adminEmail})`, async () => {
     const res = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: "admin@trionda.com",
-        password: "admin123",
+        email: adminEmail,
+        password: adminPass,
       }),
     });
     const data = await res.json();

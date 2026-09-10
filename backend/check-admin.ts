@@ -19,10 +19,12 @@ async function main() {
 
   if (admins.length === 0) {
     console.log('No admin user found. Creating one...');
-    const hashedPassword = await bcrypt.hash('Admin123!', 10);
+    const adminEmail = process.env.ADMIN_EMAIL || 's.ntriondawear7@gmail.com';
+    const adminPass = process.env.ADMIN_PASSWORD || 'SN_WEARS09@';
+    const hashedPassword = await bcrypt.hash(adminPass, 12);
     const admin = await prisma.user.create({
       data: {
-        email: 'admin@trionda.com',
+        email: adminEmail,
         name: 'Admin User',
         password: hashedPassword,
         role: 'ADMIN',
@@ -30,7 +32,7 @@ async function main() {
       },
     });
     console.log('Admin created:', admin.email, admin.name, admin.role);
-    console.log('Login with: admin@trionda.com / Admin123!');
+    console.log('Login with:', adminEmail);
   }
 
   await prisma.$disconnect();

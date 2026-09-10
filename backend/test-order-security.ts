@@ -34,7 +34,7 @@ async function main() {
   const adminRes = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: "admin@trionda.com", password: "admin123" }),
+    body: JSON.stringify({ email: process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com", password: process.env.ADMIN_PASSWORD || "SN_WEARS09@" }),
   });
   const adminData = await adminRes.json();
   const adminToken = adminData.accessToken || adminData.data?.accessToken;
@@ -126,7 +126,7 @@ async function main() {
   // Find an order owned by admin from the admin orders list
   let adminOwnedOrder: string | null = null;
   for (const o of ordersData.data) {
-    if (o.user.email === "admin@trionda.com") {
+    if (o.user.email === (process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com")) {
       adminOwnedOrder = o.orderNumber;
       break;
     }

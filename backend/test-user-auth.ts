@@ -80,8 +80,8 @@ async function main() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: "admin@trionda.com",
-        password: "Admin123!",
+        email: process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com",
+        password: process.env.ADMIN_PASSWORD || "SN_WEARS09@",
       }),
     });
     const data = await res.json();
