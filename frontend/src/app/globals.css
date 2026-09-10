@@ -20,6 +20,7 @@
 
   /* Font families */
   --font-display: var(--font-bodoni-moda);
+  --font-heading: var(--font-bodoni-moda);
   --font-body: var(--font-inter);
 }
 
