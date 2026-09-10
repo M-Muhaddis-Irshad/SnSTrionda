@@ -116,19 +116,34 @@ export function OrderConfirmationClient({
   const authToken = useAuthStore((s) => s.accessToken);
 
   // Fetch order data — called on mount and during polling
+  // Tries authenticated endpoint first (if logged in), then public with email
   const fetchOrder = useCallback(async (): Promise<OrderData | null> => {
     try {
+      const headers: Record<string, string> = {};
+      if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+
+      // 1. If logged in, try the authenticated /mine endpoint first
+      if (authToken) {
+        try {
+          const mineRes = await fetch(
+            `${apiUrl}/api/orders/mine/${orderNumber}`,
+            { headers }
+          );
+          if (mineRes.ok) {
+            const mineData = await mineRes.json();
+            if (mineData.data) return mineData.data;
+          }
+        } catch { /* fall through to public endpoint */ }
+      }
+
+      // 2. Public endpoint with email verification
       const storedEmail =
         localStorage.getItem(`trionda-order-email-${orderNumber}`) ||
         authUser?.email ||
         "";
-      const emailParam = storedEmail
-        ? `?email=${encodeURIComponent(storedEmail)}`
-        : "";
-      const headers: Record<string, string> = {};
-      if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+      if (!storedEmail) return null; // no email available
       const res = await fetch(
-        `${apiUrl}/api/orders/${orderNumber}${emailParam}`,
+        `${apiUrl}/api/orders/${orderNumber}?email=${encodeURIComponent(storedEmail)}`,
         { headers }
       );
       if (!res.ok) return null;
@@ -230,6 +245,19 @@ export function OrderConfirmationClient({
       cancelledRef.current = true;
     };
   }, [orderNumber, apiUrl, fetchOrder, verifySafepay]);
+
+  // --- Email prompt for guests ---
+  // If no email is available and we haven't found the order yet, ask for it
+  if (!loading && !order && !error && !authUser?.email && !localStorage.getItem(`trionda-order-email-${orderNumber}`)) {
+    return (
+      <EmailPrompt orderNumber={orderNumber} apiUrl={apiUrl} onFound={(email) => {
+        localStorage.setItem(`trionda-order-email-${orderNumber}`, email);
+        setLoading(true);
+        // Re-trigger fetch by updating a dependency
+        window.location.reload();
+      }} />
+    );
+  }
 
   // --- Loading state ---
   if (loading && !order) {
@@ -630,23 +658,29 @@ function CardReceipt({ order }: { order: OrderData }) {
         )}
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+          <button
+            onClick={() => window.print()}
+            className="inline-block font-body text-sm tracking-[0.15em] uppercase border border-chrome-500 bg-surface text-foreground px-6 py-2.5 rounded-lg transition hover:border-chrome-400"
+          >
+            🖨 Print / Save as PDF
+          </button>
           <Link
             href="/shop"
-            className="inline-block font-body text-sm tracking-[0.15em] uppercase border border-chrome-500 bg-surface text-foreground px-8 py-3 rounded-lg transition hover:border-chrome-400"
+            className="inline-block font-body text-sm tracking-[0.15em] uppercase border border-chrome-500 bg-surface text-foreground px-6 py-2.5 rounded-lg transition hover:border-chrome-400"
           >
             Continue Shopping
           </Link>
           <Link
             href="/account/orders"
-            className="inline-block font-body text-sm tracking-[0.15em] uppercase bg-chrome-100 text-background px-8 py-3 rounded-lg transition hover:bg-chrome-200"
+            className="inline-block font-body text-sm tracking-[0.15em] uppercase bg-chrome-100 text-background px-6 py-2.5 rounded-lg transition hover:bg-chrome-200"
           >
             View My Orders
           </Link>
         </div>
 
         {/* Footer */}
-        <div className="text-center border-t border-chrome-500 pt-6 pb-8">
+        <div className="text-center border-t border-chrome-500 pt-6 pb-8 print:hidden">
           <p className="font-display text-sm tracking-[0.15em] text-muted">
             TRIONDA WEARS
           </p>
@@ -962,6 +996,82 @@ function SummaryRow({
       >
         {value}
       </span>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Email Prompt — for guests who don't have email in localStorage
+// ---------------------------------------------------------------------------
+
+function EmailPrompt({
+  orderNumber,
+  apiUrl,
+  onFound,
+}: {
+  orderNumber: string;
+  apiUrl: string;
+  onFound: (email: string) => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [checking, setChecking] = useState(false);
+  const [errMsg, setErrMsg] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setChecking(true);
+    setErrMsg("");
+    try {
+      const res = await fetch(
+        `${apiUrl}/api/orders/${orderNumber}?email=${encodeURIComponent(email.trim())}`
+      );
+      if (res.ok) {
+        onFound(email.trim());
+      } else {
+        setErrMsg("No order found with this email. Please check and try again.");
+      }
+    } catch {
+      setErrMsg("Could not connect to server. Please try again.");
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-sm mx-auto px-4 text-center"
+      >
+        <div className="mb-4 flex h-12 w-12 mx-auto items-center justify-center rounded-full border border-chrome-500 bg-surface">
+          <svg className="h-6 w-6 text-muted" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+          </svg>
+        </div>
+        <h2 className="font-display text-xl text-foreground mb-2">Find Your Order</h2>
+        <p className="font-body text-sm text-muted mb-6">
+          Enter the email address used for order #{orderNumber}
+        </p>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email address"
+          required
+          className="w-full border border-chrome-500 bg-surface text-foreground px-4 py-3 font-body text-sm mb-3 focus:outline-none focus:border-chrome-300"
+        />
+        {errMsg && (
+          <p className="font-body text-xs text-red-400 mb-3">{errMsg}</p>
+        )}
+        <button
+          type="submit"
+          disabled={checking || !email.trim()}
+          className="w-full bg-foreground text-background py-3 font-body text-sm uppercase tracking-[0.2em] transition-colors hover:bg-chrome-200 disabled:opacity-50"
+        >
+          {checking ? "Checking..." : "Find Order"}
+        </button>
+      </form>
     </div>
   );
 }

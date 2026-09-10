@@ -1913,3 +1913,13 @@ body {
 .login-modal-btn-secondary:hover {
   background: var(--chrome-500, #222);
 }
+
+/* Print styles — hide nav, sidebar, buttons, keep only receipt content */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .login-modal-overlay, .site-header, .mobile-menu, nav[aria-label="Breadcrumb"],
+  button:not([type="submit"]), .print\:hidden, footer, .min-h-screen > div > header { display: none !important; }
+  * { color: #000 !important; background: #fff !important; border-color: #ccc !important; }
+  .bg-surface, .bg-background { background: #fff !important; }
+  .text-muted, .text-chrome-400 { color: #666 !important; }
+}

@@ -109,6 +109,7 @@ export default function ProductPurchasePanel({
   const setShowLoginModal = useWishlistStore((s) => s.setShowLoginModal);
   const authed = useAuthStore((s) => s.isAuthenticated());
   const token = useAuthStore((s) => s.accessToken);
+  const [loginModalMsg, setLoginModalMsg] = useState("Sign in to continue.");
 
   // Unique options
   const sizes = useMemo(
@@ -183,6 +184,15 @@ export default function ProductPurchasePanel({
 
   function handleAddToCart(navigateToCheckout: boolean) {
     if (!canAddToCart || !variantToAdd) return;
+    if (!authed) {
+      setLoginModalMsg(
+        navigateToCheckout
+          ? "Sign in to buy this product."
+          : "Sign in to add items to your cart."
+      );
+      setShowLoginModal(true);
+      return;
+    }
     // Use the live discounted price when available (backend-computed from
     // active Discount records).  Fall back to the variant's own price, then
     // to the base price.
@@ -426,7 +436,7 @@ export default function ProductPurchasePanel({
     <LoginModal
       open={showLoginModal}
       onClose={() => setShowLoginModal(false)}
-      message="Sign in to save items to your wishlist."
+      message={loginModalMsg}
     />
     </div>
   );

@@ -7,6 +7,7 @@ import { useCartStore, selectSubtotal } from "@/stores/cartStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useCheckoutStore } from "@/stores/checkoutStore";
 import Button from "@/components/ui/Button";
+import LoginModal from "@/components/ui/LoginModal";
 import Badge from "@/components/ui/Badge";
 import {
   SHIPPING_COST,
@@ -119,6 +120,13 @@ export default function CheckoutPage() {
   const clearCart = useCartStore((state) => state.clearCart);
   const authUser = useAuthStore((state) => state.user);
   const accessToken = useAuthStore((state) => state.accessToken);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Show login modal for guests on checkout
+  useEffect(() => {
+    if (authUser === undefined) return; // still hydrating
+    if (!authUser) setShowAuthModal(true);
+  }, [authUser]);
   const { promoCode, discountPercent, discountAmount, resetCheckout, clearCheckout } =
     useCheckoutStore();
 
@@ -856,6 +864,11 @@ export default function CheckoutPage() {
         )}
       </div>
 
+      <LoginModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        message="Sign in to complete your checkout securely."
+      />
     </main>
   );
 }

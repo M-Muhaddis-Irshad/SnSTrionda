@@ -173,6 +173,7 @@ function PriceRange({
 export default function ShopFilters({ facets, current }: ShopFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>(current.category ?? []);
   const [selectedSizes, setSelectedSizes] = useState<string[]>(current.sizes ?? []);
@@ -218,20 +219,34 @@ export default function ShopFilters({ facets, current }: ShopFiltersProps) {
 
   return (
     <aside className="w-full lg:w-64 shrink-0">
-      <div className="flex items-center justify-between border-b border-chrome-500/70 py-4">
-        <h2 className="font-body text-xs uppercase tracking-[0.25em] text-foreground">
-          Filters
-        </h2>
-        <button
-          type="button"
-          onClick={clearAll}
-          className="font-body text-xs uppercase tracking-wider text-muted underline underline-offset-4 hover:text-foreground"
-        >
-          Clear All{activeCount > 0 ? ` (${activeCount})` : ""}
-        </button>
-      </div>
+      {/* Mobile toggle */}
+      <button
+        type="button"
+        onClick={() => setMobileOpen((o) => !o)}
+        className="lg:hidden w-full flex items-center justify-between border border-chrome-500 px-4 py-3 mb-4 font-body text-xs uppercase tracking-[0.25em] text-foreground"
+      >
+        <span className="flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 6h18M3 12h12M3 18h8" strokeLinecap="round" /></svg>
+          Filters{activeCount > 0 ? ` (${activeCount})` : ""}
+        </span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={`transition-transform ${mobileOpen ? "rotate-180" : ""}`}><path d="m6 15 6-6 6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
 
-      <FilterSection label="Categories">
+      <div className={`${mobileOpen ? "block" : "hidden"} lg:block`}>
+        <div className="flex items-center justify-between border-b border-chrome-500/70 py-4">
+          <h2 className="font-body text-xs uppercase tracking-[0.25em] text-foreground">
+            Filters
+          </h2>
+          <button
+            type="button"
+            onClick={clearAll}
+            className="font-body text-xs uppercase tracking-wider text-muted underline underline-offset-4 hover:text-foreground"
+          >
+            Clear All{activeCount > 0 ? ` (${activeCount})` : ""}
+          </button>
+        </div>
+
+        <FilterSection label="Categories">
         <div className="max-h-56 overflow-y-auto pr-1">
           {facets.categories.map((cat) => (
             <CheckboxRow
@@ -321,11 +336,12 @@ export default function ShopFilters({ facets, current }: ShopFiltersProps) {
 
       <button
         type="button"
-        onClick={applyFilters}
+        onClick={() => { applyFilters(); setMobileOpen(false); }}
         className="mt-6 w-full border border-chrome-300 bg-transparent py-3 font-body text-sm uppercase tracking-[0.2em] text-foreground transition-colors hover:bg-foreground hover:text-background"
       >
         Apply Filters
       </button>
+      </div>
     </aside>
   );
 }

@@ -69,6 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const { user, accessToken, clearAuth } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const authHydrated = useAuthHydrated();
 
   const isAuthenticated = !!accessToken && !!user;
@@ -230,11 +231,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="hidden lg:flex bg-black border-b border-gray-800 px-8 py-4 items-center justify-between">
           <h1 className="text-white text-2xl font-semibold">Dashboard</h1>
           <div className="flex items-center gap-6">
-            <input
-              type="text"
-              placeholder="Search anything..."
-              className="bg-gray-900 text-white text-sm px-4 py-2 rounded border border-gray-800 focus:outline-none focus:border-gray-600"
-            />
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = searchQuery.trim().toLowerCase();
+                if (!q) return;
+                // Navigate to the most relevant admin page based on search
+                if (/order|trd/.test(q)) router.push(`/admin/orders?search=${encodeURIComponent(q)}`);
+                else if (/product|shirt|sherwani/.test(q)) router.push(`/admin/products?search=${encodeURIComponent(q)}`);
+                else if (/customer|user|account/.test(q)) router.push(`/admin/customers?search=${encodeURIComponent(q)}`);
+                else if (/coupon|promo|discount/.test(q)) router.push(`/admin/coupons?search=${encodeURIComponent(q)}`);
+                else if (/category|collection/.test(q)) router.push(`/admin/categories?search=${encodeURIComponent(q)}`);
+                else if (/chat|message|support/.test(q)) router.push(`/admin/chat?search=${encodeURIComponent(q)}`);
+                else router.push(`/admin/orders?search=${encodeURIComponent(q)}`);
+                setSearchQuery("");
+              }}
+              className="flex items-center"
+            >
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search orders, products..."
+                className="bg-gray-900 text-white text-sm px-4 py-2 rounded-l border border-gray-800 focus:outline-none focus:border-gray-600 w-48"
+              />
+              <button
+                type="submit"
+                className="bg-gray-800 text-gray-400 hover:text-white px-3 py-2.5 rounded-r border border-l-0 border-gray-800 transition-colors"
+                title="Search"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+              </button>
+            </form>
             {user?.image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img

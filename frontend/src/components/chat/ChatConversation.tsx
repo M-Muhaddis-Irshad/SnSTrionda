@@ -326,20 +326,23 @@ export default function ChatConversation({
         </div>
       )}
 
-      {/* Emoji picker */}
+      {/* Emoji picker — fixed overlay so it's never clipped */}
       {showEmoji && (
-        <div className={`mx-4 mb-2 p-3 rounded-lg border max-h-48 overflow-y-auto ${theme.emojiPanel}`}>
-          {EMOJI_CATEGORIES.map((cat) => (
-            <div key={cat.label} className="mb-2">
-              <p className={`font-body text-[10px] mb-1 ${theme.meta}`}>{cat.label}</p>
-              <div className="flex flex-wrap gap-1">
-                {cat.emojis.map((emoji) => (
-                  <button key={emoji} onClick={() => insertEmoji(emoji)} className="text-lg hover:scale-125 transition-transform p-0.5">{emoji}</button>
-                ))}
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShowEmoji(false)} />
+          <div className={`absolute bottom-full left-4 mb-2 z-50 p-3 rounded-lg border max-h-56 overflow-y-auto w-72 ${theme.emojiPanel}`}>
+            {EMOJI_CATEGORIES.map((cat) => (
+              <div key={cat.label} className="mb-2">
+                <p className={`font-body text-[10px] mb-1 ${theme.meta}`}>{cat.label}</p>
+                <div className="flex flex-wrap gap-1">
+                  {cat.emojis.map((emoji) => (
+                    <button key={emoji} onClick={() => insertEmoji(emoji)} className="text-lg hover:scale-125 transition-transform p-0.5">{emoji}</button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Image preview */}
@@ -352,7 +355,7 @@ export default function ChatConversation({
 
       {/* Input */}
       {status === "OPEN" ? (
-        <div className={`px-4 py-3 border-t ${theme.header} flex items-end gap-2`}>
+        <div className={`relative px-4 py-3 border-t ${theme.header} flex items-end gap-2`}>
           {/* Image picker */}
           <button
             onClick={() => fileInputRef.current?.click()}
