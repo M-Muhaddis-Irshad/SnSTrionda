@@ -10,7 +10,7 @@ declare const process: {
 // Tests all 6 scenarios for the secured order endpoints
 // =============================================================================
 
-const API_URL = "http://localhost:5000";
+const API_URL = process.env.API_URL || 'http://localhost:5000';
 
 let passed = 0;
 let failed = 0;

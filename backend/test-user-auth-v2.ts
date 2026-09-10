@@ -9,7 +9,7 @@ declare const process: {
 // Test: Unified Login + Customer Account — v2 (correct credentials)
 // =============================================================================
 
-const API_URL = "http://localhost:5000";
+const API_URL = process.env.API_URL || 'http://localhost:5000';
 
 async function test(name: string, fn: () => Promise<void>) {
   try {

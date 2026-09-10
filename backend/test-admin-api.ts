@@ -5,7 +5,7 @@ declare const process: {
 };
 
 // Test admin API endpoints
-const API = "http://localhost:5000/api";
+const API = `${process.env.API_URL}/api` || 'http://localhost:5000/api';
 
 let TOKEN = "";
 
