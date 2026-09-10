@@ -137,7 +137,7 @@ body {
 }
 
 .card-image {
-  @apply relative aspect-[3/4] overflow-hidden bg-surface;
+  @apply relative aspect-[4/5] overflow-hidden bg-surface;
 }
 
 .card-content {
@@ -1266,9 +1266,111 @@ body {
 }
 
 /* =============================================================================
-   PRODUCT DETAIL PAGE
+   PRODUCT DETAIL PAGE — 6-breakpoint responsive layout
    ============================================================================= */
 
+/* Container — fluid with progressive max-widths */
+.pdp-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Inner wrapper — same max-width logic for non-grid sections */
+.pdp-inner {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Portrait image column */
+.pdp-image-col {
+  min-width: 0;
+}
+
+/* Purchase info column */
+.pdp-info-col {
+  min-width: 0;
+}
+
+/* Large Mobile — min-width: 576px */
+@media (min-width: 576px) {
+  .pdp-container {
+    max-width: 540px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  .pdp-inner {
+    max-width: 540px;
+  }
+}
+
+/* Tablet — min-width: 768px → 2-column 50/50 */
+@media (min-width: 768px) {
+  .pdp-container {
+    max-width: 720px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  .pdp-inner {
+    max-width: 720px;
+  }
+  .pdp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+}
+
+/* Laptop / Standard Desktop — min-width: 992px */
+@media (min-width: 992px) {
+  .pdp-container {
+    max-width: 960px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  .pdp-inner {
+    max-width: 960px;
+  }
+  .pdp-grid {
+    gap: 3.5rem;
+  }
+}
+
+/* Large Desktop — min-width: 1200px */
+@media (min-width: 1200px) {
+  .pdp-container {
+    max-width: 1140px;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+  .pdp-inner {
+    max-width: 1140px;
+  }
+  .pdp-grid {
+    gap: 4rem;
+  }
+}
+
+/* Ultra-wide Monitors — min-width: 1400px */
+@media (min-width: 1400px) {
+  .pdp-container {
+    max-width: 1320px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+  .pdp-inner {
+    max-width: 1320px;
+  }
+  .pdp-grid {
+    gap: 5rem;
+  }
+}
+
+/* Legacy classes — kept for backwards compatibility */
 .product-detail-breadcrumb {
   @apply mb-8 font-body text-sm text-muted;
 }
@@ -1294,11 +1396,11 @@ body {
 }
 
 .product-detail-image-wrap {
-  @apply relative aspect-[3/4] overflow-hidden border border-chrome-500;
+  @apply relative aspect-[4/5] overflow-hidden border border-chrome-500/60;
 }
 
 .product-detail-image-placeholder {
-  @apply aspect-[3/4] border border-chrome-500;
+  @apply aspect-[4/5] border border-chrome-500/60;
   background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%);
 }
 

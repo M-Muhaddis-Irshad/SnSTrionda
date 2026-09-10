@@ -16,7 +16,6 @@ import {
   Mail,
   Ticket,
   Settings,
-  User,
   Truck,
   LogOut,
   MessageSquare,
@@ -60,7 +59,6 @@ const NAV_ITEMS = [
   { section: 'Settings', items: [
     { href: '/admin/settings', label: 'Store Settings', icon: Settings },
     { href: '/admin/profile', label: 'My Profile', icon: UserRound },
-    { href: '/admin/users', label: 'Users', icon: User },
   ]},
 ];
 
@@ -70,6 +68,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, accessToken, clearAuth } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Derive page title from pathname
+  const getPageTitle = () => {
+    const seg = pathname.replace('/admin', '').replace(/^\//, '');
+    if (!seg) return 'Dashboard';
+    const map: Record<string, string> = {
+      orders: 'Orders',
+      products: 'Products',
+      customers: 'Customers',
+      categories: 'Categories',
+      collections: 'Collections',
+      reviews: 'Reviews',
+      landing: 'Landing Page',
+      'brand-story': 'Brand Story',
+      media: 'Media & Campaigns',
+      chat: 'Live Chat',
+      activity: 'Activity Log',
+      discounts: 'Discounts',
+      campaigns: 'Email Campaigns',
+      coupons: 'Coupons',
+      delivery: 'Delivery Zones',
+      settings: 'Store Settings',
+      profile: 'My Profile',
+      users: 'Users',
+    };
+    // Handle nested routes like /admin/orders/123
+    const base = seg.split('/')[0];
+    return map[base] || base.charAt(0).toUpperCase() + base.slice(1);
+  };
+  const pageTitle = getPageTitle();
   const authHydrated = useAuthHydrated();
 
   const isAuthenticated = !!accessToken && !!user;
@@ -223,13 +251,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <path d="M3 7h18M3 12h18M3 17h18" strokeLinecap="round" />
             </svg>
           </button>
-          <span className="text-white text-sm font-semibold">Admin</span>
+          <span className="text-white text-sm font-semibold">{pageTitle}</span>
           <div className="w-8" />
         </header>
 
         {/* Desktop header */}
         <div className="hidden lg:flex bg-black border-b border-gray-800 px-8 py-4 items-center justify-between">
-          <h1 className="text-white text-2xl font-semibold">Dashboard</h1>
+          <h1 className="text-white text-2xl font-semibold">{pageTitle}</h1>
           <div className="flex items-center gap-6">
             <form
               onSubmit={(e) => {

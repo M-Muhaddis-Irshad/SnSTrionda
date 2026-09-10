@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Package, RefreshCw, Bell, Eye, X } from "lucide-react";
 import { fetchAdminOrders, fetchAdminOrder, updateAdminOrderStatus } from "@/lib/admin-api";
+import { useAuthStore } from "@/stores/authStore";
+import { useToastStore } from "@/stores/toastStore";
 import { getSocket } from "@/lib/socket";
 
 // ---------------------------------------------------------------------------
@@ -128,6 +130,11 @@ export default function OrdersPage() {
   const [detailOrder, setDetailOrder] = useState<AdminOrderDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectOrderId, setRejectOrderId] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const toastPush = useToastStore((s) => s.push);
 
   const loadOrders = useCallback(async (targetPage = page, status = statusFilter) => {
     try {
@@ -199,7 +206,7 @@ export default function OrdersPage() {
       await updateAdminOrderStatus(orderId, { status });
       loadOrders(page, statusFilter);
     } catch (err: any) {
-      alert(err.message || "Failed to update order status");
+      toastPush({ title: "Error", message: err.message || "Failed to update order status" });
     }
   }
 
@@ -221,41 +228,35 @@ export default function OrdersPage() {
     setDetailError("");
   }
 
-  async function handleJazzCashAction(orderId: string, action: "approve" | "reject") {
-    if (action === "reject") {
-      const reason = prompt("Rejection reason (optional):") || undefined;
-      // reason === null means user cancelled
-      if (reason === null) return;
-      try {
-        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const res = await fetch(`${API}/api/payments/jazzcash/verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId, action: "reject", reason }),
-        });
-        if (!res.ok) throw new Error((await res.json()).error || "Reject failed");
-        loadOrders(page, statusFilter);
-        // Refresh the modal if it's showing this order
-        if (detailOrder && detailOrder.id === orderId) openDetail(orderId);
-      } catch (err: any) {
-        alert(err.message || "Failed to reject payment");
-      }
-    } else {
-      try {
-        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const res = await fetch(`${API}/api/payments/jazzcash/verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId, action: "approve" }),
-        });
-        if (!res.ok) throw new Error((await res.json()).error || "Approve failed");
-        loadOrders(page, statusFilter);
-        // Refresh the modal if it's showing this order
-        if (detailOrder && detailOrder.id === orderId) openDetail(orderId);
-      } catch (err: any) {
-        alert(err.message || "Failed to approve payment");
-      }
+  async function handleJazzCashAction(orderId: string, action: "approve" | "reject", reason?: string) {
+    try {
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const res = await fetch(`${API}/api/payments/jazzcash/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+        body: JSON.stringify({ orderId, action, reason }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || `${action} failed`);
+      toastPush({ title: action === "approve" ? "Payment approved" : "Payment rejected", message: action === "approve" ? "Order confirmed successfully." : "Customer can re-upload a corrected slip." });
+      loadOrders(page, statusFilter);
+      if (detailOrder && detailOrder.id === orderId) openDetail(orderId);
+    } catch (err: any) {
+      toastPush({ title: "Error", message: err.message || `Failed to ${action} payment` });
     }
+  }
+
+  function openRejectModal(orderId: string) {
+    setRejectOrderId(orderId);
+    setRejectReason("");
+    setRejectModalOpen(true);
+  }
+
+  function submitReject() {
+    setRejectModalOpen(false);
+    handleJazzCashAction(rejectOrderId, "reject", rejectReason || undefined);
   }
 
   return (
@@ -629,7 +630,7 @@ export default function OrdersPage() {
                             Approve Payment
                           </button>
                           <button
-                            onClick={() => handleJazzCashAction(detailOrder.id, "reject")}
+                            onClick={() => openRejectModal(detailOrder.id)}
                             className="text-xs px-4 py-2 rounded bg-red-600/20 text-red-400 border border-red-600/30 hover:bg-red-600/30 transition"
                           >
                             Reject Payment
@@ -677,6 +678,45 @@ export default function OrdersPage() {
                   </ol>
                 </section>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Reject Reason Modal ── */}
+      {rejectModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setRejectModalOpen(false)}
+        >
+          <div
+            className="bg-gray-900 border border-gray-700 rounded-lg p-6 w-full max-w-sm mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-white text-lg font-semibold mb-2">Reject Payment</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              Optionally provide a reason so the customer knows what to fix.
+            </p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g. Slip is blurry, amount doesn't match..."
+              rows={3}
+              className="w-full bg-gray-800 text-white text-sm px-3 py-2 rounded border border-gray-700 focus:outline-none focus:border-gray-500 resize-none"
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => setRejectModalOpen(false)}
+                className="px-4 py-2 text-sm text-gray-400 hover:text-white border border-gray-700 rounded transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitReject}
+                className="px-4 py-2 text-sm text-white bg-red-600/20 border border-red-600/40 hover:bg-red-600/40 rounded transition"
+              >
+                Reject
+              </button>
             </div>
           </div>
         </div>

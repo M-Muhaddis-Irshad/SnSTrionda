@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Plus, Truck, Pencil, Trash2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { useToastStore } from "@/stores/toastStore";
 import Modal, {
   inputCls,
   btnPrimaryCls,
@@ -76,6 +77,7 @@ function zoneToForm(zone: DeliveryZone): ZoneForm {
 // ---------------------------------------------------------------------------
 
 export default function DeliveryPage() {
+  const toastPush = useToastStore((s) => s.push);
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -177,7 +179,7 @@ export default function DeliveryPage() {
       setDeleteTarget(null);
       await loadZones();
     } catch (err: any) {
-      alert(err.message || "Failed to delete delivery zone");
+      toastPush({ title: "Error", message: err.message || "Failed to delete delivery zone" });
     } finally {
       setDeleting(false);
     }
@@ -205,7 +207,7 @@ export default function DeliveryPage() {
       });
       await loadZones();
     } catch (err: any) {
-      alert(err.message || "Failed to update zone");
+      toastPush({ title: "Error", message: err.message || "Failed to update zone" });
     }
   }
 

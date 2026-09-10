@@ -3,7 +3,7 @@ import { prisma } from "./src/db";
 import bcrypt from "bcryptjs";
 
 async function createAdmin() {
-  const email = "admin@trionda.com";
+  const email = process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com";
   const existing = await prisma.user.findUnique({ where: { email } });
   
   if (existing) {
@@ -16,7 +16,7 @@ async function createAdmin() {
     return;
   }
 
-  const passwordHash = await bcrypt.hash("admin123", 12);
+  const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || "SN_WEARS09@", 12);
   const user = await prisma.user.create({
     data: {
       email,

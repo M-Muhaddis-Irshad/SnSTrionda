@@ -13,7 +13,8 @@ export const USER_ROLES = ["CUSTOMER", "ADMIN"] as const;
 export type UserRoleValue = (typeof USER_ROLES)[number];
 
 // The original system admin — their role can NEVER be changed by anyone.
-const PROTECTED_ADMIN_EMAIL = "admin@trionda.com";
+const PROTECTED_ADMIN_EMAIL = process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SN_WEARS09@";
 
 // ---------------------------------------------------------------------------
 // Custom Error

@@ -30,7 +30,7 @@ import type { DeliveryZone } from "@/types/delivery";
 // Types & constants
 // ---------------------------------------------------------------------------
 
-type PaymentMethod = "CARD" | "COD" | "JAZZCASH";
+type PaymentMethod = "COD" | "JAZZCASH";
 
 interface CheckoutFormData {
   email: string;
@@ -372,53 +372,6 @@ export default function CheckoutPage() {
       // Purge promo + any persisted draft so the next checkout starts clean.
       clearCheckout();
 
-      if (paymentMethod === "CARD") {
-        setLoadingStep("Redirecting to payment...");
-        try {
-          const paymentRes = await fetch(
-            `${API_URL}/api/payments/safepay/create`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ orderId: data.data.id }),
-            }
-          );
-          const paymentData = await paymentRes.json();
-
-          if (!paymentRes.ok) {
-            setStatus("error");
-            setServerError(
-              paymentData.error ||
-                "Failed to initiate card payment. Your order has been placed — please contact support."
-            );
-            clearCart();
-            router.push(`/order-confirmation/${data.data.orderNumber}`);
-            return;
-          }
-
-          // Keep the tracker token so the order-confirmation page can verify
-          // the payment with Safepay directly (works without a webhook).
-          if (paymentData.data?.trackerToken) {
-            localStorage.setItem(
-              `trionda-order-tracker-${data.data.orderNumber}`,
-              paymentData.data.trackerToken
-            );
-          }
-
-          clearCart();
-          window.location.href = paymentData.data.checkoutUrl;
-          return;
-        } catch {
-          setStatus("error");
-          setServerError(
-            "Could not connect to payment service. Your order has been placed — please contact support."
-          );
-          clearCart();
-          router.push(`/order-confirmation/${data.data.orderNumber}`);
-          return;
-        }
-      }
-
       setLoadingStep("Order placed! Redirecting...");
       clearCart();
       router.push(`/order-confirmation/${data.data.orderNumber}`);
@@ -680,14 +633,6 @@ export default function CheckoutPage() {
                   <FormStep stepNumber={5} title="Payment" subtitle="How would you like to pay?">
                     <div className="space-y-3">
                       <PaymentMethodCard
-                        value="CARD"
-                        title="Credit / Debit Card"
-                        description="Pay securely via Safepay"
-                        selected={paymentMethod === "CARD"}
-                        onSelect={() => setPaymentMethod("CARD")}
-                        expandedNote="After placing your order you'll be redirected to Safepay to complete the payment securely."
-                      />
-                      <PaymentMethodCard
                         value="COD"
                         title="Cash on Delivery"
                         description="Pay when your order arrives"
@@ -761,8 +706,8 @@ export default function CheckoutPage() {
                       <div className="checkout-review-divider" />
                       <ReviewLine label="Payment" onEdit={() => goToStep(4)}>
                         <p className="font-body text-sm text-foreground">
-                          {paymentMethod === "CARD"
-                            ? "Credit / Debit Card (Safepay)"
+                          {paymentMethod === "JAZZCASH"
+                            ? "JazzCash"
                             : "Cash on Delivery"}
                         </p>
                       </ReviewLine>

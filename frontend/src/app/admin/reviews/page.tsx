@@ -8,6 +8,7 @@ import Modal, {
   btnSecondaryCls,
   btnDangerCls,
 } from "@/app/admin/media/components/Modal";
+import { useToastStore } from "@/stores/toastStore";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -76,6 +77,7 @@ function Stars({ rating }: { rating: number }) {
 // ---------------------------------------------------------------------------
 
 export default function AdminReviewsPage() {
+  const toastPush = useToastStore((s) => s.push);
   const [tab, setTab] = useState<Tab>("PENDING");
   const [reviews, setReviews] = useState<AdminReview[]>([]);
   const [counts, setCounts] = useState<Record<Tab, number>>({
@@ -138,7 +140,7 @@ export default function AdminReviewsPage() {
         await loadAll();
       }
     } catch (err: any) {
-      alert(err.message || "Action failed");
+      toastPush({ title: "Error", message: err.message || "Action failed" });
     } finally {
       setBusy(false);
     }
@@ -154,7 +156,7 @@ export default function AdminReviewsPage() {
       await loadReviews(tab);
       await loadAll();
     } catch (err: any) {
-      alert(err.message || "Failed to delete review");
+      toastPush({ title: "Error", message: err.message || "Failed to delete review" });
     } finally {
       setBusy(false);
     }

@@ -18,6 +18,7 @@ import {
   type ImageUsage,
 } from "@/types/admin.types";
 import Link from "next/link";
+import { useToastStore } from "@/stores/toastStore";
 
 const categoryColors: Record<ImageCategory, string> = {
   HERO: "bg-purple-500/20 text-purple-300",
@@ -28,6 +29,7 @@ const categoryColors: Record<ImageCategory, string> = {
 };
 
 export default function ImagesTab() {
+  const toastPush = useToastStore((s) => s.push);
   const [images, setImages] = useState<ImageAsset[]>([]);
   const [pagination, setPagination] = useState<Paginated<ImageAsset>["pagination"] | null>(null);
   const [page, setPage] = useState(1);
@@ -102,7 +104,7 @@ export default function ImagesTab() {
         prev.map((i) => (i.id === image.id ? { ...i, active: !i.active } : i))
       );
     } catch (err: any) {
-      alert(err?.message || "Update failed");
+      toastPush({ title: "Error", message: err?.message || "Update failed" });
     } finally {
       setBusyId("");
     }

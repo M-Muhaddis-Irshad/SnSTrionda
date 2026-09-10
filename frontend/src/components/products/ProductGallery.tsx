@@ -1,9 +1,9 @@
 "use client";
 
 // =============================================================================
-// ProductGallery — compact main image + thumbnails. Clicking the main image
-// opens a fullscreen modal carousel (prev / next / keyboard) through all
-// product images.
+// ProductGallery — portrait 4:5 main image + thumbnails. Clicking the main
+// image opens a fullscreen modal carousel (prev / next / keyboard) through
+// all product images.
 // =============================================================================
 
 import { useCallback, useEffect, useState } from "react";
@@ -63,27 +63,27 @@ export default function ProductGallery({
 
   if (!active) {
     return (
-      <div className="flex aspect-[3/4] items-center justify-center border border-chrome-500 bg-surface">
+      <div className="flex aspect-[4/5] items-center justify-center border border-chrome-500/60 bg-surface">
         <span className="font-body text-sm text-chrome-400">No image available</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col-reverse gap-4 sm:flex-row">
+    <div className="flex flex-col-reverse gap-3 sm:flex-row">
       {/* Thumbnail strip — vertical on sm+, horizontal on mobile */}
       {images.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto sm:flex-col sm:overflow-y-auto sm:max-h-[24rem] scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto sm:flex-col sm:overflow-y-auto sm:max-h-[32rem] scrollbar-hide">
           {images.map((img, index) => (
             <button
               key={img.id}
               type="button"
               onClick={() => setActiveIndex(index)}
               aria-label={`View image ${index + 1}`}
-              className={`h-20 w-16 shrink-0 border transition-colors ${
+              className={`h-[4.5rem] w-[3.5rem] shrink-0 border transition-colors ${
                 index === activeIndex
                   ? "border-foreground"
-                  : "border-chrome-500 hover:border-chrome-300"
+                  : "border-chrome-500/60 hover:border-chrome-400"
               }`}
             >
               <img
@@ -96,22 +96,22 @@ export default function ProductGallery({
         </div>
       )}
 
-      {/* Main image — compact, click to open the carousel */}
+      {/* Main image — portrait 4:5, click to open the carousel */}
       <div className="relative flex-1">
         <button
           type="button"
           onClick={() => setCarouselOpen(true)}
           aria-label="Open image gallery"
-          className="block w-full max-w-[26rem] mx-auto"
+          className="block w-full"
         >
-          <div className="relative aspect-[3/4] overflow-hidden border border-chrome-500 bg-surface">
+          <div className="relative aspect-[4/5] overflow-hidden border border-chrome-500/60 bg-surface">
             <img
               src={active.url}
               alt={active.altText || productName}
               className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]"
             />
           </div>
-          <span className="mt-3 inline-flex items-center gap-2 border border-chrome-500 px-4 py-2 font-body text-xs uppercase tracking-[0.2em] text-muted hover:border-chrome-300 hover:text-foreground transition-colors">
+          <span className="mt-3 inline-flex items-center gap-2 border border-chrome-500/60 px-4 py-2 font-body text-xs uppercase tracking-[0.2em] text-muted hover:border-chrome-400 hover:text-foreground transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
               <path
                 strokeLinecap="round"

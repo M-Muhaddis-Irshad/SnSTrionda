@@ -46,6 +46,7 @@ import {
   updateAdminVariant,
   deleteAdminVariant,
 } from "@/lib/admin-api";
+import { useToastStore } from "@/stores/toastStore";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -107,6 +108,7 @@ function variantDraftKey(v: { id?: string }, index: number): string {
 // ---------------------------------------------------------------------------
 
 export default function ProductsPage() {
+  const toastPush = useToastStore((s) => s.push);
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,7 +200,7 @@ export default function ProductsPage() {
       setDeleteTarget(null);
       await loadProducts();
     } catch (err: any) {
-      alert(err.message || "Failed to delete product");
+      toastPush({ title: "Error", message: err.message || "Failed to delete product" });
     } finally {
       setDeleting(false);
     }

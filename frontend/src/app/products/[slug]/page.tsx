@@ -140,7 +140,6 @@ export async function generateMetadata({
     openGraph: {
       title: product.name,
       description,
-      // images: product.images.length > 0 ? [product.images[0].url] : undefined,
       images: [
         {
           url: "https://res.cloudinary.com/gbor3ceh/image/upload/v1788586190/Trionda_OG_Image.png",
@@ -148,7 +147,7 @@ export async function generateMetadata({
           height: 630,
           alt: "Trionda Wears",
         },
-      ]
+      ],
     },
   };
 }
@@ -182,9 +181,14 @@ export default async function ProductDetailPage({
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 font-body text-xs uppercase tracking-[0.2em] text-muted">
+      {/* ------------------------------------------------------------------ */}
+      {/* Breadcrumb — outside the constrained container for full-width */}
+      {/* ------------------------------------------------------------------ */}
+      <nav
+        aria-label="Breadcrumb"
+        className="pdp-container border-b border-chrome-500/40"
+      >
+        <div className="pdp-inner flex flex-wrap items-center gap-2 py-4 font-body text-xs uppercase tracking-[0.2em] text-muted">
           <Link href="/" className="transition-colors hover:text-foreground">Home</Link>
           <span className="text-chrome-400">/</span>
           <Link href="/shop" className="transition-colors hover:text-foreground">Shop</Link>
@@ -194,36 +198,48 @@ export default async function ProductDetailPage({
           </Link>
           <span className="text-chrome-400">/</span>
           <span className="text-foreground">{product.name}</span>
-        </nav>
+        </div>
+      </nav>
 
-        {/* Product grid */}
-        <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Gallery */}
+      {/* ------------------------------------------------------------------ */}
+      {/* Product grid — the 6-breakpoint split-screen layout                */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="pdp-container">
+        <div className="pdp-grid">
+          {/* Left column — Image Gallery (portrait 4:5) */}
           <FadeIn>
-            <ProductGallery images={product.images} productName={product.name} />
+            <div className="pdp-image-col">
+              <ProductGallery images={product.images} productName={product.name} />
+            </div>
           </FadeIn>
 
-          {/* Purchase panel */}
+          {/* Right column — Purchase Panel (buy box) */}
           <FadeIn delay={0.12}>
-            <ProductPurchasePanel
-              productId={product.id}
-              productName={product.name}
-              productSlug={product.slug}
-              categoryName={product.category.name}
-              basePrice={Number(product.basePrice)}
-              discountedPrice={product.discountedPrice}
-              isCustomizable={product.isCustomizable}
-              variants={product.variants}
-              images={product.images}
-              apiUrl={API_URL}
-              rating={rating}
-              reviewCount={reviews.length}
-            />
+            <div className="pdp-info-col">
+              <ProductPurchasePanel
+                productId={product.id}
+                productName={product.name}
+                productSlug={product.slug}
+                categoryName={product.category.name}
+                basePrice={Number(product.basePrice)}
+                discountedPrice={product.discountedPrice}
+                isCustomizable={product.isCustomizable}
+                variants={product.variants}
+                images={product.images}
+                apiUrl={API_URL}
+                rating={rating}
+                reviewCount={reviews.length}
+              />
+            </div>
           </FadeIn>
         </div>
+      </div>
 
-        {/* Tabs + accordion */}
-        <div className="mt-16 border-t border-chrome-500/70 pt-8">
+      {/* ------------------------------------------------------------------ */}
+      {/* Tabs + accordion                                                   */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="pdp-container border-t border-chrome-500/40">
+        <div className="pdp-inner py-10">
           <ProductDetailTabs
             description={product.description}
             variants={product.variants}
@@ -231,28 +247,40 @@ export default async function ProductDetailPage({
             categoryName={product.category.name}
           />
         </div>
+      </div>
 
-        {/* Secondary lifestyle image */}
-        {secondaryImage && (
-          <section className="mt-16" aria-label="Lifestyle imagery">
-            <div className="relative aspect-[21/9] overflow-hidden border border-chrome-500">
+      {/* ------------------------------------------------------------------ */}
+      {/* Secondary lifestyle image                                          */}
+      {/* ------------------------------------------------------------------ */}
+      {secondaryImage && (
+        <section className="pdp-container" aria-label="Lifestyle imagery">
+          <div className="pdp-inner py-10">
+            <div className="relative aspect-[21/9] overflow-hidden border border-chrome-500/60">
               <img
                 src={secondaryImage.url}
                 alt={secondaryImage.altText || `${product.name} — lifestyle`}
                 className="h-full w-full object-cover"
               />
             </div>
-          </section>
-        )}
+          </div>
+        </section>
+      )}
 
-        {/* Customer reviews — approved only */}
-        <div className="mt-16">
+      {/* ------------------------------------------------------------------ */}
+      {/* Customer reviews — approved only                                   */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="pdp-container border-t border-chrome-500/40">
+        <div className="pdp-inner py-10">
           <ProductReviews productId={product.id} />
         </div>
+      </div>
 
-        {/* You Might Also Like */}
-        {relatedProducts.length > 0 && (
-          <section className="mt-20">
+      {/* ------------------------------------------------------------------ */}
+      {/* You Might Also Like                                                */}
+      {/* ------------------------------------------------------------------ */}
+      {relatedProducts.length > 0 && (
+        <section className="pdp-container border-t border-chrome-500/40">
+          <div className="pdp-inner py-12">
             <h2 className="font-display text-2xl tracking-[0.1em] text-foreground">
               You Might Also Like
             </h2>
@@ -262,9 +290,9 @@ export default async function ProductDetailPage({
                 <ProductCard key={related.id} product={related} layout="grid" />
               ))}
             </div>
-          </section>
-        )}
-      </div>
+          </div>
+        </section>
+      )}
 
       <BenefitsBar />
     </main>
