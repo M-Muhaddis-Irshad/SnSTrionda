@@ -137,6 +137,7 @@ export default function CheckoutPage() {
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
   const [jazzcashSettings, setJazzcashSettings] = useState<Record<string, string>>({});
+  const [showJazzCashModal, setShowJazzCashModal] = useState(false);
 
   // Delivery zones (Pakistan cities with charges + map)
   const [zones, setZones] = useState<DeliveryZone[]>([]);
@@ -277,6 +278,12 @@ export default function CheckoutPage() {
       return;
     }
 
+    // When JazzCash is selected, show account details modal first
+    if (currentId === "payment" && paymentMethod === "JAZZCASH") {
+      setShowJazzCashModal(true);
+      return;
+    }
+
     const validation = validateStep(currentId, form);
     const currentFields = fieldForStep(currentId);
     const stepErrors: ErrorsMap = {};
@@ -395,7 +402,7 @@ export default function CheckoutPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-16 pb-28 sm:pb-16">
         <div className="flex items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl tracking-[0.1em] text-foreground">
@@ -814,6 +821,57 @@ export default function CheckoutPage() {
         onClose={() => setShowAuthModal(false)}
         message="Sign in to complete your checkout securely."
       />
+
+      {/* JazzCash account details modal */}
+      {showJazzCashModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setShowJazzCashModal(false)}
+        >
+          <div
+            className="bg-surface border border-chrome-500 rounded-lg p-6 w-full max-w-md mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-display text-xl tracking-wider text-foreground mb-1">JazzCash Payment</h3>
+            <p className="font-body text-xs text-muted mb-5">Transfer to the account below, then place your order.</p>
+            <div className="rounded-lg border border-chrome-500 bg-background p-4 space-y-3">
+              <div>
+                <p className="font-body text-[10px] uppercase tracking-wider text-muted">Account Name</p>
+                <p className="font-body text-sm text-foreground font-medium mt-0.5">{jazzcashSettings.jazzcash_account_name || '—'}</p>
+              </div>
+              <div>
+                <p className="font-body text-[10px] uppercase tracking-wider text-muted">Account Number</p>
+                <p className="font-body text-sm text-foreground font-mono mt-0.5">{jazzcashSettings.jazzcash_account_number || '—'}</p>
+              </div>
+              {jazzcashSettings.jazzcash_instructions && (
+                <div>
+                  <p className="font-body text-[10px] uppercase tracking-wider text-muted">Instructions</p>
+                  <p className="font-body text-xs text-muted mt-0.5">{jazzcashSettings.jazzcash_instructions}</p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setShowJazzCashModal(false)}
+                className="px-5 py-2.5 font-body text-xs tracking-wider uppercase border border-chrome-500 text-foreground hover:bg-chrome-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowJazzCashModal(false);
+                  goToStep(Math.min(stepIndex + 1, STEPS.length - 1));
+                }}
+                className="px-5 py-2.5 font-body text-xs tracking-wider uppercase border border-chrome-300 bg-chrome-500 text-foreground hover:bg-chrome-400 transition"
+              >
+                I've noted the details
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

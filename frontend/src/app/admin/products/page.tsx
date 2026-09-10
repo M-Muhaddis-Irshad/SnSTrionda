@@ -891,15 +891,14 @@ const VariantEditor = forwardRef<VariantEditorHandle, {
   const [rows, setRows] = useState<VariantDraft[]>([]);
   const [busyKey, setBusyKey] = useState("");
 
-  useEffect(() => {
-    setRows(
+  useEffect(() => {      setRows(
       variants.map((v, i) => ({
         key: variantDraftKey(v, i),
         id: v.id,
         size: v.size || "",
         color: v.color || "",
         fabricType: v.fabricType || "",
-        sku: v.sku || "",
+        sku: v.sku || generateSKU(),
         price: v.price !== null && v.price !== undefined ? String(Number(v.price)) : "",
         stockQuantity: String(v.stockQuantity ?? 0),
       }))
@@ -933,6 +932,12 @@ const VariantEditor = forwardRef<VariantEditorHandle, {
     setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)));
   }
 
+  // Auto-generate a unique SKU like TRD-XXXX (4-char hex)
+  function generateSKU(): string {
+    const hex = Math.random().toString(16).substring(2, 6).toUpperCase();
+    return `TRD-${hex}`;
+  }
+
   function addRow() {
     setRows((prev) => [
       ...prev,
@@ -941,7 +946,7 @@ const VariantEditor = forwardRef<VariantEditorHandle, {
         size: "",
         color: "",
         fabricType: "",
-        sku: "",
+        sku: generateSKU(),
         price: "",
         stockQuantity: "0",
       },
@@ -1088,10 +1093,10 @@ const VariantEditor = forwardRef<VariantEditorHandle, {
                   </td>
                   <td className="px-2 py-2">
                     <input
-                      className={inputCell}
+                      className={inputCell + " opacity-60 cursor-not-allowed"}
                       value={row.sku}
-                      onChange={(e) => patchRow(row.key, { sku: e.target.value })}
-                      placeholder="TRD-M-BLK"
+                      readOnly
+                      title="Auto-generated SKU"
                     />
                   </td>
                   <td className="px-2 py-2">

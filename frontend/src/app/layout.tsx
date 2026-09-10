@@ -8,6 +8,7 @@ import InitialPreloader from "@/components/InitialPreloader";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import InstallPrompt from "@/components/InstallPrompt";
 import WishlistSync from "@/components/WishlistSync";
+import RouteLoader from "@/components/ui/RouteLoader";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -82,6 +83,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-screen overflow-x-hidden bg-background text-foreground font-body antialiased pb-14 lg:pb-0">
         <InitialPreloader />
+        <RouteLoader />
         <ConditionalShell>
           {children}
         </ConditionalShell>

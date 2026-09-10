@@ -177,7 +177,7 @@ export default async function ProductDetailPage({
       ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
       : null;
 
-  const secondaryImage = product.images[1];
+  // Secondary lifestyle image intentionally removed — product gallery only
 
   return (
     <main className="min-h-screen bg-background">
@@ -249,22 +249,7 @@ export default async function ProductDetailPage({
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Secondary lifestyle image                                          */}
-      {/* ------------------------------------------------------------------ */}
-      {secondaryImage && (
-        <section className="pdp-container" aria-label="Lifestyle imagery">
-          <div className="pdp-inner py-10">
-            <div className="relative aspect-[21/9] overflow-hidden border border-chrome-500/60">
-              <img
-                src={secondaryImage.url}
-                alt={secondaryImage.altText || `${product.name} — lifestyle`}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </div>
-        </section>
-      )}
+
 
       {/* ------------------------------------------------------------------ */}
       {/* Customer reviews — approved only                                   */}
