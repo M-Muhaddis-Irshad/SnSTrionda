@@ -1,3 +1,10 @@
+import "dotenv/config";
+
+declare const process: {
+  env: Record<string, string | undefined>;
+  exit(code?: number): never;
+};
+
 // =============================================================================
 // Order Security Verification Test
 // Tests all 6 scenarios for the secured order endpoints
@@ -34,7 +41,7 @@ async function main() {
   const adminRes = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com", password: process.env.ADMIN_PASSWORD || "SN_WEARS09@" }),
+    body: JSON.stringify({ email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD }),
   });
   const adminData = await adminRes.json();
   const adminToken = adminData.accessToken || adminData.data?.accessToken;
@@ -122,16 +129,16 @@ async function main() {
   // We need to find an order owned by the admin to test this properly.
   // The test order is owned by test-cust, not admin. Let's find an admin-owned order.
   console.log("\n── Test 6: /api/orders/mine/:orderNumber, CORRECT owner → expect 200 ──");
-  
+
   // Find an order owned by admin from the admin orders list
   let adminOwnedOrder: string | null = null;
   for (const o of ordersData.data) {
-    if (o.user.email === (process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com")) {
+    if (o.user.email === (process.env.ADMIN_EMAIL)) {
       adminOwnedOrder = o.orderNumber;
       break;
     }
   }
-  
+
   if (adminOwnedOrder) {
     await test("GET /api/orders/mine/:orderNumber with correct owner token → 200", async () => {
       const res = await fetch(`${API_URL}/api/orders/mine/${adminOwnedOrder}`, {
@@ -160,7 +167,7 @@ async function main() {
       if (variant) break;
     }
     assert(product && variant, "No product with stock available");
-    
+
     // Create order as customer
     const createRes = await fetch(`${API_URL}/api/orders`, {
       method: "POST",
@@ -185,7 +192,7 @@ async function main() {
     const createData = await createRes.json();
     const newOrderNumber = createData.data.orderNumber;
     console.log(`  Created order: ${newOrderNumber}`);
-    
+
     await test("GET /api/orders/mine/:orderNumber with correct owner token → 200", async () => {
       const res = await fetch(`${API_URL}/api/orders/mine/${newOrderNumber}`, {
         headers: { Authorization: `Bearer ${custToken}` },
@@ -195,7 +202,7 @@ async function main() {
       assert(data.data.orderNumber === newOrderNumber, "Order number mismatch");
       assert(data.data.userId === custId, "UserId mismatch — wrong order returned");
     });
-    
+
     // Also verify that viewing this new order with the WRONG token fails
     await test("GET /api/orders/mine/:newOrder with wrong user → still 404", async () => {
       const res = await fetch(`${API_URL}/api/orders/mine/${newOrderNumber}`, {

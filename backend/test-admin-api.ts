@@ -1,3 +1,9 @@
+import "dotenv/config";
+
+declare const process: {
+  env: Record<string, string | undefined>;
+};
+
 // Test admin API endpoints
 const API = "http://localhost:5000/api";
 
@@ -7,10 +13,16 @@ async function login() {
   const res = await fetch(`${API}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com", password: process.env.ADMIN_PASSWORD || "SN_WEARS09@" }),
+    body: JSON.stringify({
+      email: process.env.ADMIN_EMAIL,
+      password: process.env.ADMIN_PASSWORD,
+    }),
   });
+
   const data = await res.json();
+
   TOKEN = data.accessToken;
+
   console.log("✅ Login successful, role:", data.user.role);
 }
 

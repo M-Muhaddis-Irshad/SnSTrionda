@@ -1,3 +1,10 @@
+import "dotenv/config";
+
+declare const process: {
+  env: Record<string, string | undefined>;
+  exit(code?: number): never;
+};
+
 // =============================================================================
 // Test: Unified Login + Customer Account functionality
 // =============================================================================
@@ -80,8 +87,8 @@ async function main() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com",
-        password: process.env.ADMIN_PASSWORD || "SN_WEARS09@",
+        email: process.env.ADMIN_EMAIL,
+        password: process.env.ADMIN_PASSWORD,
       }),
     });
     const data = await res.json();

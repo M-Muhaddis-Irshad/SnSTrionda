@@ -1,3 +1,10 @@
+import "dotenv/config";
+
+declare const process: {
+  env: Record<string, string | undefined>;
+  exit(code?: number): never;
+};
+
 // =============================================================================
 // Test: Unified Login + Customer Account — v2 (correct credentials)
 // =============================================================================
@@ -51,8 +58,8 @@ async function main() {
   });
 
   // ── 2. Login as admin ──
-  const adminEmail = process.env.ADMIN_EMAIL || "s.ntriondawear7@gmail.com";
-  const adminPass = process.env.ADMIN_PASSWORD || "SN_WEARS09@";
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPass = process.env.ADMIN_PASSWORD;
   console.log("\n2. Admin Login");
   await test(`POST /api/auth/login — admin (${adminEmail})`, async () => {
     const res = await fetch(`${API_URL}/api/auth/login`, {
