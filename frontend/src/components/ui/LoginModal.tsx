@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
-import { API_URL } from "@/lib/auth";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 interface LoginModalProps {
   open: boolean;
@@ -80,7 +81,8 @@ export default function LoginModal({ open, onClose, message }: LoginModalProps) 
         return;
       }
 
-      setAuth(data.data.user, data.data.accessToken, data.data.refreshToken);
+      // Backend returns a flat shape: { message, user, accessToken, refreshToken }
+      setAuth(data.user, data.accessToken, data.refreshToken);
       setSuccess(true);
 
       // Brief delay so user sees the success state, then close
@@ -114,7 +116,8 @@ export default function LoginModal({ open, onClose, message }: LoginModalProps) 
         return;
       }
 
-      setAuth(data.data.user, data.data.accessToken, data.data.refreshToken);
+      // Backend returns a flat shape: { message, user, accessToken, refreshToken }
+      setAuth(data.user, data.accessToken, data.refreshToken);
       setSuccess(true);
 
       setTimeout(() => {

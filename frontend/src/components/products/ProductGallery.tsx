@@ -128,7 +128,7 @@ export default function ProductGallery({
       {/* Fullscreen modal carousel */}
       {carouselOpen && (
         <div
-          className="fixed inset-0 z-[95] flex flex-col bg-black/95 p-4 sm:p-8"
+          className="fixed inset-0 z-[95] flex flex-col bg-black/95 p-4 sm:p-8 w-full! h-full!"
           role="dialog"
           aria-modal="true"
           aria-label="Product image gallery"

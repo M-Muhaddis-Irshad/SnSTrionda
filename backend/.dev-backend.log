@@ -1,0 +1,14 @@
+
+> trionda-backend@1.0.0 dev
+> nodemon --watch src --ext ts --exec tsx src/server.ts
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): src\**\*[39m
+[33m[nodemon] watching extensions: ts[39m
+[32m[nodemon] starting `tsx src/server.ts`[39m
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+🚀 Server running on port 5000
+📋 Health check: http://localhost:5000/api/health
+🔌 Socket server: https://snstrionda.onrender.com
+🛡️  Rate limiting active on /api/* (300 req / 15 min)

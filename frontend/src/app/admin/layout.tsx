@@ -256,7 +256,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Desktop header */}
-        <div className="hidden lg:flex bg-black border-b border-gray-800 px-8 py-4 items-center justify-between">
+        <div className="hidden lg:flex bg-black border-b border-gray-800 px-8 py-[19px] items-center justify-between">
           <h1 className="text-white text-2xl font-semibold">{pageTitle}</h1>
           <div className="flex items-center gap-6">
             <form
