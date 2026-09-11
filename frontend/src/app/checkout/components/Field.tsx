@@ -19,6 +19,7 @@ interface FieldProps {
   rows?: number;
   disabled?: boolean;
   hint?: ReactNode;
+  maxLength?: number;
 }
 
 export default function Field({
@@ -38,6 +39,7 @@ export default function Field({
   rows = 3,
   disabled,
   hint,
+  maxLength,
 }: FieldProps) {
   const autoId = useId();
   const fieldId = id || autoId;
@@ -105,6 +107,7 @@ export default function Field({
             inputMode={inputMode}
             autoComplete={autoComplete}
             disabled={disabled}
+            maxLength={maxLength}
             onChange={(e) => onChange(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => {

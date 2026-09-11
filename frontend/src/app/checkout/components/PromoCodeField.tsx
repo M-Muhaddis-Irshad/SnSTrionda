@@ -4,6 +4,7 @@ import { useState } from "react";
 import { API_URL } from "@/lib/checkout";
 import { useCheckoutStore } from "@/stores/checkoutStore";
 import { useCartStore, selectSubtotal } from "@/stores/cartStore";
+import { useAuthStore } from "@/stores/authStore";
 
 interface PromoCodeFieldProps {
   id?: string;
@@ -13,6 +14,7 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
   const { promoCode, discountPercent, discountAmount, applyPromo, clearPromo } =
     useCheckoutStore();
   const subtotal = useCartStore(selectSubtotal);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,10 +31,14 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
     setError("");
 
     try {
+      const headers: Record<string, string> = {};
+      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+
       const res = await fetch(
         `${API_URL}/api/orders/promo/validate?code=${encodeURIComponent(
           code
-        )}&subtotal=${encodeURIComponent(String(Math.round(subtotal)))}`
+        )}&subtotal=${encodeURIComponent(String(Math.round(subtotal)))}`,
+        { headers }
       );
       const data = await res.json();
 

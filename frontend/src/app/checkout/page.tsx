@@ -565,8 +565,9 @@ export default function CheckoutPage() {
                           label="Postal code (optional)"
                           inputMode="numeric"
                           autoComplete="postal-code"
+                          maxLength={5}
                           value={form.postalCode}
-                          onChange={(v) => handleChange("postalCode", v)}
+                          onChange={(v) => handleChange("postalCode", v.replace(/[^0-9]/g, "").slice(0, 5))}
                           onBlur={() => handleBlur("postalCode")}
                           error={fieldError("postalCode")}
                         />
@@ -579,7 +580,7 @@ export default function CheckoutPage() {
                         required
                         autoComplete="tel"
                         value={form.phone}
-                        onChange={(v) => handleChange("phone", v)}
+                        onChange={(v) => handleChange("phone", v.replace(/[^0-9+]/g, ""))}
                         onBlur={() => handleBlur("phone")}
                         error={fieldError("phone")}
                         hint="Delivery agents may call this number."

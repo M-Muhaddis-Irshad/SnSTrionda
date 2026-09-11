@@ -16,7 +16,7 @@ import type { DeliveryZone } from "@/types/delivery";
 function buildEmbedSrc(query: string, zoom: number): string {
   return `https://maps.google.com/maps?q=${encodeURIComponent(
     query
-  )}&z=${zoom}&output=embed`;
+  )}&z=${zoom}&t=m&output=embed&iwloc=0`;
 }
 
 interface GeoCoords {
@@ -180,7 +180,6 @@ export default function DeliveryMap({ zones, selectedZoneId, onSelect }: Deliver
       <div className="relative overflow-hidden border border-chrome-500 bg-surface">
         {src ? (
           <iframe
-            key={src}
             src={src}
             title={query ? `Map of ${query}` : "Delivery map"}
             loading="lazy"
