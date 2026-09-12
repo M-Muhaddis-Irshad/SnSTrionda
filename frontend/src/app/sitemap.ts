@@ -6,7 +6,7 @@ import type { MetadataRoute } from "next";
 // static routes only if the API is unreachable, so the build never breaks.
 // ---------------------------------------------------------------------------
 
-const BASE_URL = "https://sns-trionda.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sns-trionda.vercel.app";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export const revalidate = 3600;
