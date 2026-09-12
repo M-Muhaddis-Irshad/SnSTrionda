@@ -497,6 +497,25 @@ export default function CheckoutPage() {
                             }));
                           }
                         }}
+                        onAddressResolved={(addr) => {
+                          setForm((prev) => ({
+                            ...prev,
+                            address: addr.street || prev.address,
+                            city: addr.city || prev.city,
+                            province: addr.province || prev.province,
+                            postalCode: addr.postalCode || prev.postalCode,
+                            country: addr.country || prev.country,
+                          }));
+                          // Clear any address-related validation errors
+                          setErrors((prev) => {
+                            const copy = { ...prev };
+                            delete copy.address;
+                            delete copy.city;
+                            delete copy.province;
+                            delete copy.postalCode;
+                            return copy;
+                          });
+                        }}
                       />
                       <div className="checkout-name-row">
                         <Field

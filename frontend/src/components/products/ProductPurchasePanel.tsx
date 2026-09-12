@@ -163,9 +163,16 @@ export default function ProductPurchasePanel({
     ? variants[0]
     : null;
 
-  const displayPrice = matchedVariant?.price ?? basePrice;
-  const hasSale =
+  // Admin-managed sale (discounts feature) takes precedence;
+  // otherwise a variant priced below the base price counts as the item's own sale.
+  const hasAdminSale =
+    discountedPrice != null && discountedPrice < basePrice;
+  const hasVariantSale =
     matchedVariant?.price != null && matchedVariant.price !== basePrice;
+  const hasSale = hasAdminSale || hasVariantSale;
+  const displayPrice = hasAdminSale
+    ? discountedPrice!
+    : matchedVariant?.price ?? basePrice;
   const stock = variantToAdd?.stockQuantity ?? 0;
   // Made-to-order products are never stock-gated; zero-variant products
   // show as "no variant selected" rather than "sold out".
@@ -239,14 +246,14 @@ export default function ProductPurchasePanel({
 
       {/* Price */}
       <div className="mt-5 flex items-baseline gap-3">
-        <p className="font-display text-2xl tracking-wide text-foreground">
-          Rs. {displayPrice.toLocaleString("en-PK")}
-        </p>
         {hasSale && (
           <p className="font-body text-sm text-muted line-through">
             Rs. {basePrice.toLocaleString("en-PK")}
           </p>
         )}
+        <p className="font-display text-2xl tracking-wide text-foreground">
+          Rs. {displayPrice.toLocaleString("en-PK")}
+        </p>
       </div>
 
       {/* Size buttons */}

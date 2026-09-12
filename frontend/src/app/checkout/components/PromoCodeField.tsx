@@ -19,8 +19,7 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleApply(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleApply() {
     const code = input.trim();
     if (!code) {
       setError("Enter a promo code first.");
@@ -96,7 +95,7 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
   }
 
   return (
-    <form onSubmit={handleApply} noValidate>
+    <div>
       <div className="flex gap-3">
         <label htmlFor={id} className="sr-only">
           Promo code
@@ -109,6 +108,12 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
             setInput(e.target.value);
             if (error) setError("");
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleApply();
+            }
+          }}
           placeholder="e.g. TRIONDA10"
           autoComplete="off"
           aria-invalid={!!error}
@@ -120,7 +125,8 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
             ${error ? "border-red-500" : "border-chrome-500"}`}
         />
         <button
-          type="submit"
+          type="button"
+          onClick={handleApply}
           disabled={loading || !input.trim()}
           className="btn btn--primary btn--sm disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -139,6 +145,6 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
           the store&apos;s active coupons.
         </p>
       )}
-    </form>
+    </div>
   );
 }

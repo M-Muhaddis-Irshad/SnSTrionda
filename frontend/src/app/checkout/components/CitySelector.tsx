@@ -17,11 +17,21 @@ const DeliveryMap = dynamic(() => import("./DeliveryMap"), {
 // CitySelector — dropdown of delivery zones + interactive map of Pakistan
 // ---------------------------------------------------------------------------
 
+interface GeoAddress {
+  street: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  country: string;
+}
+
 interface CitySelectorProps {
   zones: DeliveryZone[];
   selectedZoneId: string | null;
   onSelect: (zone: DeliveryZone | null) => void;
   loading?: boolean;
+  /** Called when the map resolves an address from a pin or geolocation. */
+  onAddressResolved?: (address: GeoAddress) => void;
 }
 
 export default function CitySelector({
@@ -29,6 +39,7 @@ export default function CitySelector({
   selectedZoneId,
   onSelect,
   loading = false,
+  onAddressResolved,
 }: CitySelectorProps) {
   const selectedZone = zones.find((z) => z.id === selectedZoneId) || null;
 
@@ -93,11 +104,12 @@ export default function CitySelector({
         </div>
       )}
 
-      {/* Google map — tracks the selected city + typed area */}
+      {/* Interactive map — tracks the selected city + typed area + click-to-pin */}
       <DeliveryMap
         zones={zones}
         selectedZoneId={selectedZoneId}
         onSelect={onSelect}
+        onAddressResolved={onAddressResolved}
       />
     </div>
   );

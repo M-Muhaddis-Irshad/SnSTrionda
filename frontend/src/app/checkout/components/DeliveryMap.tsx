@@ -1,13 +1,11 @@
 "use client";
 
 // =============================================================================
-// Google Maps delivery map — replaces the old Leaflet map.
+// Google Maps delivery map with reverse geocoding.
 // Uses the keyless Google Maps embed iframe (output=embed), which needs no API
-// key. The map stays in sync with the checkout in THREE ways:
-//   • picking a city in the dropdown / city chips re-centers the map
-//   • typing an area / landmark pans the map to that location
-//   • "Use my current location" (browser geolocation, with permission) drops a
-//     pin at the user's actual position
+// key. The "Use my location" button and area search both trigger reverse
+// geocoding via the free Nominatim API so the checkout address fields are
+// auto-filled.
 // =============================================================================
 
 import { useEffect, useMemo, useState } from "react";
@@ -19,18 +17,89 @@ function buildEmbedSrc(query: string, zoom: number): string {
   )}&z=${zoom}&t=m&output=embed&iwloc=0`;
 }
 
-interface GeoCoords {
-  lat: number;
-  lng: number;
+// ---------------------------------------------------------------------------
+// Geocoded address returned by Nominatim
+// ---------------------------------------------------------------------------
+interface GeoAddress {
+  street: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  country: string;
+}
+
+// ---------------------------------------------------------------------------
+// Nominatim reverse geocoding (free, no API key)
+// ---------------------------------------------------------------------------
+async function reverseGeocode(
+  lat: number,
+  lng: number
+): Promise<GeoAddress | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`,
+      { headers: { "Accept-Language": "en" } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const a = data.address || {};
+    return {
+      street:
+        [a.house_number, a.road, a.neighbourhood || a.suburb || a.village]
+          .filter(Boolean)
+          .join(" ") ||
+        data.display_name?.split(",")[0] ||
+        "",
+      city: a.city || a.town || a.village || a.county || "",
+      province: a.state || a.region || "",
+      postalCode: a.postcode || "",
+      country: a.country || "Pakistan",
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Nominatim forward geocoding — find coordinates for an area search query
+// ---------------------------------------------------------------------------
+async function forwardGeocode(
+  query: string
+): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(
+        query
+      )}&limit=1`
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data?.length > 0) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 interface DeliveryMapProps {
   zones: DeliveryZone[];
   selectedZoneId: string | null;
   onSelect: (zone: DeliveryZone) => void;
+  /** Called when a location is resolved — fills the address form. */
+  onAddressResolved?: (address: GeoAddress) => void;
 }
 
-export default function DeliveryMap({ zones, selectedZoneId, onSelect }: DeliveryMapProps) {
+// ---------------------------------------------------------------------------
+// DeliveryMap component
+// ---------------------------------------------------------------------------
+export default function DeliveryMap({
+  zones,
+  selectedZoneId,
+  onSelect,
+  onAddressResolved,
+}: DeliveryMapProps) {
   const selected = zones.find((z) => z.id === selectedZoneId) || null;
 
   // Area / landmark typed by the customer — debounced before it pans the map.
@@ -38,9 +107,15 @@ export default function DeliveryMap({ zones, selectedZoneId, onSelect }: Deliver
   const [debouncedTyped, setDebouncedTyped] = useState("");
 
   // Browser geolocation (only when the customer allows it).
-  const [coords, setCoords] = useState<GeoCoords | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState("");
+
+  // Geocoding status
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeError, setGeocodeError] = useState("");
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedTyped(typed.trim()), 350);
@@ -54,35 +129,87 @@ export default function DeliveryMap({ zones, selectedZoneId, onSelect }: Deliver
     setDebouncedTyped("");
     setCoords(null);
     setGeoError("");
+    setGeocodeError("");
   }, [selectedZoneId]);
 
   // ── Current location ─────────────────────────────────────────────────────
   function locateMe() {
     setGeoError("");
+    setGeocodeError("");
     if (!("geolocation" in navigator)) {
       setGeoError("Geolocation is not supported by this browser.");
       return;
     }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
         setLocating(false);
         setTyped(""); // typed area, if any, no longer drives the map
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setCoords({ lat, lng });
+
+        // Reverse geocode to fill address fields
+        setGeocoding(true);
+        try {
+          const addr = await reverseGeocode(lat, lng);
+          if (addr && onAddressResolved) {
+            onAddressResolved(addr);
+          }
+        } catch {
+          setGeocodeError("Could not resolve address for your location.");
+        } finally {
+          setGeocoding(false);
+        }
       },
       (err) => {
         setLocating(false);
         if (err.code === err.PERMISSION_DENIED) {
-          setGeoError("Location permission was denied. You can still type your area above.");
+          setGeoError(
+            "Location permission was denied. You can still type your area above."
+          );
         } else if (err.code === err.POSITION_UNAVAILABLE) {
           setGeoError("Your location could not be determined right now.");
         } else {
-          setGeoError("Timed out while getting your location. Please try again.");
+          setGeoError(
+            "Timed out while getting your location. Please try again."
+          );
         }
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
   }
+
+  // ── Area search — geocode the typed query and reverse-geocode for address ─
+  useEffect(() => {
+    if (!debouncedTyped || !selected) return;
+    let cancelled = false;
+
+    async function geocodeArea() {
+      const query = `${debouncedTyped}, ${selected!.name}, Pakistan`;
+      setGeocoding(true);
+      setGeocodeError("");
+      try {
+        const coords = await forwardGeocode(query);
+        if (cancelled || !coords) return;
+        // Reverse geocode the found coordinates to get a full address
+        const addr = await reverseGeocode(coords.lat, coords.lng);
+        if (!cancelled && addr && onAddressResolved) {
+          onAddressResolved(addr);
+        }
+      } catch {
+        if (!cancelled) setGeocodeError("Could not resolve address for this area.");
+      } finally {
+        if (!cancelled) setGeocoding(false);
+      }
+    }
+
+    geocodeArea();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedTyped, selected]);
 
   // ── Effective map query ──────────────────────────────────────────────────
   const query = useMemo(() => {
@@ -116,7 +243,6 @@ export default function DeliveryMap({ zones, selectedZoneId, onSelect }: Deliver
               if (coords) setCoords(null);
               if (geoError) setGeoError("");
             }}
-            // placeholder="e.g. Gulberg, DHA, Model Town…"
             autoComplete="off"
           />
           <label
@@ -168,11 +294,20 @@ export default function DeliveryMap({ zones, selectedZoneId, onSelect }: Deliver
           {geoError}
         </p>
       )}
-      {showingMyLocation && (
+      {geocoding && (
+        <p className="font-body text-[11px] text-chrome-200">
+          Resolving address…
+        </p>
+      )}
+      {geocodeError && (
+        <p className="font-body text-xs text-amber-400" role="alert">
+          {geocodeError}
+        </p>
+      )}
+      {showingMyLocation && !geocoding && (
         <p className="font-body text-[11px] text-chrome-200">
           Showing your current location ({coords!.lat.toFixed(5)},{" "}
-          {coords!.lng.toFixed(5)}) — the delivery address on your order is the
-          one entered on the form.
+          {coords!.lng.toFixed(5)}) — address fields updated above.
         </p>
       )}
 
@@ -221,8 +356,8 @@ export default function DeliveryMap({ zones, selectedZoneId, onSelect }: Deliver
 
       <p className="font-body text-[11px] text-muted">
         The map updates as you pick a city, type your area, or share your
-        location — it is a visual aid only; your saved address is what the order
-        ships to.
+        location — your address fields are auto-filled from the resolved
+        location.
       </p>
     </div>
   );
