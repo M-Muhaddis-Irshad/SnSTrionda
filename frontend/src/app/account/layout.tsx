@@ -67,7 +67,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
         {/* Two-column layout: sidebar + content */}
         <div className="flex flex-col sm:flex-row gap-8 sm:gap-12">
           {/* Sidebar navigation */}
-          <nav className="sm:w-48 shrink-0">
+          <nav className="sm:w-48 shrink-0 border border-chrome-500 bg-surface p-6 sm:p-8">
             <div className="flex sm:flex-col gap-4 sm:gap-1 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0">
               {NAV_ITEMS.map((item) => {
                 const isActive = item.exact

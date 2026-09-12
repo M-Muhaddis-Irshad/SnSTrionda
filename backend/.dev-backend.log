@@ -12,3 +12,4 @@
 📋 Health check: http://localhost:5000/api/health
 🔌 Socket server: https://snstrionda.onrender.com
 🛡️  Rate limiting active on /api/* (300 req / 15 min)
+Socket emit to "admin" (admin:activity-logged) failed: [DOMException [TimeoutError]: The operation was aborted due to timeout]

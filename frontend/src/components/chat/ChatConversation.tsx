@@ -371,7 +371,7 @@ export default function ChatConversation({
           {/* Emoji picker toggle */}
           <button
             onClick={() => { setShowEmoji(!showEmoji); }}
-            className={`shrink-0 p-2.5 rounded transition-colors ${showEmoji ? (dark ? "bg-gray-700" : "bg-chrome-300") : theme.chip} hover:opacity-80`}
+            className={`shrink-0 p-1.5 rounded transition-colors ${showEmoji ? (dark ? "bg-gray-700" : "bg-chrome-300") : theme.chip} hover:opacity-80`}
             title="Emoji"
           >
             <span className="text-lg">😊</span>
