@@ -524,6 +524,30 @@ export default function OrdersPage() {
                     Phone: {detailOrder.shippingAddress?.phone || "—"}
                   </p>
                 </div>
+                {/* Google Maps embed showing delivery location */}
+                {detailOrder.shippingAddress && (
+                  <div className="mt-3 rounded overflow-hidden border border-gray-700">
+                    <iframe
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                        [
+                          detailOrder.shippingAddress.addressLine1,
+                          detailOrder.shippingAddress.addressLine2,
+                          detailOrder.shippingAddress.city,
+                          detailOrder.shippingAddress.province,
+                          detailOrder.shippingAddress.postalCode,
+                          detailOrder.shippingAddress.country,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")
+                      )}&z=15&t=m&output=embed&iwloc=0`}
+                      title="Delivery location on Google Maps"
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="h-[240px] w-full border-0"
+                    />
+                  </div>
+                )}
               </section>
 
               {/* Items */}

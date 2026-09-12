@@ -15,9 +15,23 @@ export default function PromoCodeField({ id = "promo-code" }: PromoCodeFieldProp
     useCheckoutStore();
   const subtotal = useCartStore(selectSubtotal);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Require sign-in for promo codes — per-user coupon limits need an
+  // authenticated user so the server can enforce them.
+  if (!isAuthenticated && !promoCode) {
+    return (
+      <div className="border border-chrome-500 bg-surface p-4">
+        <p className="font-body text-sm text-muted">
+          Please <span className="text-chrome-200">sign in</span> to apply a promo code.
+          Coupon limits are tied to your account.
+        </p>
+      </div>
+    );
+  }
 
   async function handleApply() {
     const code = input.trim();
