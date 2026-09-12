@@ -316,3 +316,30 @@
   77 |       return;
   78 |     }
   79 |     // Avoid hammering the refresh endpoint on every auto-retry of one failure (src/lib/socket.ts:76:15)
+[browser] Socket connection error: websocket error 
+    at Socket.<anonymous> (src/lib/socket.ts:76:15)
+  74 |       /invalid or expired token|authentication required/i.test(err.message || "");
+  75 |     if (!isAuthError) {
+> 76 |       console.error("Socket connection error:", err.message);
+     |               ^
+  77 |       return;
+  78 |     }
+  79 |     // Avoid hammering the refresh endpoint on every auto-retry of one failure (src/lib/socket.ts:76:15)
+[browser] Socket connection error: websocket error 
+    at Socket.<anonymous> (src/lib/socket.ts:76:15)
+  74 |       /invalid or expired token|authentication required/i.test(err.message || "");
+  75 |     if (!isAuthError) {
+> 76 |       console.error("Socket connection error:", err.message);
+     |               ^
+  77 |       return;
+  78 |     }
+  79 |     // Avoid hammering the refresh endpoint on every auto-retry of one failure (src/lib/socket.ts:76:15)
+[browser] Socket connection error: websocket error 
+    at Socket.<anonymous> (src/lib/socket.ts:76:15)
+  74 |       /invalid or expired token|authentication required/i.test(err.message || "");
+  75 |     if (!isAuthError) {
+> 76 |       console.error("Socket connection error:", err.message);
+     |               ^
+  77 |       return;
+  78 |     }
+  79 |     // Avoid hammering the refresh endpoint on every auto-retry of one failure (src/lib/socket.ts:76:15)
