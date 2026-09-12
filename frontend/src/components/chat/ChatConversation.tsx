@@ -326,25 +326,6 @@ export default function ChatConversation({
         </div>
       )}
 
-      {/* Emoji picker — fixed overlay so it's never clipped */}
-      {showEmoji && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setShowEmoji(false)} />
-          <div className={`absolute bottom-full left-4 mb-2 z-50 p-3 rounded-lg border max-h-56 overflow-y-auto w-72 ${theme.emojiPanel}`}>
-            {EMOJI_CATEGORIES.map((cat) => (
-              <div key={cat.label} className="mb-2">
-                <p className={`font-body text-[10px] mb-1 ${theme.meta}`}>{cat.label}</p>
-                <div className="flex flex-wrap gap-1">
-                  {cat.emojis.map((emoji) => (
-                    <button key={emoji} onClick={() => insertEmoji(emoji)} className="text-lg hover:scale-125 transition-transform p-0.5">{emoji}</button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
       {/* Image preview */}
       {previewUrl && (
         <div className="mx-4 mb-2 relative inline-block w-fit">
@@ -369,13 +350,30 @@ export default function ChatConversation({
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
 
           {/* Emoji picker toggle */}
-          <button
-            onClick={() => { setShowEmoji(!showEmoji); }}
-            className={`shrink-0 p-1.5 rounded transition-colors ${showEmoji ? (dark ? "bg-gray-700" : "bg-chrome-300") : theme.chip} hover:opacity-80`}
-            title="Emoji"
-          >
-            <span className="text-lg">😊</span>
-          </button>
+          <div className="relative shrink-0">
+            <button
+              onClick={() => { setShowEmoji(!showEmoji); }}
+              className={`p-1.5 rounded transition-colors ${showEmoji ? (dark ? "bg-gray-700" : "bg-chrome-300") : theme.chip} hover:opacity-80`}
+              title="Emoji"
+            >
+              <span className="text-lg">😊</span>
+            </button>
+            {/* Emoji picker — anchored below the button */}
+            {showEmoji && (
+              <div className={`absolute bottom-full left-[-60] max-[360]:left-[-67] sm:left-0 mb-4 p-3 rounded-lg border max-h-56 overflow-y-auto w-72 ${theme.emojiPanel}`}>
+                {EMOJI_CATEGORIES.map((cat) => (
+                  <div key={cat.label} className="mb-2">
+                    <p className={`font-body text-[10px] mb-1 ${theme.meta}`}>{cat.label}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {cat.emojis.map((emoji, idx) => (
+                        <button key={`${cat.label}-${idx}-${emoji}`} onClick={() => insertEmoji(emoji)} className="text-lg hover:scale-125 transition-transform p-0.5">{emoji}</button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           <textarea
             ref={textareaRef}
