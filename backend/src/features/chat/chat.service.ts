@@ -1,6 +1,7 @@
 import { prisma } from "../../db";
 import cloudinary from "../../config/cloudinary";
 import { safeEmit, createNotification, notifyAdminsNewChatSession } from "../../services/socketService";
+import { isAdminRole } from "../auth/auth.middleware";
 
 // Custom Error
 export class ChatError extends Error {
@@ -106,7 +107,7 @@ async function assertAccess(sessionId: string, actorId: string, role: string) {
   });
 
   if (!session) throw new ChatError("Chat session not found.", 404);
-  const isParticipant = session.customerId === actorId || role === "ADMIN" || session.adminId === actorId;
+  const isParticipant = session.customerId === actorId || isAdminRole(role) || session.adminId === actorId;
   if (!isParticipant) throw new ChatError("You do not have access to this chat session.", 403);
   return session;
 }
@@ -129,7 +130,7 @@ export async function sendMessage(sessionId: string, senderId: string, role: str
   if (!sender) throw new ChatError("Sender not found", 404);
 
   const updateData: any = {};
-  if (role === "ADMIN" && !session.adminId) updateData.adminId = senderId;
+  if (isAdminRole(role) && !session.adminId) updateData.adminId = senderId;
   if (session.status !== "OPEN") updateData.status = "OPEN";
 
   const [, saved] = await prisma.$transaction([

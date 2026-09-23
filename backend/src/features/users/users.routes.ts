@@ -16,7 +16,7 @@ import {
 const router = Router();
 
 // All routes require authentication + ADMIN role
-router.use(authenticate, requireRole("ADMIN"));
+router.use(authenticate, requireRole("ADMIN", "SUPER_ADMIN"));
 
 // GET /api/admin/users?page&limit&role&search — paginated list
 router.get("/", handleListUsers);

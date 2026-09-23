@@ -146,9 +146,13 @@ export async function changeUserRole(actorId: string | undefined, userId: string
     throw new UsersError("User not found", 404);
   }
 
-  // The original admin account is permanently protected — no one can
-  // change their role, not even another admin or themselves.
-  if (user.email === PROTECTED_ADMIN_EMAIL && user.role === "ADMIN" && role !== "ADMIN") {
+  // The original (super) admin account is permanently protected — no one can
+  // change their role, not even another admin or themselves. This covers both
+  // the legacy delegated ADMIN and the shadow SUPER_ADMIN row that backs the
+  // dedicated SuperAdmin table.
+  const isProtected =
+    !!PROTECTED_ADMIN_EMAIL && user.email === PROTECTED_ADMIN_EMAIL && user.role !== "CUSTOMER";
+  if (isProtected && role !== user.role) {
     throw new UsersError("The original admin account cannot be demoted.", 403);
   }
 

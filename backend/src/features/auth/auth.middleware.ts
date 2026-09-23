@@ -7,6 +7,15 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
+// Roles that may access admin-only endpoints. ADMIN = delegated admin (a
+// regular User row); SUPER_ADMIN = the store owner (credentials live in the
+// dedicated SuperAdmin table, with a shadow User row for FK-based features).
+export const ADMIN_ROLES = ["ADMIN", "SUPER_ADMIN"] as const;
+
+export function isAdminRole(role?: string): boolean {
+  return !!role && (ADMIN_ROLES as readonly string[]).includes(role);
+}
+
 // ---------------------------------------------------------------------------
 // Extended Request type — attaches decoded token payload to req.user
 // ---------------------------------------------------------------------------

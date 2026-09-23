@@ -8,6 +8,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import TermsConditionsModal from '@/components/modals/TermsConditionsModal';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import { isAdminRole } from '@/lib/roles';
 import Link from 'next/link';
 
 const LOGIN_BG = 'https://res.cloudinary.com/gbor3ceh/image/upload/v1788284310/trionda-wears/auth/auth-login.jpg';
@@ -62,7 +63,7 @@ function LoginForm() {
 
       setAuth(result.user, result.accessToken, result.refreshToken);
 
-      if (result.user?.role === 'ADMIN') {
+      if (isAdminRole(result.user?.role)) {
         router.push('/admin');
       } else {
         router.push(callbackUrl);
@@ -94,7 +95,7 @@ function LoginForm() {
 
       setAuth(result.user, result.accessToken, result.refreshToken);
 
-      if (result.user?.role === 'ADMIN') {
+      if (isAdminRole(result.user?.role)) {
         router.push('/admin');
       } else {
         router.push(callbackUrl);

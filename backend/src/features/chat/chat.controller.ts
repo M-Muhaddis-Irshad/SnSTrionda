@@ -4,6 +4,7 @@
 
 import { Request, Response } from "express";
 import cloudinary from "../../config/cloudinary";
+import { isAdminRole } from "../auth/auth.middleware";
 import {
   createSession,
   listMySessions,
@@ -83,7 +84,7 @@ export async function handleListMySessions(req: Request, res: Response) {
 
 export async function handleListActiveSessions(req: Request, res: Response) {
   try {
-    if (req.user?.role !== "ADMIN") {
+    if (!isAdminRole(req.user?.role)) {
       return res.status(403).json({ error: "Admin access required." });
     }
     const status = (req.query.status as string) || "OPEN";

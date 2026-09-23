@@ -4,6 +4,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { isAdminRole } from "@/lib/roles";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -77,7 +78,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       isAuthenticated: () => !!get().accessToken && !!get().user,
 
-      isAdmin: () => get().user?.role === "ADMIN",
+      isAdmin: () => isAdminRole(get().user?.role),
     }),
     {
       name: "trionda-auth",

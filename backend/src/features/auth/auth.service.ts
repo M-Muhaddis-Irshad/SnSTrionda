@@ -111,10 +111,42 @@ export async function register(body: RegisterRequestBody): Promise<AuthTokensRes
 export async function login(body: LoginRequestBody): Promise<AuthTokensResponse> {
   const { email, password } = body;
 
-  // Find user by email
+  // 1. Super admin credentials live in their own dedicated table, so they are
+  //    never mixed with customer accounts.
+  const superAdmin = await prisma.superAdmin.findUnique({ where: { email } });
+  if (superAdmin) {
+    const isSuperAdminPasswordValid = await bcrypt.compare(password, superAdmin.password || "");
+    if (!isSuperAdminPasswordValid) {
+      // Generic error — don't reveal whether email or password was wrong
+      throw new AppError("Invalid email or password", 401);
+    }
+
+    // The super admin has a matching shadow row in the User table (role
+    // SUPER_ADMIN, no usable password) so JWT refresh, /auth/me, chat and the
+    // activity feed keep working through the existing User relations.
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || user.role !== "SUPER_ADMIN") {
+      throw new AppError("Super admin account is not fully configured", 500);
+    }
+
+    const tokens = generateTokens(user);
+
+    return {
+      user: sanitizeUser(user),
+      ...tokens,
+    };
+  }
+
+  // 2. Normal users and delegated admins
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     // Generic error — don't reveal whether email or password was wrong
+    throw new AppError("Invalid email or password", 401);
+  }
+
+  // A SUPER_ADMIN shadow row without a matching SuperAdmin entry must never
+  // be allowed to sign in through the regular path.
+  if (user.role === "SUPER_ADMIN") {
     throw new AppError("Invalid email or password", 401);
   }
 
@@ -294,6 +326,12 @@ export async function googleLogin(body: GoogleLoginRequestBody): Promise<AuthTok
     if (Object.keys(patch).length > 0) {
       user = await prisma.user.update({ where: { id: user.id }, data: patch });
     }
+  }
+
+  // Super admins authenticate with their own dedicated credentials — never via
+  // Google (the shadow User row must not be reachable through OAuth).
+  if (user.role === "SUPER_ADMIN") {
+    throw new AppError("This account requires admin credentials to sign in.", 403);
   }
 
   const tokens = generateTokens(user);

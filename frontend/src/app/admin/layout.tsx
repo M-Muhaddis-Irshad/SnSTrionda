@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useAuthHydrated } from '@/lib/useAuthHydrated';
+import { isAdminRole } from '@/lib/roles';
 
 const NAV_ITEMS = [
   { section: 'Main', items: [
@@ -101,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const authHydrated = useAuthHydrated();
 
   const isAuthenticated = !!accessToken && !!user;
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = isAdminRole(user?.role);
 
   // Guard against redirecting on a stale render. Zustand rehydrates the
   // persisted session asynchronously, and an effect queued by an early render
@@ -112,7 +113,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!authHydrated) return; // wait for persisted auth before deciding
     const st = useAuthStore.getState();
     const authed = !!st.accessToken && !!st.user;
-    const admin = st.user?.role === 'ADMIN';
+    const admin = isAdminRole(st.user?.role);
     if (!authed || !admin) {
       router.replace('/login');
     }

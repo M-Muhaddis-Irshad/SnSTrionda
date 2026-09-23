@@ -11,6 +11,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import { useToastStore } from "@/stores/toastStore";
 import { refreshAccessToken } from "@/lib/auth";
+import { isAdminRole } from "@/lib/roles";
 import type { AppNotification } from "@/types/realtime";
 
 export const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -114,7 +115,7 @@ export function disconnectSocket(): void {
 
 function attachGlobalHandlers(sock: Socket) {
   const { user } = useAuthStore.getState();
-  const isAdmin = user?.role === "ADMIN";
+  const isAdmin = isAdminRole(user?.role);
 
   // --- Catalog changes (product / category / coupon / discount / collection /
   //     settings writes from the admin). CatalogRealtime listens for the

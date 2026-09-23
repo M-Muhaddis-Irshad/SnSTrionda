@@ -42,7 +42,7 @@ function handleMulterError(err: any, _req: Request, res: Response, next: NextFun
 router.post(
   "/:productId/images",
   authenticate,
-  requireRole("ADMIN"),
+  requireRole("ADMIN", "SUPER_ADMIN"),
   upload.single("image"),
   handleMulterError,
   handleUploadImage
@@ -52,7 +52,7 @@ router.post(
 router.delete(
   "/:productId/images/:imageId",
   authenticate,
-  requireRole("ADMIN"),
+  requireRole("ADMIN", "SUPER_ADMIN"),
   handleDeleteImage
 );
 

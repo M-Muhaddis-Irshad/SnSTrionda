@@ -43,6 +43,7 @@ const ROLES = ["CUSTOMER", "ADMIN"];
 const ROLE_BADGES: Record<string, string> = {
   ADMIN: "bg-purple-500/10 text-purple-400 border-purple-500/30",
   CUSTOMER: "bg-gray-800 text-gray-300 border-gray-700",
+  SUPER_ADMIN: "bg-amber-500/10 text-amber-400 border-amber-500/30",
 };
 
 function formatDate(dateStr: string): string {
@@ -253,16 +254,25 @@ export default function UserTable({ mode }: { mode: "customers" | "users" }) {
                       {formatDate(user.createdAt)}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex justify-end">
-                        <button
-                          onClick={() => openRoleModal(user)}
-                          aria-label={`Change role of ${user.name || user.email}`}
-                          title="Change role"
-                          className="p-2 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition"
+                      {user.role === "SUPER_ADMIN" ? (
+                        <span
+                          className="text-[10px] px-2 py-1 rounded bg-gray-800 text-gray-500 border border-gray-700"
+                          title="The super admin account is protected and cannot be changed."
                         >
-                          <Pencil size={14} />
-                        </button>
-                      </div>
+                          Protected
+                        </span>
+                      ) : (
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => openRoleModal(user)}
+                            aria-label={`Change role of ${user.name || user.email}`}
+                            title="Change role"
+                            className="p-2 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -17,6 +17,7 @@ import http from "http";
 import jwt from "jsonwebtoken";
 import { prisma } from "../db";
 import { getAllowedOrigins } from "../config/corsOrigins";
+import { isAdminRole } from "../features/auth/auth.middleware";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const ADMIN_STATS_INTERVAL_MS = 30_000; // push admin:stats-updated every 30s
@@ -177,7 +178,7 @@ export function initSocket(httpServer: http.Server): Server {
   // -------------------------------------------------------------------------
   io.on("connection", (socket: Socket) => {
     const user = (socket as any).user as AuthPayload;
-    const isAdmin = user.role === "ADMIN";
+    const isAdmin = isAdminRole(user.role);
     console.log(`🔌 Socket connected: ${socket.id} (user: ${user.userId}, role: ${user.role})`);
 
     // Personal room — notifications & order status updates target this

@@ -186,7 +186,7 @@ export function initSocket(httpServer: http.Server): Server {
   // Connection handler
   io.on("connection", (socket: Socket) => {
     const user = (socket as any).user as AuthPayload;
-    const isAdmin = user.role === "ADMIN";
+    const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
     console.log(`🔌 Socket connected: ${socket.id} (user: ${user.userId}, role: ${user.role})`);
 
     socket.join(`user:${user.userId}`);

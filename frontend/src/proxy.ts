@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtDecode } from "jwt-decode";
+import { isAdminRole } from "@/lib/roles";
 
 const STOREFRONT_ROUTES = [
   "/",
@@ -64,13 +65,13 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  // ADMIN on storefront → redirect to /admin
-  if (userRole === "ADMIN" && isStorefrontRoute) {
+  // ADMIN / SUPER_ADMIN on storefront → redirect to /admin
+  if (isAdminRole(userRole) && isStorefrontRoute) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
-  // ADMIN on admin route → allow
-  if (userRole === "ADMIN" && isAdminRoute) {
+  // ADMIN / SUPER_ADMIN on admin route → allow
+  if (isAdminRole(userRole) && isAdminRoute) {
     return NextResponse.next();
   }
 

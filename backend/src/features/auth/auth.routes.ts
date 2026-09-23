@@ -54,6 +54,6 @@ router.patch("/me", authenticate, handleUpdateProfile);
 router.post("/me/avatar", authenticate, upload.single("image"), handleMulterError, handleUploadAvatar);
 
 // Admin-only routes — require authenticate + ADMIN role
-router.get("/admin-check", authenticate, requireRole("ADMIN"), handleAdminCheck);
+router.get("/admin-check", authenticate, requireRole("ADMIN", "SUPER_ADMIN"), handleAdminCheck);
 
 export default router;

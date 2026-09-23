@@ -54,7 +54,7 @@ const router = Router();
 // All admin routes require authentication + ADMIN role
 // ---------------------------------------------------------------------------
 
-router.use(authenticate, requireRole("ADMIN"));
+router.use(authenticate, requireRole("ADMIN", "SUPER_ADMIN"));
 
 // ---------------------------------------------------------------------------
 // Dashboard
