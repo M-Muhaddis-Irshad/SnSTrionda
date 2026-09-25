@@ -4,6 +4,7 @@
 
 import { Router, Request, Response, NextFunction } from "express";
 import multer from "multer";
+import rateLimit from "express-rate-limit";
 import {
   handleRegister,
   handleLogin,
@@ -15,6 +16,8 @@ import {
   handleUploadAvatar,
   handleAdminCheck,
   handleGetAuthImage,
+  handleForgotPassword,
+  handleResetPassword,
 } from "./auth.controller";
 import { authenticate, requireRole } from "./auth.middleware";
 
@@ -40,10 +43,32 @@ function handleMulterError(err: any, _req: Request, res: Response, next: NextFun
   next(err);
 }
 
+// ---------------------------------------------------------------------------
+// Stricter per-route limits for the reset flow (they run inside the broader
+// /api/auth limiter, so whichever fires first wins).
+// ---------------------------------------------------------------------------
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many reset requests. Please try again in 10 minutes." },
+});
+
+const resetPasswordLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts. Please try again in 5 minutes." },
+});
+
 // Public routes
 router.post("/register", handleRegister);
 router.post("/login", handleLogin);
 router.post("/google", handleGoogleLogin);
+router.post("/forgot-password", forgotPasswordLimiter, handleForgotPassword);
+router.post("/reset-password", resetPasswordLimiter, handleResetPassword);
 router.post("/refresh", handleRefresh);
 router.post("/logout", handleLogout);
 router.get("/images/:pageType", handleGetAuthImage);

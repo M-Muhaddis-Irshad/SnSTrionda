@@ -24,11 +24,11 @@ services:
       - key: NODE_VERSION
         value: "22"
 
-      # The Vercel frontend origin — MUST match exactly (scheme + host, no
-      # trailing slash). Also the only origin allowed to open a Socket.IO
-      # connection. Update when a custom domain is added.
+      # Frontend origins allowed to call the API / open Socket.IO. Comma-
+      # separated; each entry MUST match exactly (scheme + host, no trailing
+      # slash). Includes the custom domain, the www variant and the Vercel URL.
       - key: CORS_ORIGIN
-        value: https://sns-trionda.vercel.app
+        value: https://snwears.com,https://www.snwears.com,https://sns-trionda.vercel.app
 
       # Neon database (see backend/.env.example for which string goes where)
       - key: DATABASE_URL

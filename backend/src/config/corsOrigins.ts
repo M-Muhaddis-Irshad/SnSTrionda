@@ -26,3 +26,22 @@ export function getAllowedOrigins(): string[] {
 
   return Array.from(new Set([...configured, ...DEV_ORIGINS]));
 }
+
+// ---------------------------------------------------------------------------
+// Primary origin — the single canonical public frontend.
+// Used for absolute links that must point at production (password-reset links
+// in email, Safepay return URLs) where CORS_ORIGIN may be a comma-separated
+// list. PUBLIC_SITE_URL wins when set, then the first CORS_ORIGIN entry.
+// ---------------------------------------------------------------------------
+
+export function getPrimaryOrigin(): string {
+  const explicit = process.env.PUBLIC_SITE_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+
+  const configured = (process.env.CORS_ORIGIN || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  return configured[0] || "http://localhost:3000";
+}

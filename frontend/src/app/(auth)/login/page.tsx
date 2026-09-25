@@ -152,6 +152,13 @@ function LoginForm() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
+            {/* Confirmation banner after a successful password reset */}
+            {searchParams.get('reset') === '1' && (
+              <div className="bg-emerald-500/10 border border-emerald-500/60 text-emerald-300 px-4 py-3 rounded text-sm">
+                Password updated. Sign in with your new password.
+              </div>
+            )}
+
             {/* Email */}
             <div>
               <label className="auth-field">EMAIL ADDRESS</label>

@@ -11,6 +11,8 @@ import {
   logout,
   updateProfile,
   uploadAvatar,
+  forgotPassword,
+  resetPassword,
   AppError,
 } from "./auth.service";
 import { prisma } from "../../db";
@@ -19,6 +21,8 @@ import type {
   LoginRequestBody,
   GoogleLoginRequestBody,
   RefreshRequestBody,
+  ForgotPasswordRequestBody,
+  ResetPasswordRequestBody,
 } from "./auth.types";
 
 // ---------------------------------------------------------------------------
@@ -267,6 +271,59 @@ export async function handleGoogleLogin(req: Request, res: Response) {
     }
     console.error("Google login error:", err?.message || err);
     res.status(500).json({ error: "Internal server error", details: err?.message });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/auth/forgot-password — email a 6-digit reset code
+// ---------------------------------------------------------------------------
+// Always 200 for a well-formed request: the response must never reveal
+// whether the address has an account attached.
+
+export async function handleForgotPassword(req: Request, res: Response) {
+  try {
+    const body = getBody<ForgotPasswordRequestBody>(req);
+
+    if (!body.email) {
+      return res.status(400).json({ error: "Email is required." });
+    }
+
+    const result = await forgotPassword(body);
+
+    res.json(result);
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Forgot password error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/auth/reset-password — redeem the code and set a new password
+// ---------------------------------------------------------------------------
+
+export async function handleResetPassword(req: Request, res: Response) {
+  try {
+    const body = getBody<ResetPasswordRequestBody>(req);
+
+    if (!body.email || !body.otp) {
+      return res.status(400).json({ error: "Email and reset code are required." });
+    }
+    if (!body.newPassword && !body.password) {
+      return res.status(400).json({ error: "New password is required." });
+    }
+
+    const result = await resetPassword(body);
+
+    res.json(result);
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Reset password error:", err?.message || err);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 

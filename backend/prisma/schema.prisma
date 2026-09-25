@@ -322,6 +322,21 @@ model User {
   phone         String?
   role          UserRole  @default(CUSTOMER)
 
+  // -------------------------------------------------------------------------
+  // Password reset (OTP flow).
+  // passwordResetToken stores the BCRYPT HASH of the 6-digit code (never the
+  // code itself), passwordResetTokenExpiry is 15 minutes from issue, and
+  // passwordResetAttempts counts wrong OTP tries before the code is wiped.
+  // All three are null/zero when no reset is in progress.
+  // -------------------------------------------------------------------------
+  passwordResetToken       String?   @unique
+  passwordResetTokenExpiry DateTime?
+  passwordResetAttempts    Int       @default(0)
+
+  // Incremented every time the password changes so JWTs issued before the reset
+  // are rejected immediately (see auth.middleware.ts authenticate).
+  tokenVersion             Int       @default(0)
+
   accounts        Account[]
   sessions        Session[]
   addresses       Address[]

@@ -77,9 +77,17 @@ Notes:
 
 ## 4. Google Cloud Console (one-time)
 
-Add `https://sns-trionda.vercel.app` to **Authorized JavaScript origins** for
-the OAuth client (same client id used in step 2/3). Without this the Google
-button can render but the login silently fails.
+Add every origin the button runs on to **Authorized JavaScript origins** for
+the OAuth client (same client id used in step 2/3):
+
+- `https://snwears.com`
+- `https://www.snwears.com`
+- `https://sns-trionda.vercel.app`
+- `http://localhost:3000` (local dev)
+
+Without this the Google button can render but the login silently fails. The
+client id must be set as `NEXT_PUBLIC_GOOGLE_CLIENT_ID` on Vercel **and** as
+`GOOGLE_CLIENT_ID` on Render — the ID-token flow uses no client secret.
 
 ## 5. Verify
 
@@ -98,7 +106,9 @@ button can render but the login silently fails.
 - **Admin falls back to localhost** → `NEXT_PUBLIC_BACKEND_URL` unset/wrong in
   Vercel.
 - **Socket never connects / "connection error" in console** → `CORS_ORIGIN` on
-  Render doesn't exactly match the Vercel URL (scheme+host, no trailing slash).
+  Render doesn't exactly match the browser URL (scheme+host, no trailing
+  slash). It is a comma-separated list, e.g.
+  `https://snwears.com,https://www.snwears.com`.
 - **Google button missing** → `NEXT_PUBLIC_GOOGLE_CLIENT_ID` not set in Vercel.
 - **New tables missing / Prisma unknown model errors** → migration (step 1)
   wasn't run against that database.

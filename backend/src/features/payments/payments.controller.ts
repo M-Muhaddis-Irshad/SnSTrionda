@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { Request, Response } from "express";
+import { getPrimaryOrigin } from "../../config/corsOrigins";
 import {
   createSafepayCheckout,
   verifySafepayTracker,
@@ -25,8 +26,10 @@ export async function handleCreateCheckout(req: Request, res: Response) {
       return res.status(400).json({ error: "orderId is required." });
     }
 
-    const frontendBaseUrl =
-      process.env.CORS_ORIGIN || "http://localhost:3000";
+    // CORS_ORIGIN may be a comma-separated allow-list; the first entry is the
+    // canonical public frontend used for the Safepay return/redirect URLs.
+    // Canonical public origin (CORS_ORIGIN may be a comma-separated list).
+    const frontendBaseUrl = getPrimaryOrigin();
 
     const result = await createSafepayCheckout({ orderId }, frontendBaseUrl);
 

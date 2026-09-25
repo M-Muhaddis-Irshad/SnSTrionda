@@ -4,6 +4,7 @@
 
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { prisma } from "../../db";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -24,6 +25,8 @@ export interface AuthPayload {
   userId: string;
   email: string;
   role: string;
+  /** Snapshot of User.tokenVersion when the token was issued. */
+  tokenVersion?: number;
   type: "access";
 }
 
@@ -41,7 +44,7 @@ declare global {
 // Reads the Authorization header, verifies the JWT access token, and attaches
 // the decoded payload to req.user. Returns 401 on any failure.
 
-export function authenticate(req: Request, res: Response, next: NextFunction) {
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -50,21 +53,47 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 
   const token = authHeader.split(" ")[1];
 
+  let decoded: AuthPayload;
+
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
-
-    if (decoded.type !== "access") {
-      return res.status(401).json({ error: "Invalid token type. Access token required." });
-    }
-
-    req.user = decoded;
-    next();
+    decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
   } catch (err: any) {
     if (err.name === "TokenExpiredError") {
       return res.status(401).json({ error: "Access token has expired. Please refresh your token." });
     }
     return res.status(401).json({ error: "Invalid access token." });
   }
+
+  if (decoded.type !== "access") {
+    return res.status(401).json({ error: "Invalid token type. Access token required." });
+  }
+
+  // Session invalidation — tokens minted before a password reset carry an
+  // older tokenVersion and are rejected here. This costs one primary-key
+  // lookup per authenticated request; the tradeoff is instant invalidation of
+  // every outstanding JWT when the password changes (see resetPassword).
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { tokenVersion: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid access token." });
+    }
+
+    if ((decoded.tokenVersion ?? 0) !== user.tokenVersion) {
+      return res
+        .status(401)
+        .json({ error: "Your session was reset. Please sign in again." });
+    }
+  } catch (err) {
+    console.error("Token version check failed:", err);
+    return res.status(500).json({ error: "Could not validate session." });
+  }
+
+  req.user = decoded;
+  next();
 }
 
 // ---------------------------------------------------------------------------

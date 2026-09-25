@@ -21,6 +21,21 @@ export interface RefreshRequestBody {
   refreshToken: string;
 }
 
+/** Request body for POST /api/auth/forgot-password */
+export interface ForgotPasswordRequestBody {
+  email: string;
+}
+
+/** Request body for POST /api/auth/reset-password */
+export interface ResetPasswordRequestBody {
+  email: string;
+  /** The 6-digit code from the reset email. */
+  otp: string;
+  newPassword: string;
+  /** Alias accepted for robustness. */
+  password?: string;
+}
+
 /** Request body for POST /api/auth/google */
 export interface GoogleLoginRequestBody {
   credential: string; // Google ID token from frontend
@@ -50,6 +65,8 @@ export interface AccessTokenPayload {
   userId: string;
   email: string;
   role: string;
+  /** Snapshot of User.tokenVersion when issued — bumped on password reset. */
+  tokenVersion?: number;
   type: "access";
 }
 
@@ -57,5 +74,6 @@ export interface AccessTokenPayload {
 export interface RefreshTokenPayload {
   userId: string;
   email: string;
+  tokenVersion?: number;
   type: "refresh";
 }
